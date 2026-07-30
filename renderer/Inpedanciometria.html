@@ -1,0 +1,1011 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Impedanciometría Clínica | MPO · Loud · Moderate · Soft</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #ffffff;
+            font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, sans-serif;
+            padding: 28px 32px;
+            color: #1e293b;
+        }
+
+        .logo-empresa-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .logo-empresa-top img {
+            height: 70px;
+            object-fit: contain;
+            border-radius: 12px;
+        }
+
+        .logo-texto-temporal {
+            font-weight: 700;
+            font-size: 1.2rem;
+            color: #001e81;
+        }
+
+        .logo-texto-temporal span {
+            display: block;
+            font-size: 0.7rem;
+            color: #475569;
+        }
+
+        .btn-back-floating {
+            background: #1e3a8a;
+            color: white;
+            border: none;
+            padding: 10px 24px;
+            border-radius: 40px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: all 0.2s;
+        }
+
+        .btn-back-floating:hover {
+            background: #0f2b4d;
+            transform: translateY(-1px);
+        }
+
+        .logo-header {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        .logo-header h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #001e81;
+            margin-bottom: 8px;
+        }
+
+        .logo-header p {
+            color: #475569;
+            font-weight: 500;
+            font-size: 0.95rem;
+        }
+
+        .impedance-layout {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 32px;
+            margin-bottom: 36px;
+        }
+
+        .impedance-left, .impedance-right {
+            flex: 1;
+            min-width: 450px;
+        }
+
+        .card-graph {
+            background: #ffffff;
+            border-radius: 20px;
+            box-shadow: 0 8px 28px rgba(0, 0, 0, 0.12);
+            padding: 24px 28px;
+            border: 1px solid #e9eef3;
+        }
+
+        .card-graph h3 {
+            font-weight: 600;
+            font-size: 1.25rem;
+            margin-bottom: 18px;
+            border-left: 4px solid #c8102e;
+            padding-left: 14px;
+        }
+
+        .graph-container {
+            display: flex;
+            justify-content: center;
+            margin: 16px 0 8px;
+            position: relative;
+        }
+
+        .symbols-panel {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 16px;
+            margin-bottom: 16px;
+            padding: 12px;
+            background: #f8fafc;
+            border-radius: 16px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .symbol-btn {
+            background: white;
+            border: 1.5px solid #cbd5e1;
+            padding: 6px 12px;
+            border-radius: 40px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .symbol-btn.active {
+            background: #1e3a8a;
+            border-color: #1e3a8a;
+            color: white;
+        }
+
+        .symbol-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .mask-controls {
+            display: flex;
+            gap: 12px;
+            margin-top: 12px;
+            margin-bottom: 8px;
+        }
+
+        .mask-btn {
+            background: #f1f5f9;
+            border: 1px solid #cbd5e1;
+            padding: 8px 16px;
+            border-radius: 40px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .mask-btn.active {
+            background: #1e3a8a;
+            color: white;
+            border-color: #1e3a8a;
+        }
+
+        .values-section {
+            margin-top: 20px;
+        }
+
+        .values-title {
+            font-weight: 600;
+            font-size: 0.85rem;
+            color: #2c5f83;
+            margin-bottom: 12px;
+        }
+
+        .table-scroll {
+            overflow-x: auto;
+            margin-bottom: 16px;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.7rem;
+            min-width: 750px;
+        }
+
+        .data-table th, .data-table td {
+            border: 1px solid #dee9f0;
+            padding: 0.5rem 0.25rem;
+            text-align: center;
+        }
+
+        .data-table th {
+            background: #f8fafc;
+            font-weight: 700;
+        }
+
+        .data-table td:first-child {
+            background: #f8fafc;
+            font-weight: 600;
+            width: 70px;
+        }
+
+        .data-table input {
+            width: 52px;
+            padding: 0.3rem 0.2rem;
+            text-align: center;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 0.7rem;
+            transition: all 0.2s;
+        }
+        
+        .data-table input:focus {
+            outline: none;
+            border-color: #1e3a8a;
+            box-shadow: 0 0 0 2px rgba(30,58,138,0.2);
+        }
+
+        .btn-update {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            padding: 10px 20px;
+            border-radius: 40px;
+            font-weight: 600;
+            font-size: 0.8rem;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 12px;
+        }
+
+        .btn-update:hover {
+            background: #f1f5f9;
+            transform: translateY(-1px);
+        }
+
+        .legend-horizontal {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            background: #f8fafc;
+            width: fit-content;
+            margin: 0 auto 28px auto;
+            padding: 0.5rem 2rem;
+            border-radius: 60px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .legend-dot {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 500;
+            font-size: 0.8rem;
+        }
+
+        .legend-dot.azul::before { content: "●"; color: #1E88E5; font-size: 1.2rem; }
+        .legend-dot.rojo::before { content: "●"; color: #D81B60; font-size: 1.2rem; }
+
+        .bottom-full {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 32px;
+            margin-top: 24px;
+        }
+
+        .info-card {
+            background: #ffffff;
+            border-radius: 20px;
+            box-shadow: 0 8px 28px rgba(0, 0, 0, 0.12);
+            padding: 24px 28px;
+            border: 1px solid #e9eef3;
+        }
+
+        .info-card h3 {
+            font-weight: 600;
+            font-size: 1.15rem;
+            margin-bottom: 20px;
+            border-left: 4px solid #c8102e;
+            padding-left: 14px;
+        }
+
+        .result-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid #ecf3f9;
+            font-size: 0.78rem;
+        }
+
+        .result-row span:last-child {
+            background: #eef3f9;
+            padding: 0.2rem 0.8rem;
+            border-radius: 30px;
+        }
+
+        .footer-note {
+            margin-top: 2rem;
+            text-align: center;
+            font-size: 0.7rem;
+            color: #6f95b0;
+            border-top: 1px solid #e2edf2;
+            padding-top: 1rem;
+        }
+
+        @media (max-width: 950px) {
+            body { padding: 20px; }
+            .impedance-left, .impedance-right { min-width: auto; }
+            .bottom-full { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+<button class="btn-back-floating" id="btnVolverFloating">← Volver al Dashboard</button>
+
+<div class="logo-empresa-top">
+    <img src="../img/saninlogo.jpg" alt="Logo U.D.A." onerror="this.style.display='none'">
+    <div class="logo-texto-temporal">
+        <strong>AUDIOLOGÍA CLÍNICA</strong>
+        <span>Especialistas en Audición</span>
+    </div>
+</div>
+
+<div class="logo-header">
+    <h1>IMPEDANCIOMETRÍA</h1>
+    <p>MPO · Loud · Moderate · Soft | Símbolos audiométricos · Enmascaramiento</p>
+</div>
+
+<div class="impedance-layout">
+    
+    <!-- OÍDO DERECHO - AZUL -->
+    <div class="impedance-left">
+        <div class="card-graph">
+            <h3 style="color:#1E88E5;">🔵 Oído Derecho</h3>
+            <div class="graph-container">
+                <canvas id="canvasOD" width="600" height="320" style="width:100%; height:auto; border-radius:16px; border:1px solid #edf2f7; background:white;"></canvas>
+            </div>
+            
+            <div class="symbols-panel">
+                <button class="symbol-btn" data-ear="od" data-symbol="air">🎧 Vía Aérea (X)</button>
+                <button class="symbol-btn" data-ear="od" data-symbol="airMask">🔲 Vía Aérea Enmasc (□△)</button>
+                <button class="symbol-btn" data-ear="od" data-symbol="bone">🦴 Vía Ósea (>)</button>
+                <button class="symbol-btn" data-ear="od" data-symbol="boneMask">📦 Vía Ósea Enmasc ([ ])</button>
+                <button class="symbol-btn" data-ear="od" data-symbol="tinnitus">🔔 Tinnitus</button>
+                <button class="symbol-btn" data-ear="od" data-symbol="mcl">😊 MCL</button>
+                <button class="symbol-btn" data-ear="od" data-symbol="ucl">⚠️ UCL</button>
+                <button class="symbol-btn" data-ear="od" data-symbol="nr">⬇️ Sin Respuesta</button>
+            </div>
+            
+            <div class="mask-controls">
+                <button class="mask-btn" id="maskODon">🔊 Activar Enmascaramiento OD</button>
+                <button class="mask-btn" id="maskODoff">🔇 Desactivar Enmascaramiento OD</button>
+            </div>
+            
+            <div class="values-section">
+                <div class="values-title">📊 Tabla de valores OD (dB)</div>
+                <div class="table-scroll">
+                    <table class="data-table" id="tableOD">
+                        <thead>
+                            <tr>
+                                <th>Frecuencia</th>
+                                <th>125</th><th>250</th><th>500</th><th>625</th><th>750</th>
+                                <th>1k</th><th>1.1k</th><th>1.25k</th><th>1.5k</th><th>1.75k</th>
+                                <th>2k</th><th>3k</th><th>4k</th><th>5k</th><th>6k</th><th>8k</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td style="background:#f7fafd; font-weight:700;">MPO</td>
+                                <td><input type="number" id="od_mpo_125" value="" step="1" min="0" max="130"></td>
+                                <td><input type="number" id="od_mpo_250" value="" step="1" min="0" max="130"></td>
+                                <td><input type="number" id="od_mpo_500" value="" step="1" min="0" max="130"></td>
+                                <td><input type="number" id="od_mpo_625" value="" step="1" min="0" max="130"></td>
+                                <td><input type="number" id="od_mpo_750" value="" step="1" min="0" max="130"></td>
+                                <td><input type="number" id="od_mpo_1000" value="" step="1" min="0" max="130"></td>
+                                <td><input type="number" id="od_mpo_1100" value="" step="1" min="0" max="130"></td>
+                                <td><input type="number" id="od_mpo_1250" value="" step="1" min="0" max="130"></td>
+                                <td><input type="number" id="od_mpo_1500" value="" step="1" min="0" max="130"></td>
+                                <td><input type="number" id="od_mpo_1750" value="" step="1" min="0" max="130"></td>
+                                <td><input type="number" id="od_mpo_2000" value="" step="1" min="0" max="130"></td>
+                                <td><input type="number" id="od_mpo_3000" value="" step="1" min="0" max="130"></td>
+                                <td><input type="number" id="od_mpo_4000" value="" step="1" min="0" max="130"></td>
+                                <td><input type="number" id="od_mpo_5000" value="" step="1" min="0" max="130"></td>
+                                <td><input type="number" id="od_mpo_6000" value="" step="1" min="0" max="130"></td>
+                                <td><input type="number" id="od_mpo_8000" value="" step="1" min="0" max="130"></td>
+                            </tr>
+                            <tr>
+                                <td style="background:#f7fafd; font-weight:700;">Loud</td>
+                                <td><input type="number" id="od_loud_125" value="" step="1" min="0" max="130"></td>
+                                <td><input type="number" id="od_loud_250" value="" step="1" min="0" max="130"></td>
+                                <td><input type="number" id="od_loud_500" value="" step="1" min="0" max="130"></td>
+                                <td><input type="number" id="od_loud_625" value="" step="1" min="0" max="130"></td>
+                                <td><input type="number" id="od_loud_750" value="" step="1" min="0" max="130"></td>
+                                <td><input type="number" id="od_loud_1000" value="" step="1" min="0" max="130"></td>
+                                <td><input type="number" id="od_loud_1100" value="" step="1" min="0" max="130"></td>
+                                <td><input type="number" id="od_loud_1250" value="" step="1" min="0" max="130"></td>
+                                <td><input type="number" id="od_loud_1500" value="" step="1" min="0" max="130"></td>
+                                <td><input type="number" id="od_loud_1750" value="" step="1" min="0" max="130"></td>
+                                <td><input type="number" id="od_loud_2000" value="" step="1" min="0" max="130"></td>
+                                <td><input type="number" id="od_loud_3000" value="" step="1" min="0" max="130"></td>
+                                <td><input type="number" id="od_loud_4000" value="" step="1" min="0" max="130"></td>
+                                <td><input type="number" id="od_loud_5000" value="" step="1" min="0" max="130"></td>
+                                <td><input type="number" id="od_loud_6000" value="" step="1" min="0" max="130"></td>
+                                <td><input type="number" id="od_loud_8000" value="" step="1" min="0" max="130"></td>
+                            </tr>
+                            <tr>
+                                <td style="background:#f7fafd; font-weight:700;">Moderate</td>
+                                <td><input type="number" id="od_moderate_125" value="" step="1" min="0" max="130"></td>
+                                <td><input type="number" id="od_moderate_250" value="" step="1" min="0" max="130"></td>
+                                <td><input type="number" id="od_moderate_500" value="" step="1" min="0" max="130"></td>
+                                <td><input type="number" id="od_moderate_625" value="" step="1" min="0" max="130"></td>
+                                <td><input type="number" id="od_moderate_750" value="" step="1" min="0" max="130"></td>
+                                <td><input type="number" id="od_moderate_1000" value="" step="1" min="0" max="130"></td>
+                                <td><input type="number" id="od_moderate_1100" value="" step="1" min="0" max="130"></td>
+                                <td><input type="number" id="od_moderate_1250" value="" step="1" min="0" max="130"></td>
+                                <td><input type="number" id="od_moderate_1500" value="" step="1" min="0" max="130"></td>
+                                <td><input type="number" id="od_moderate_1750" value="" step="1" min="0" max="130"></td>
+                                <td><input type="number" id="od_moderate_2000" value="" step="1" min="0" max="130"></td>
+                                <td><input type="number" id="od_moderate_3000" value="" step="1" min="0" max="130"></td>
+                                <td><input type="number" id="od_moderate_4000" value="" step="1" min="0" max="130"></td>
+                                <td><input type="number" id="od_moderate_5000" value="" step="1" min="0" max="130"></td>
+                                <td><input type="number" id="od_moderate_6000" value="" step="1" min="0" max="130"></td>
+                                <td><input type="number" id="od_moderate_8000" value="" step="1" min="0" max="130"></td>
+                            </tr>
+                            <tr>
+                                <td style="background:#f7fafd; font-weight:700;">Soft</td>
+                                <td><input type="number" id="od_soft_125" value="" step="1" min="0" max="130"></td>
+                                <td><input type="number" id="od_soft_250" value="" step="1" min="0" max="130"></td>
+                                <td><input type="number" id="od_soft_500" value="" step="1" min="0" max="130"></td>
+                                <td><input type="number" id="od_soft_625" value="" step="1" min="0" max="130"></td>
+                                <td><input type="number" id="od_soft_750" value="" step="1" min="0" max="130"></td>
+                                <td><input type="number" id="od_soft_1000" value="" step="1" min="0" max="130"></td>
+                                <td><input type="number" id="od_soft_1100" value="" step="1" min="0" max="130"></td>
+                                <td><input type="number" id="od_soft_1250" value="" step="1" min="0" max="130"></td>
+                                <td><input type="number" id="od_soft_1500" value="" step="1" min="0" max="130"></td>
+                                <td><input type="number" id="od_soft_1750" value="" step="1" min="0" max="130"></td>
+                                <td><input type="number" id="od_soft_2000" value="" step="1" min="0" max="130"></td>
+                                <td><input type="number" id="od_soft_3000" value="" step="1" min="0" max="130"></td>
+                                <td><input type="number" id="od_soft_4000" value="" step="1" min="0" max="130"></td>
+                                <td><input type="number" id="od_soft_5000" value="" step="1" min="0" max="130"></td>
+                                <td><input type="number" id="od_soft_6000" value="" step="1" min="0" max="130"></td>
+                                <td><input type="number" id="od_soft_8000" value="" step="1" min="0" max="130"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <button class="btn-update" onclick="actualizarOD()">📈 Actualizar gráfica OD</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- OÍDO IZQUIERDO - ROJO -->
+    <div class="impedance-right">
+        <div class="card-graph">
+            <h3 style="color:#D81B60;">🔴 Oído Izquierdo</h3>
+            <div class="graph-container">
+                <canvas id="canvasOI" width="600" height="320" style="width:100%; height:auto; border-radius:16px; border:1px solid #edf2f7; background:white;"></canvas>
+            </div>
+            
+            <div class="symbols-panel">
+                <button class="symbol-btn" data-ear="oi" data-symbol="air">🎧 Vía Aérea (O)</button>
+                <button class="symbol-btn" data-ear="oi" data-symbol="airMask">🔲 Vía Aérea Enmasc (□▽)</button>
+                <button class="symbol-btn" data-ear="oi" data-symbol="bone">🦴 Vía Ósea (<)</button>
+                <button class="symbol-btn" data-ear="oi" data-symbol="boneMask">📦 Vía Ósea Enmasc ([ ])</button>
+                <button class="symbol-btn" data-ear="oi" data-symbol="tinnitus">🔔 Tinnitus</button>
+                <button class="symbol-btn" data-ear="oi" data-symbol="mcl">😊 MCL</button>
+                <button class="symbol-btn" data-ear="oi" data-symbol="ucl">⚠️ UCL</button>
+                <button class="symbol-btn" data-ear="oi" data-symbol="nr">⬇️ Sin Respuesta</button>
+            </div>
+            
+            <div class="mask-controls">
+                <button class="mask-btn" id="maskOIon">🔊 Activar Enmascaramiento OI</button>
+                <button class="mask-btn" id="maskOIoff">🔇 Desactivar Enmascaramiento OI</button>
+            </div>
+            
+            <div class="values-section">
+                <div class="values-title">📊 Tabla de valores OI (dB)</div>
+                <div class="table-scroll">
+                    <table class="data-table" id="tableOI">
+                        <thead>
+                            <tr>
+                                <th>Frecuencia</th>
+                                <th>125</th><th>250</th><th>500</th><th>625</th><th>750</th>
+                                <th>1k</th><th>1.1k</th><th>1.25k</th><th>1.5k</th><th>1.75k</th>
+                                <th>2k</th><th>3k</th><th>4k</th><th>5k</th><th>6k</th><th>8k</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td style="background:#f7fafd; font-weight:700;">MPO</td>
+                                <td><input type="number" id="oi_mpo_125" value="" step="1" min="0" max="130"></td>
+                                <td><input type="number" id="oi_mpo_250" value="" step="1" min="0" max="130"></td>
+                                <td><input type="number" id="oi_mpo_500" value="" step="1" min="0" max="130"></td>
+                                <td><input type="number" id="oi_mpo_625" value="" step="1" min="0" max="130"></td>
+                                <td><input type="number" id="oi_mpo_750" value="" step="1" min="0" max="130"></td>
+                                <td><input type="number" id="oi_mpo_1000" value="" step="1" min="0" max="130"></td>
+                                <td><input type="number" id="oi_mpo_1100" value="" step="1" min="0" max="130"></td>
+                                <td><input type="number" id="oi_mpo_1250" value="" step="1" min="0" max="130"></td>
+                                <td><input type="number" id="oi_mpo_1500" value="" step="1" min="0" max="130"></td>
+                                <td><input type="number" id="oi_mpo_1750" value="" step="1" min="0" max="130"></td>
+                                <td><input type="number" id="oi_mpo_2000" value="" step="1" min="0" max="130"></td>
+                                <td><input type="number" id="oi_mpo_3000" value="" step="1" min="0" max="130"></td>
+                                <td><input type="number" id="oi_mpo_4000" value="" step="1" min="0" max="130"></td>
+                                <td><input type="number" id="oi_mpo_5000" value="" step="1" min="0" max="130"></td>
+                                <td><input type="number" id="oi_mpo_6000" value="" step="1" min="0" max="130"></td>
+                                <td><input type="number" id="oi_mpo_8000" value="" step="1" min="0" max="130"></td>
+                            </tr>
+                            <tr>
+                                <td style="background:#f7fafd; font-weight:700;">Loud</td>
+                                <td><input type="number" id="oi_loud_125" value="" step="1" min="0" max="130"></td>
+                                <td><input type="number" id="oi_loud_250" value="" step="1" min="0" max="130"></td>
+                                <td><input type="number" id="oi_loud_500" value="" step="1" min="0" max="130"></td>
+                                <td><input type="number" id="oi_loud_625" value="" step="1" min="0" max="130"></td>
+                                <td><input type="number" id="oi_loud_750" value="" step="1" min="0" max="130"></td>
+                                <td><input type="number" id="oi_loud_1000" value="" step="1" min="0" max="130"></td>
+                                <td><input type="number" id="oi_loud_1100" value="" step="1" min="0" max="130"></td>
+                                <td><input type="number" id="oi_loud_1250" value="" step="1" min="0" max="130"></td>
+                                <td><input type="number" id="oi_loud_1500" value="" step="1" min="0" max="130"></td>
+                                <td><input type="number" id="oi_loud_1750" value="" step="1" min="0" max="130"></td>
+                                <td><input type="number" id="oi_loud_2000" value="" step="1" min="0" max="130"></td>
+                                <td><input type="number" id="oi_loud_3000" value="" step="1" min="0" max="130"></td>
+                                <td><input type="number" id="oi_loud_4000" value="" step="1" min="0" max="130"></td>
+                                <td><input type="number" id="oi_loud_5000" value="" step="1" min="0" max="130"></td>
+                                <td><input type="number" id="oi_loud_6000" value="" step="1" min="0" max="130"></td>
+                                <td><input type="number" id="oi_loud_8000" value="" step="1" min="0" max="130"></td>
+                            </tr>
+                            <tr>
+                                <td style="background:#f7fafd; font-weight:700;">Moderate</td>
+                                <td><input type="number" id="oi_moderate_125" value="" step="1" min="0" max="130"></td>
+                                <td><input type="number" id="oi_moderate_250" value="" step="1" min="0" max="130"></td>
+                                <td><input type="number" id="oi_moderate_500" value="" step="1" min="0" max="130"></td>
+                                <td><input type="number" id="oi_moderate_625" value="" step="1" min="0" max="130"></td>
+                                <td><input type="number" id="oi_moderate_750" value="" step="1" min="0" max="130"></td>
+                                <td><input type="number" id="oi_moderate_1000" value="" step="1" min="0" max="130"></td>
+                                <td><input type="number" id="oi_moderate_1100" value="" step="1" min="0" max="130"></td>
+                                <td><input type="number" id="oi_moderate_1250" value="" step="1" min="0" max="130"></td>
+                                <td><input type="number" id="oi_moderate_1500" value="" step="1" min="0" max="130"></td>
+                                <td><input type="number" id="oi_moderate_1750" value="" step="1" min="0" max="130"></td>
+                                <td><input type="number" id="oi_moderate_2000" value="" step="1" min="0" max="130"></td>
+                                <td><input type="number" id="oi_moderate_3000" value="" step="1" min="0" max="130"></td>
+                                <td><input type="number" id="oi_moderate_4000" value="" step="1" min="0" max="130"></td>
+                                <td><input type="number" id="oi_moderate_5000" value="" step="1" min="0" max="130"></td>
+                                <td><input type="number" id="oi_moderate_6000" value="" step="1" min="0" max="130"></td>
+                                <td><input type="number" id="oi_moderate_8000" value="" step="1" min="0" max="130"></td>
+                            </tr>
+                            <tr>
+                                <td style="background:#f7fafd; font-weight:700;">Soft</td>
+                                <td><input type="number" id="oi_soft_125" value="" step="1" min="0" max="130"></td>
+                                <td><input type="number" id="oi_soft_250" value="" step="1" min="0" max="130"></td>
+                                <td><input type="number" id="oi_soft_500" value="" step="1" min="0" max="130"></td>
+                                <td><input type="number" id="oi_soft_625" value="" step="1" min="0" max="130"></td>
+                                <td><input type="number" id="oi_soft_750" value="" step="1" min="0" max="130"></td>
+                                <td><input type="number" id="oi_soft_1000" value="" step="1" min="0" max="130"></td>
+                                <td><input type="number" id="oi_soft_1100" value="" step="1" min="0" max="130"></td>
+                                <td><input type="number" id="oi_soft_1250" value="" step="1" min="0" max="130"></td>
+                                <td><input type="number" id="oi_soft_1500" value="" step="1" min="0" max="130"></td>
+                                <td><input type="number" id="oi_soft_1750" value="" step="1" min="0" max="130"></td>
+                                <td><input type="number" id="oi_soft_2000" value="" step="1" min="0" max="130"></td>
+                                <td><input type="number" id="oi_soft_3000" value="" step="1" min="0" max="130"></td>
+                                <td><input type="number" id="oi_soft_4000" value="" step="1" min="0" max="130"></td>
+                                <td><input type="number" id="oi_soft_5000" value="" step="1" min="0" max="130"></td>
+                                <td><input type="number" id="oi_soft_6000" value="" step="1" min="0" max="130"></td>
+                                <td><input type="number" id="oi_soft_8000" value="" step="1" min="0" max="130"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <button class="btn-update" onclick="actualizarOI()">🔄 Actualizar gráfica OI</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="legend-horizontal">
+    <span class="legend-dot azul">Oído Derecho (MPO)</span>
+    <span class="legend-dot rojo">Oído Izquierdo (MPO)</span>
+    <span style="font-size:0.7rem; background:#eef2fa; padding:0.2rem 0.7rem; border-radius:40px;">🎯 Seleccione símbolos para dibujar en la gráfica</span>
+</div>
+
+<script>
+    const freqs = [125, 250, 500, 625, 750, 1000, 1100, 1250, 1500, 1750, 2000, 3000, 4000, 5000, 6000, 8000];
+    const freqLabels = ["125","250","500","625","750","1k","1.1k","1.25k","1.5k","1.75k","2k","3k","4k","5k","6k","8k"];
+
+    let symbolsOD = { air: false, airMask: false, bone: false, boneMask: false, tinnitus: false, mcl: false, ucl: false, nr: false };
+    let symbolsOI = { air: false, airMask: false, bone: false, boneMask: false, tinnitus: false, mcl: false, ucl: false, nr: false };
+    let maskingOD = false;
+    let maskingOI = false;
+
+    function setupClearOnFocus() {
+        const allInputs = document.querySelectorAll('#tableOD input, #tableOI input');
+        allInputs.forEach(input => {
+            input.addEventListener('focus', function(e) {
+                this.value = '';
+            });
+        });
+    }
+
+    function setupKeyboardNavigation() {
+        const allInputs = document.querySelectorAll('#tableOD input, #tableOI input');
+        
+        allInputs.forEach(input => {
+            input.addEventListener('keydown', function(e) {
+                const key = e.key;
+                const currentCell = this.parentElement;
+                const currentRow = currentCell.parentElement;
+                const table = currentRow.parentElement.parentElement;
+                
+                const rows = Array.from(table.querySelectorAll('tbody tr'));
+                const currentRowIndex = rows.indexOf(currentRow);
+                
+                const cells = Array.from(currentRow.querySelectorAll('td'));
+                const currentCellIndex = cells.indexOf(currentCell);
+                
+                let targetCell = null;
+                
+                switch(key) {
+                    case 'ArrowRight':
+                        e.preventDefault();
+                        if (currentCellIndex < cells.length - 1) {
+                            targetCell = cells[currentCellIndex + 1];
+                        }
+                        break;
+                    case 'ArrowLeft':
+                        e.preventDefault();
+                        if (currentCellIndex > 0) {
+                            targetCell = cells[currentCellIndex - 1];
+                        }
+                        break;
+                    case 'ArrowDown':
+                        e.preventDefault();
+                        if (currentRowIndex < rows.length - 1) {
+                            const nextRow = rows[currentRowIndex + 1];
+                            const nextRowCells = Array.from(nextRow.querySelectorAll('td'));
+                            if (nextRowCells.length > currentCellIndex) {
+                                targetCell = nextRowCells[currentCellIndex];
+                            }
+                        }
+                        break;
+                    case 'ArrowUp':
+                        e.preventDefault();
+                        if (currentRowIndex > 0) {
+                            const prevRow = rows[currentRowIndex - 1];
+                            const prevRowCells = Array.from(prevRow.querySelectorAll('td'));
+                            if (prevRowCells.length > currentCellIndex) {
+                                targetCell = prevRowCells[currentCellIndex];
+                            }
+                        }
+                        break;
+                    default:
+                        return;
+                }
+                
+                if (targetCell) {
+                    const targetInput = targetCell.querySelector('input');
+                    if (targetInput) {
+                        targetInput.focus();
+                    }
+                }
+            });
+        });
+    }
+
+    function getX(freq, width = 560) {
+        const minF = 125, maxF = 8000;
+        const leftMargin = 55, rightMargin = width - 25;
+        const logMin = Math.log10(minF), logMax = Math.log10(maxF);
+        const logF = Math.log10(freq);
+        return leftMargin + ((logF - logMin) / (logMax - logMin)) * (rightMargin - leftMargin);
+    }
+
+    function getY(dB, height = 300) {
+        const topMargin = 32, bottomMargin = height - 28;
+        const maxDB = 130, minDB = 0;
+        return topMargin + ((maxDB - dB) / (maxDB - minDB)) * (bottomMargin - topMargin);
+    }
+
+    function drawSymbol(ctx, x, y, type, ear) {
+        const color = ear === 'od' ? '#1E88E5' : '#D81B60';
+        ctx.save();
+        ctx.strokeStyle = color;
+        ctx.fillStyle = color;
+        ctx.lineWidth = 2.5;
+        
+        switch(type) {
+            case 'air':
+                if(ear === 'od') {
+                    // X para OD
+                    ctx.beginPath();
+                    ctx.moveTo(x-7, y-7); 
+                    ctx.lineTo(x+7, y+7);
+                    ctx.moveTo(x+7, y-7); 
+                    ctx.lineTo(x-7, y+7);
+                    ctx.stroke();
+                } else {
+                    // Círculo para OI
+                    ctx.beginPath();
+                    ctx.arc(x, y, 7, 0, 2*Math.PI);
+                    ctx.stroke();
+                }
+                break;
+            case 'airMask':
+                ctx.strokeRect(x-7, y-7, 14, 14);
+                if(ear === 'od') {
+                    ctx.beginPath(); 
+                    ctx.moveTo(x, y-5); 
+                    ctx.lineTo(x+5, y+3); 
+                    ctx.lineTo(x-5, y+3); 
+                    ctx.fill();
+                } else {
+                    ctx.beginPath(); 
+                    ctx.moveTo(x, y+5); 
+                    ctx.lineTo(x+5, y-3); 
+                    ctx.lineTo(x-5, y-3); 
+                    ctx.fill();
+                }
+                break;
+            case 'bone':
+                ctx.beginPath();
+                if(ear === 'od') {
+                    ctx.moveTo(x-6, y-6); 
+                    ctx.lineTo(x+4, y); 
+                    ctx.lineTo(x-6, y+6);
+                } else {
+                    ctx.moveTo(x+6, y-6); 
+                    ctx.lineTo(x-4, y); 
+                    ctx.lineTo(x+6, y+6);
+                }
+                ctx.stroke();
+                break;
+            case 'boneMask':
+                ctx.beginPath();
+                ctx.moveTo(x-8, y-6); 
+                ctx.lineTo(x-8, y+6);
+                ctx.moveTo(x+8, y-6); 
+                ctx.lineTo(x+8, y+6);
+                ctx.stroke();
+                break;
+            case 'tinnitus':
+                ctx.font = "bold 16px 'Segoe UI'";
+                ctx.fillText("🔔", x-10, y+6);
+                break;
+            case 'mcl':
+                ctx.font = "bold 10px 'Segoe UI'";
+                ctx.fillText("MCL", x-12, y-5);
+                break;
+            case 'ucl':
+                ctx.font = "bold 10px 'Segoe UI'";
+                ctx.fillText("UCL", x-12, y-5);
+                break;
+            case 'nr':
+                ctx.beginPath();
+                ctx.moveTo(x-5, y-10); 
+                ctx.lineTo(x+5, y+2);
+                ctx.moveTo(x+5, y-10); 
+                ctx.lineTo(x-5, y+2);
+                ctx.stroke();
+                ctx.font = "bold 14px 'Segoe UI'";
+                ctx.fillText("↓", x-4, y+12);
+                break;
+        }
+        ctx.restore();
+    }
+
+    function drawFullChart(canvasId, mpoArray, earType) {
+        const canvas = document.getElementById(canvasId);
+        if (!canvas) return;
+        const width = 600, height = 320;
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        
+        // Fondo blanco
+        ctx.fillStyle = "#FFFFFF";
+        ctx.fillRect(0, 0, width, height);
+        
+        // Cuadrícula horizontal (dB)
+        const dbGrid = [0,20,40,60,80,100,120,130];
+        ctx.strokeStyle = "#E1E9F0";
+        ctx.lineWidth = 0.5;
+        ctx.setLineDash([3, 2]);
+        dbGrid.forEach(dB => {
+            const y = getY(dB, height);
+            if(y > 25 && y < height - 25){
+                ctx.beginPath();
+                ctx.moveTo(45, y);
+                ctx.lineTo(width - 20, y);
+                ctx.stroke();
+            }
+        });
+        
+        // Etiquetas dB
+        ctx.fillStyle = "#557c9c";
+        ctx.font = "7px 'Inter'";
+        ctx.setLineDash([]);
+        dbGrid.forEach(dB => {
+            const y = getY(dB, height);
+            ctx.fillText(dB.toString(), 38, y+3);
+        });
+        
+        // Título eje Y
+        ctx.save();
+        ctx.translate(18, height/2);
+        ctx.rotate(-Math.PI/2);
+        ctx.fillStyle = "#2c6280";
+        ctx.font = "8px 'Inter'";
+        ctx.fillText("Intensidad (dB)", -40, 0);
+        ctx.restore();
+        
+        // Cuadrícula vertical (frecuencias)
+        ctx.strokeStyle = "#e4edf4";
+        ctx.lineWidth = 0.4;
+        freqs.forEach((f, idx) => {
+            const x = getX(f, width);
+            ctx.beginPath();
+            ctx.moveTo(x, getY(0, height));
+            ctx.lineTo(x, getY(130, height));
+            ctx.stroke();
+            ctx.fillStyle = "#3f6a8c";
+            ctx.font = "6.5px 'Inter'";
+            ctx.fillText(freqLabels[idx], x-8, getY(0, height)+18);
+        });
+        
+        // Título eje X
+        ctx.fillStyle = "#2c6280";
+        ctx.font = "8px 'Inter'";
+        ctx.fillText("Frecuencia (Hz)", width/2-40, height-8);
+        
+        // Dibujar línea MPO
+        ctx.beginPath();
+        ctx.strokeStyle = earType === 'od' ? '#1E88E5' : '#D81B60';
+        ctx.lineWidth = 3;
+        ctx.setLineDash([]);
+        
+        let firstPoint = true;
+        for(let i=0; i<freqs.length; i++){
+            const value = mpoArray[i];
+            if (value === null || value === undefined || value === '' || isNaN(value)) {
+                firstPoint = true;
+                continue;
+            }
+            
+            const x = getX(freqs[i], width);
+            const y = getY(parseFloat(value), height);
+            
+            if (firstPoint) {
+                ctx.moveTo(x, y);
+                firstPoint = false;
+            } else {
+                ctx.lineTo(x, y);
+            }
+        }
+        ctx.stroke();
+        
+        // Dibujar puntos MPO
+        for(let i=0; i<freqs.length; i++){
+            const value = mpoArray[i];
+            if (value === null || value === undefined || value === '' || isNaN(value)) continue;
+            
+            const x = getX(freqs[i], width);
+            const y = getY(parseFloat(value), height);
+            ctx.fillStyle = earType === 'od' ? '#1E88E5' : '#D81B60';
+            ctx.beginPath();
+            ctx.arc(x, y, 5, 0, 2*Math.PI);
+            ctx.fill();
+            ctx.fillStyle = "white";
+            ctx.beginPath();
+            ctx.arc(x, y, 2.5, 0, 2*Math.PI);
+            ctx.fill();
+        }
+        
+        // === DIBUJAR SÍMBOLOS (SIEMPRE) ===
+        const symbols = earType === 'od' ? symbolsOD : symbolsOI;
+        const maskingActive = earType === 'od' ? maskingOD : maskingOI;
+        
+        // Posiciones fijas para los símbolos
+        const symbolPositions = [
+            { freq: 500, dB: 45, type: 'air' },
+            { freq: 1000, dB: 55, type: 'bone' },
+            { freq: 2000, dB: 70, type: 'mcl' },
+            { freq: 4000, dB: 95, type: 'ucl' },
+            { freq: 6000, dB: 110, type: 'nr' },
+            { freq: 250, dB: 35, type: 'tinnitus' }
+        ];
+        
+        // Dibujar según enmascaramiento activo o no
+        if(maskingActive) {
+            if(symbols.airMask) {
+                const pos = symbolPositions.find(p => p.type === 'air');
+                if(pos) drawSymbol(ctx, getX(pos.freq, width), getY(pos.dB, height), 'airMask', earType);
+            }
+            if(symbols.boneMask) {
+                const pos = symbolPositions.find(p => p.type === 'bone');
+                if(pos) drawSymbol(ctx, getX(pos.freq, width), getY(pos.dB, height), 'boneMask', earType);
+            }
+        } else {
+            if(symbols.air) {
+                const pos = symbolPositions.find(p => p.type === 'air');
+                if(pos) drawSymbol(ctx, getX(pos.freq, width), getY(pos.dB, height), 'air', earType);
+            }
+            if(symbols.bone) {
+                const pos = symbolPositions.find(p => p.type === 'bone');
+                if(pos) drawSymbol(ctx, getX(pos.freq, width), getY(pos.dB, height), 'bone', earType);
+            }
+        }
+        
+        // Dibujar siempre estos símbolos si están activos
+        if(symbols.tinnitus) drawSymbol(ctx, getX(250, width), getY(35, height), 'tinnitus', earType);
+        if(symbols.mcl) drawSymbol(ctx, getX(2000, width), getY(70, height), 'mcl', earType);
+        if(symbols.ucl) drawSymbol(ctx, getX(4000, width), getY(95, height), 'ucl', earType);
+        if(symbols.nr) drawSymbol(ctx, getX(6000, width), getY(110, height), 'nr', earType);
+    }
+
+    function getODMPO() {
+        return freqs.map(f => {
+            const input = document.getElementById(`od_mpo_${f}`);
+            if (!input || input.value === '') return null;
+            const val = parseFloat(input.value);
+            return isNaN(val) ? null : val;
+        });
+    }
+    
+    function getOIMPO() {
+        return freqs.map(f => {
+            const input = document.getElementById(`oi_mpo_${f}`);
+            if (!input || input.value === '') return null;
+            const val = parseFloat(input.value);
+            return isNaN(val) ? null : val;
+        });
+    }
+    
+    function actualizarOD() { 
+        drawFullChart('canvasOD', getODMPO(), 'od'); 
+    }
+    
+    function actualizarOI() { 
+        drawFullChart('canvasOI', getOIMPO(), 'oi'); 
+    }
+
+    function setupSymbolButtons(ear, symbolsObj, updateFunc) {
+        document.querySelectorAll(`.symbol-btn[data-ear="${ear}"]`).forEach(btn => {
+            btn.addEventListener('click', () => {
+                const symbol = btn.dataset.symbol;
+                symbolsObj[symbol] = !symbolsObj[symbol];
+                if(symbolsObj[symbol]) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+                updateFunc();
+            });
+        });
+    }
+
+    window.regresarDashboard = function() {
+        if (window.api && window.api.volverDashboard) window.api.volverDashboard();
+        else alert('No se puede regresar al dashboard');
+    };
+
+    document.addEventListener('DOMContentLoaded', () => {
+        actualizarOD(); 
+        actualizarOI();
+        
+        setupClearOnFocus();
+        setupKeyboardNavigation();
+        
+        setupSymbolButtons('od', symbolsOD, actualizarOD);
+        setupSymbolButtons('oi', symbolsOI, actualizarOI);
+        
+        document.getElementById('maskODon')?.addEventListener('click', () => { 
+            maskingOD = true; 
+            actualizarOD(); 
+        });
+        document.getElementById('maskODoff')?.addEventListener('click', () => { 
+            maskingOD = false; 
+            actualizarOD(); 
+        });
+        document.getElementById('maskOIon')?.addEventListener('click', () => { 
+            maskingOI = true; 
+            actualizarOI(); 
+        });
+        document.getElementById('maskOIoff')?.addEventListener('click', () => { 
+            maskingOI = false; 
+            actualizarOI(); 
+        });
+        
+        document.getElementById('btnVolverFloating')?.addEventListener('click', window.regresarDashboard);
+        
+        const inputsOD = document.querySelectorAll('#tableOD input');
+        const inputsOI = document.querySelectorAll('#tableOI input');
+        inputsOD.forEach(inp => inp.addEventListener('change', actualizarOD));
+        inputsOI.forEach(inp => inp.addEventListener('change', actualizarOI));
+    });
+</script>
+</body>
+</html>

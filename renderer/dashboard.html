@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard | Clínica Audiométrica</title>
+  <style>
+    /* RESET */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Arial, sans-serif;
+    }
+
+    body {
+      background: #f5f7fa;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    /* CONTENEDOR PRINCIPAL */
+    .dashboard-container {
+      display: flex;
+      height: 100vh;
+    }
+
+    /* SIDEBAR */
+    .sidebar {
+      width: 260px;
+      background: #ffffff;
+      border-right: 1px solid #e5e7eb;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+    }
+
+    /* LOGO EN SIDEBAR */
+    .sidebar-logo {
+      text-align: center;
+      margin-bottom: 30px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid #e5e7eb;
+    }
+
+    .sidebar-logo img {
+      max-width: 120px;
+      height: auto;
+      margin-bottom: 10px;
+    }
+
+    .sidebar-logo h2 {
+      font-size: 1rem;
+      color: #1f2937;
+      margin-top: 8px;
+    }
+
+    .sidebar-logo span {
+      font-size: 0.7rem;
+      color: #6b7280;
+      display: block;
+    }
+
+    /* NAVEGACIÓN */
+    .sidebar nav {
+      flex: 1;
+    }
+
+    .sidebar nav button {
+      width: 100%;
+      padding: 12px;
+      margin-bottom: 8px;
+      background: transparent;
+      border: none;
+      border-radius: 8px;
+      text-align: left;
+      cursor: pointer;
+      font-size: 14px;
+      color: #374151;
+      transition: all 0.2s ease;
+    }
+
+    .sidebar nav button:hover {
+      background: #f3f4f6;
+    }
+
+    .sidebar nav button.active {
+      background: #e0edff;
+      color: #2563eb;
+      font-weight: 500;
+    }
+
+    /* CONTENIDO */
+    .content {
+      flex: 1;
+      padding: 30px;
+      overflow-y: auto;
+    }
+
+    /* USER INFO */
+    .user-info {
+      background: white;
+      padding: 16px 24px;
+      border-radius: 12px;
+      margin-bottom: 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+      border: 1px solid #e5e7eb;
+    }
+
+    .user-info .user-details {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .user-avatar {
+      width: 40px;
+      height: 40px;
+      background: #2563eb;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: bold;
+      font-size: 18px;
+    }
+
+    .user-info span {
+      color: #1f2937;
+    }
+
+    .user-info .rol {
+      font-weight: bold;
+      color: #2563eb;
+      background: #e0edff;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+    }
+
+    .logout-btn {
+      background: #ef4444;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 500;
+      transition: background 0.2s;
+    }
+
+    .logout-btn:hover {
+      background: #dc2626;
+    }
+
+    /* TÍTULOS */
+    .content h1 {
+      margin-top: 0;
+      margin-bottom: 5px;
+      color: #1f2937;
+      font-size: 1.8rem;
+    }
+
+    .subtitle {
+      margin-bottom: 25px;
+      font-size: 14px;
+      color: #6b7280;
+    }
+
+    /* TARJETAS */
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 20px;
+    }
+
+    .card {
+      background: #ffffff;
+      padding: 22px;
+      border-radius: 14px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+      border: 1px solid #e5e7eb;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      cursor: pointer;
+    }
+
+    .card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+    }
+
+    .card h3 {
+      margin-top: 0;
+      margin-bottom: 10px;
+      color: #1f2937;
+      font-size: 1.1rem;
+    }
+
+    .card p {
+      font-size: 13px;
+      color: #6b7280;
+      line-height: 1.5;
+    }
+
+    .card button {
+      margin-top: 15px;
+      padding: 10px;
+      width: 100%;
+      border: none;
+      border-radius: 8px;
+      background: #2563eb;
+      color: white;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 500;
+      transition: background 0.2s ease;
+    }
+
+    .card button:hover {
+      background: #1e40af;
+    }
+
+    /* SCROLL */
+    .content::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    .content::-webkit-scrollbar-track {
+      background: #f1f1f1;
+      border-radius: 10px;
+    }
+
+    .content::-webkit-scrollbar-thumb {
+      background: #c1c1c1;
+      border-radius: 10px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="dashboard-container">
+  <!-- SIDEBAR CON LOGO -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <img src="../img/saninlogo.jpg" alt="Logo U.D.A." onerror="this.style.display='none'; this.parentElement.innerHTML='<h2>🏥 Clínica Auditiva</h2><span>Especialistas en Audición</span>'">
+      <h2>Clínica Auditiva</h2>
+      <span>Especialistas en Audición</span>
+    </div>
+    <nav id="navMenu">
+      <!-- Botones dinámicos según rol -->
+    </nav>
+  </aside>
+
+  <!-- CONTENIDO PRINCIPAL -->
+  <main class="content">
+    <div class="user-info">
+      <div class="user-details">
+        <div class="user-avatar" id="userAvatar">👤</div>
+        <div>
+          <span id="userNombre" style="font-weight: 500;"></span>
+          <span class="rol" id="userRol"></span>
+        </div>
+      </div>
+      <button class="logout-btn" onclick="cerrarSesion()">Cerrar Sesión</button>
+    </div>
+
+    <h1>Panel principal</h1>
+    <p class="subtitle" id="bienvenidaMsg"></p>
+
+    <div class="cards" id="cardsContainer">
+      <!-- Tarjetas dinámicas según rol -->
+    </div>
+  </main>
+</div>
+
+<script>
+  let usuarioActual = null;
+
+  // Configuración de módulos por rol
+  const modulosPorRol = {
+    administrador: [
+      { id: 'pacientes', nombre: 'Pacientes', descripcion: 'Registro y gestión de pacientes, historial clínico', archivo: 'pacientes.html', icono: '👥' },
+      { id: 'citas', nombre: 'Citas', descripcion: 'Agenda y control de citas programadas', archivo: 'citas.html', icono: '📅' },
+      { id: 'audiometria', nombre: 'Audiometrías', descripcion: 'Resultados y seguimiento clínico audiológico', archivo: 'audiometria.html', icono: '🎧' },
+      { id: 'audiometriaCompleta', nombre: 'Audiometría Tonal Completa', descripcion: 'Evaluación completa con AC, BC, UCL y logoaudiometría', archivo: 'AudiometríaTonalCompleta.html', icono: '🔊' },
+      { id: 'logoaudiometria', nombre: 'Logoaudiometría', descripcion: 'Pruebas de reconocimiento de palabras', archivo: 'Logoaudiometria.html', icono: '🗣️' },
+      { id: 'impedanciometria', nombre: 'Impedanciometría', descripcion: 'Estudio de la impedancia acústica', archivo: 'Inpedanciometria.html', icono: '📊' },
+         { id: 'resultados', nombre: 'Resultados', descripcion: 'Consulta y gestión de resultados de citas', archivo: 'resultadoshistorialdetalles.html', icono: '📊' },
+      { id: 'informes', nombre: 'Informes', descripcion: 'Generación de reportes y certificados médicos', archivo: 'informes.html', icono: '📄' },
+      { id: 'configuracion', nombre: 'Configuración', descripcion: 'Configuración del sistema y usuarios', archivo: 'configuracion.html', icono: '⚙️' }
+    ],
+    secretaria: [
+      { id: 'pacientes', nombre: 'Pacientes', descripcion: 'Registro y gestión de pacientes', archivo: 'pacientes.html', icono: '👥' },
+      { id: 'citas', nombre: 'Citas', descripcion: 'Agenda y control de citas programadas', archivo: 'citas.html', icono: '📅' },
+       { nombre: '📊 Reportes', archivo: 'reportes.html' }
+    ],
+    audiologo: [
+      { id: 'audiometria', nombre: 'Audiometría Tonal', descripcion: '', archivo: 'AudiometriaTonal.html', icono: '' },
+     // { id: 'audiometriaCompleta', nombre: 'Audiometría Tonal Completa', descripcion: 'Evaluación completa con AC, BC, UCL', archivo: 'AudiometríaTonalCompleta.html', icono: '🔊' },
+      { id: 'logoaudiometria', nombre: 'Logoaudiometría', descripcion: '', archivo: 'Logoaudiometria.html', icono: '' },
+      { id: 'resultados', nombre: 'Resultados', archivo: 'resultadoshistorialdetalles.html' },
+    //  { id: 'impedanciometria', nombre: 'Impedanciometría', descripcion: 'Estudio de la impedancia acústica', archivo: 'Inpedanciometria.html', icono: '📊' }
+    ]
+  };
+
+  // Botones del sidebar por rol
+  const botonesSidebarPorRol = {
+    administrador: [
+      { nombre: '👥 Pacientes', archivo: 'pacientes.html' },
+      { nombre: '📅 Citas', archivo: 'citas.html' },
+      { nombre: '🎧 Audiometrías', archivo: 'audiometria.html' },
+      { nombre: '🔊 Audiometría Tonal', archivo: 'AudiometríaTonalCompleta.html' },
+      { nombre: '🗣️ Logoaudiometría', archivo: 'Logoaudiometria.html' },
+      { nombre: '📊 Impedanciometría', archivo: 'Inpedanciometria.html' },
+      { nombre: '📄 Informes', archivo: 'informes.html' },
+      { nombre: '⚙️ Configuración', archivo: 'configuracion.html' }
+    ],
+    secretaria: [
+      { nombre: '👥 Pacientes', archivo: 'pacientes.html' },
+      { nombre: '📅 Citas', archivo: 'citas.html' }
+    ],
+    audiologo: [
+      { nombre: 'Citas Semana', archivo: 'citassemana.html' },
+      { nombre: ' Audiometría Tonal', archivo: 'AudiometriaTonal.html' },
+      { nombre: ' Logoaudiometría', archivo: 'Logoaudiometria.html' },
+
+    ]
+  };
+
+  function navegarA(destino) {
+    if (window.api && window.api.navegar) {
+      window.api.navegar(destino);
+    } else {
+      console.error('No se puede navegar: API no disponible');
+      alert('Error: No se puede cambiar de página');
+    }
+  }
+
+  function cerrarSesion() {
+    navegarA('login.html');
+  }
+
+  function cargarSidebar(rol) {
+    const navMenu = document.getElementById('navMenu');
+    navMenu.innerHTML = '';
+    
+    const botones = botonesSidebarPorRol[rol] || [];
+    
+    botones.forEach(boton => {
+      const btn = document.createElement('button');
+      btn.textContent = boton.nombre;
+      btn.onclick = () => navegarA(boton.archivo);
+      navMenu.appendChild(btn);
+    });
+  }
+
+  function cargarTarjetas(rol) {
+    const cardsContainer = document.getElementById('cardsContainer');
+    cardsContainer.innerHTML = '';
+    
+    const modulos = modulosPorRol[rol] || [];
+    
+    if (modulos.length === 0) {
+      cardsContainer.innerHTML = '<p style="color: #6b7280;">No tienes módulos asignados</p>';
+      return;
+    }
+    
+    modulos.forEach(modulo => {
+      const card = document.createElement('div');
+      card.className = 'card';
+      
+      card.innerHTML = `
+        <h3>${modulo.icono} ${modulo.nombre}</h3>
+        <p>${modulo.descripcion}</p>
+        <button>Ver módulo</button>
+      `;
+      
+      const button = card.querySelector('button');
+      button.addEventListener('click', (e) => {
+        e.stopPropagation();
+        navegarA(modulo.archivo);
+      });
+      
+      card.addEventListener('click', () => {
+        navegarA(modulo.archivo);
+      });
+      
+      cardsContainer.appendChild(card);
+    });
+  }
+
+  function getInitials(nombre) {
+    if (!nombre) return '👤';
+    const parts = nombre.split(' ');
+    if (parts.length >= 2) {
+      return (parts[0][0] + parts[1][0]).toUpperCase();
+    }
+    return nombre.substring(0, 2).toUpperCase();
+  }
+
+  async function cargarUsuario() {
+    try {
+      if (window.api && window.api.getUsuarioActual) {
+        usuarioActual = await window.api.getUsuarioActual();
+        
+        if (!usuarioActual) {
+          navegarA('login.html');
+          return;
+        }
+        
+        // Mostrar información del usuario
+        document.getElementById('userNombre').textContent = usuarioActual.nombre_completo;
+        document.getElementById('userRol').textContent = usuarioActual.rol.toUpperCase();
+        
+        // Avatar con iniciales
+        const avatar = document.getElementById('userAvatar');
+        const iniciales = getInitials(usuarioActual.nombre_completo);
+        avatar.textContent = iniciales;
+        
+        // Mensaje de bienvenida
+        let mensaje = '';
+        switch(usuarioActual.rol) {
+          case 'administrador':
+            mensaje = 'Bienvenido Administrador. Tienes acceso completo al sistema.';
+            break;
+          case 'audiologo':
+            mensaje = 'Bienvenido Audiólogo. Acceso a pruebas audiológicas y citas de pacientes.';
+            break;
+          case 'secretaria':
+            mensaje = 'Bienvenida Secretaria. Acceso a gestión de pacientes y citas.';
+            break;
+          default:
+            mensaje = 'Bienvenido al sistema.';
+        }
+        document.getElementById('bienvenidaMsg').textContent = mensaje;
+        
+        cargarSidebar(usuarioActual.rol);
+        cargarTarjetas(usuarioActual.rol);
+      } else {
+        console.error('API no disponible');
+      }
+    } catch (error) {
+      console.error('Error cargando usuario:', error);
+      navegarA('login.html');
+    }
+  }
+
+  // Inicializar
+  cargarUsuario();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,1416 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Registro de Citas | Clínica Audiología</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+/* Estilos para botones de acciones con texto */
+.acciones-cell {
+  white-space: nowrap;
+}
+
+.btn-accion-text {
+  padding: 6px 12px;
+  margin: 0 3px;
+  border: none;
+  border-radius: 6px;
+   border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: inherit;
+}
+
+/* Botón Editar - AZUL */
+.btn-editar-text {
+  background-color: #3b82f6;
+  color: white;
+}
+
+.btn-editar-text:hover {
+  background-color: #2563eb;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(59,130,246,0.3);
+}
+
+/* Botón Postergar - VERDE */
+.btn-postergar-text {
+  background-color: #10b981;
+  color: white;
+}
+
+.btn-postergar-text:hover {
+  background-color: #059669;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(16,185,129,0.3);
+}
+
+/* Botón Cancelar - ROJO */
+.btn-cancelar-text {
+  background-color: #ef4444;
+  color: white;
+}
+
+.btn-cancelar-text:hover {
+  background-color: #dc2626;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(239,68,68,0.3);
+}
+
+/* Efecto active para todos los botones */
+.btn-accion-text:active {
+  transform: translateY(0);
+}
+    body {
+      background: #ffffff;
+      font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, sans-serif;
+      padding: 20px 24px;
+      color: #1e293b;
+    }
+
+    /* Header con logo y botón volver */
+    .logo-empresa-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+
+    .logo-empresa-top img {
+      height: 70px;
+      object-fit: contain;
+      border-radius: 12px;
+    }
+
+    .logo-texto-temporal {
+      font-weight: 700;
+      font-size: 1.2rem;
+      color: #001e81;
+    }
+
+    .logo-texto-temporal span {
+      display: block;
+      font-size: 0.7rem;
+      color: #475569;
+    }
+
+    .btn-dashboard {
+      background: #1e3a8a;
+      color: white;
+      border: none;
+      padding: 10px 24px;
+      border-radius: 40px;
+      font-weight: 600;
+      cursor: pointer;
+      font-size: 0.85rem;
+      transition: all 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+    }
+
+    .btn-dashboard:hover {
+      background: #0f2b4d;
+      transform: translateY(-1px);
+    }
+
+    /* Layout principal - Dos columnas */
+    .main-layout {
+      display: grid;
+      grid-template-columns: 380px 1fr;
+      gap: 24px;
+      align-items: start;
+    }
+
+    /* Columna izquierda - Formulario más compacto */
+    .form-sidebar {
+      position: sticky;
+      top: 20px;
+    }
+
+    .form-card {
+      background: #ffffff;
+      border-radius: 20px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      border: 1px solid #e2e8f0;
+      overflow: hidden;
+    }
+
+    .form-header {
+      background: #ffffff;
+      padding: 16px 20px;
+      border-bottom: 1px solid #e2e8f0;
+    }
+
+    .form-header h2 {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: #0f2b4d;
+      margin: 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .form-header h2:before {
+      content: "📅";
+      font-size: 1.3rem;
+    }
+
+    .form-body {
+      padding: 20px;
+      max-height: calc(100vh - 160px);
+      overflow-y: auto;
+    }
+
+    /* Formulario más compacto */
+    .form-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .group {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .group label {
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: #4a5b7a;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .group input,
+    .group select,
+    .group textarea {
+      width: 100%;
+      padding: 8px 12px;
+      border: 1.5px solid #e2e8f0;
+      border-radius: 10px;
+      font-size: 0.85rem;
+      font-family: inherit;
+      background: #ffffff;
+      transition: all 0.2s ease;
+    }
+
+    .group input:focus,
+    .group select:focus,
+    .group textarea:focus {
+      border-color: #3b82f6;
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(59,130,246,0.1);
+    }
+
+    .group input[readonly] {
+      background-color: #f8fafc;
+      cursor: default;
+      color: #64748b;
+    }
+
+    .group textarea {
+      resize: vertical;
+      min-height: 60px;
+    }
+
+    .btn-save {
+      background: #2563eb;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 40px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      width: 100%;
+      margin-top: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .btn-save:hover {
+      background: #1d4ed8;
+      transform: translateY(-1px);
+    }
+
+    /* Estilos para búsqueda de paciente */
+    .resultados-busqueda {
+      position: absolute;
+      background: white;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      max-height: 200px;
+      overflow-y: auto;
+      z-index: 1000;
+      width: calc(100% - 24px);
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      display: none;
+    }
+
+    .item-sugerencia {
+      padding: 10px 12px;
+      cursor: pointer;
+      border-bottom: 1px solid #f1f5f9;
+      font-size: 0.85rem;
+    }
+
+    .item-sugerencia:hover {
+      background: #f1f5f9;
+    }
+
+    /* Columna derecha - Tabla de citas */
+    .citas-panel {
+      background: white;
+      border-radius: 20px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      border: 1px solid #ffffff;
+      overflow: hidden;
+    }
+
+    .nav-buttons {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.btn-nav {
+  background: white;
+  color: #475569;
+  border: 2px solid #e2e8f0;
+  padding: 10px 22px;
+  border-radius: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 0.85rem;
+  transition: all 0.25s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: inherit;
+}
+
+.btn-nav:hover {
+  border-color: #94a3b8;
+  background: #f8fafc;
+  transform: translateY(-2px);
+}
+
+.btn-nav.active {
+  background: #2563eb;
+  color: white;
+  border-color: #2563eb;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
+}
+
+.btn-nav.active:hover {
+  background: #1d4ed8;
+  border-color: #1d4ed8;
+}
+    .panel-header {
+      background: #ffffff;
+      padding: 16px 20px;
+      border-bottom: 1px solid #ffffff;
+    }
+
+    .panel-header h3 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #0f2b4d;
+      margin-bottom: 12px;
+    }
+
+    /* Filtros */
+    .filtros {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 16px;
+    }
+
+    .filtro-group {
+      flex: 1;
+      min-width: 140px;
+    }
+
+    .filtro-group label {
+      font-size: 0.7rem;
+      font-weight: 600;
+      color: #64748b;
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    .filtro-group input,
+    .filtro-group select {
+      width: 100%;
+      padding: 6px 10px;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      font-size: 0.8rem;
+    }
+
+    /* Búsqueda con lupa */
+    .search-box {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 16px;
+    }
+
+    .search-box input {
+      flex: 1;
+      padding: 8px 12px;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      font-size: 0.85rem;
+    }
+
+    .btn-search {
+      background: #3b82f6;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 0.85rem;
+    }
+
+    /* Tabla */
+    .tabla-container {
+      overflow-x: auto;
+      padding: 0 20px 20px 20px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.8rem;
+    }
+
+    th, td {
+      padding: 10px 8px;
+      text-align: left;
+      border-bottom: 1px solid #e2e8f0;
+    }
+
+    th {
+      background: #f8fafc;
+      font-weight: 700;
+      color: #475569;
+      position: sticky;
+      top: 0;
+    }
+
+    tr:hover {
+      background: #f8fafc;
+    }
+
+    .prioridad-alta {
+      background: #ffe4e4;
+      font-weight: 600;
+    }
+
+    .badge {
+      padding: 2px 8px;
+      border-radius: 12px;
+      font-size: 0.7rem;
+      font-weight: 600;
+    }
+
+    .badge-pendiente { background: #fef3c7; color: #d97706; }
+    .badge-atendida { background: #d1fae5; color: #059669; }
+    .badge-cancelada { background: #fee2e2; color: #dc2626; }
+
+    .btn-accion {
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 1rem;
+      padding: 4px 6px;
+      border-radius: 6px;
+      transition: all 0.2s;
+    }
+
+    .btn-accion:hover {
+      background: #e2e8f0;
+    }
+
+    .btn-cancelar:hover { color: #dc2626; }
+    .btn-editar:hover { color: #3b82f6; }
+    .btn-postergar:hover { color: #f59e0b; }
+
+    /* Paginador */
+    .paginador {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      padding: 16px;
+      border-top: 1px solid #e2e8f0;
+    }
+
+    .paginador button {
+      padding: 6px 12px;
+      border: 1px solid #e2e8f0;
+      background: white;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.8rem;
+    }
+
+    .paginador button:hover:not(:disabled) {
+      background: #3b82f6;
+      color: white;
+      border-color: #3b82f6;
+    }
+
+    .paginador button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .paginador .active {
+      background: #3b82f6;
+      color: white;
+      border-color: #3b82f6;
+    }
+
+    /* Modal */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.5);
+      z-index: 2000;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .modal-content {
+      background: white;
+      border-radius: 20px;
+      padding: 24px;
+      max-width: 500px;
+      width: 90%;
+    }
+
+    .modal-content h4 {
+      margin-bottom: 16px;
+    }
+
+    .modal-buttons {
+      display: flex;
+      gap: 12px;
+      margin-top: 20px;
+      justify-content: flex-end;
+    }
+
+    .mensaje {
+      padding: 10px 16px;
+      border-radius: 12px;
+      font-size: 0.8rem;
+      margin-top: 12px;
+      display: none;
+    }
+
+    .mensaje.exito {
+      background: #e0f2fe;
+      color: #075985;
+      border-left: 4px solid #0ea5e9;
+    }
+
+    .mensaje.error {
+      background: #ffe4e2;
+      color: #b91c1c;
+      border-left: 4px solid #ef4444;
+    }
+
+    @media (max-width: 900px) {
+      body { padding: 16px; }
+      .main-layout { grid-template-columns: 1fr; }
+      .form-sidebar { position: static; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="logo-empresa-top">
+  <img src="../img/saninlogo.jpg" alt="Logo U.D.A." onerror="this.style.display='none';">
+  <div class="logo-texto-temporal" style="display: none;" id="fallbackLogo">
+    <strong>AUDIOLOGÍA CLÍNICA</strong>
+    <span>Especialistas en Audición</span>
+  </div>
+  <button class="btn-dashboard" id="btnVolverDashboard">← Volver al Dashboard</button>
+  <!-- Agregar después del botón volver -->
+<div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+  <button class="btn-dashboard" id="btnVolverDashboard">← Volver al Dashboard</button>
+  
+  <!-- NUEVO BOTÓN PARA POSTGRESQL -->
+  <button class="btn-dashboard" id="btnIniciarPostgres" style="background: #059669;">
+    SERVIDOR UDA
+  </button>
+  <span id="postgresStatus" style="font-size: 0.75rem; font-weight: 600; padding: 4px 12px; border-radius: 20px; background: #f1f5f9; color: #475569;">
+    ⏳ Verificando...
+  </span>
+</div>
+</div>
+        <div class="nav-buttons">
+  <button class="btn-nav" id="btnCitasSemana">Seguimiento citas</button>
+
+ 
+</div>
+<div class="main-layout">
+
+  <!-- Columna izquierda: Formulario compacto -->
+  <div class="form-sidebar">
+    <div class="form-card">
+      <div class="form-header">
+        <h2>Registrar Cita</h2>
+      </div>
+
+      <div class="form-body">
+        <form id="formCita">
+          <div class="form-grid">
+            <div class="group" style="position: relative;">
+              <label>🔍 Paciente</label>
+              <input type="text" id="buscarPaciente" placeholder="Buscar por nombre o cédula..." autocomplete="off">
+              <div id="resultadosBusqueda" class="resultados-busqueda"></div>
+              <select id="pacientesSelect" required style="margin-top: 8px;">
+                <option value="">-- Seleccione un paciente --</option>
+              </select>
+            </div>
+
+            <div class="group">
+              <label>Documento</label>
+              <input type="text" id="documento" placeholder="CC / DNI" readonly>
+            </div>
+
+            <div class="group">
+              <label>Teléfono</label>
+              <input type="tel" id="telefono" placeholder="Teléfono de contacto" readonly>
+            </div>
+
+            <div class="group">
+              <label>Entidad</label>
+              <select id="entidadSelect" required>
+                <option value="">Seleccione entidad</option>
+              </select>
+            </div>
+
+            <div class="group">
+              <label>Fecha</label>
+              <input type="date" id="fechaCita" required>
+            </div>
+
+            <div class="group">
+              <label>Hora</label>
+              <input type="time" id="horaCita" required>
+            </div>
+
+            <div class="group">
+              <label>Tipo atención</label>
+              <select id="tipoAtencion">
+                <option value="Audiometría">Audiometría</option>
+                <option value="Logoaudiometria">Logoaudiometria</option>
+                <option value="Impedanciometria">Impedanciometria</option>
+                <option value="Control">Control</option>
+                <option value="Audiometria Tonal y Logoadiometria">Audiometria Tonal y Logoadiometria</option>
+                <option value="Prepagada">Prepagada</option>
+                <option value="Cuadro Clinico Auditivo">Cuadro Clinico Auditivo</option>
+              </select>
+            </div>
+
+            <div class="group">
+              <label>Estado</label>
+              <select id="estado">
+                <option value="pendiente">Pendiente</option>
+                <option value="atendida">Atendida</option>
+                <option value="cancelada">Cancelada</option>
+                <option value="no_asistio">No asistió</option>
+              </select>
+            </div>
+
+            <div class="group">
+              <label>Prioridad</label>
+              <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                <input type="checkbox" id="prioridad" style="width: 16px; height: 16px;">
+                <span style="font-size: 0.8rem;">Marcar como prioritaria</span>
+              </label>
+            </div>
+
+            <div class="group">
+              <label> Motivo</label>
+              <textarea id="motivo" placeholder="Motivo de la consulta" rows="2"></textarea>
+            </div>
+
+            <div class="group">
+              <label>Observaciones</label>
+              <textarea id="observaciones" placeholder="Notas adicionales" rows="2"></textarea>
+            </div>
+          </div>
+
+          <button type="submit" class="btn-save">Grabar Cita</button>
+          <div id="mensaje" class="mensaje"></div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Columna derecha: Tabla de citas -->
+  <div class="citas-panel">
+    <div class="panel-header">
+      <h3>Todas las Citas Registradas</h3>
+      
+      <div class="filtros">
+        <div class="filtro-group">
+          <label>Filtrar por fecha</label>
+          <input type="date" id="filtroFecha">
+        </div>
+        <div class="filtro-group">
+          <label>Filtrar por entidad</label>
+          <select id="filtroEntidad">
+            <option value="">Todas</option>
+          </select>
+        </div>
+        <div class="filtro-group">
+          <label>Filtrar por prioridad</label>
+          <select id="filtroPrioridad">
+            <option value="">Todas</option>
+            <option value="true">Prioritarias</option>
+            <option value="false">Normales</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="search-box">
+        <input type="text" id="searchInput" placeholder="🔍 Buscar por nombre o cédula...">
+        <button class="btn-search" id="btnBuscar">Buscar</button>
+        <button class="btn-search" id="btnLimpiarBusqueda" style="background: #64748b;">Limpiar</button>
+      </div>
+    </div>
+
+    <div class="tabla-container">
+      <table>
+        <thead>
+          <tr>
+            <th>Fecha</th><th>Hora</th><th>Paciente</th><th>Documento</th><th>Entidad</th><th>Prioridad</th><th>Motivo</th><th>Estado</th><th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody id="tablaCitasBody">
+          <tr><td colspan="9">Cargando citas...</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="paginador" id="paginador"></div>
+  </div>
+</div>
+
+<!-- Modal para postergar cita -->
+<div id="modalPostergar" class="modal">
+  <div class="modal-content">
+    <h4>Postergar Cita</h4>
+    <div class="group">
+      <label>Nueva fecha</label>
+      <input type="date" id="nuevaFecha" required>
+    </div>
+    <div class="group">
+      <label>Nueva hora</label>
+      <input type="time" id="nuevaHora" required>
+    </div>
+    <div class="modal-buttons">
+      <button class="btn-save" id="confirmarPostergar" style="width: auto; padding: 8px 20px;">Confirmar</button>
+      <button class="btn-dashboard" id="cancelarModal" style="background: #94a3b8;">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  let pacientesLista = [];
+  let entidadesLista = [];
+  let todasLasCitas = [];
+  let citasFiltradas = [];
+  let paginaActual = 1;
+  const registrosPorPagina = 10;
+  let citaSeleccionadaId = null;
+
+  // Elementos DOM
+  const buscarPaciente = document.getElementById("buscarPaciente");
+  const pacientesSelect = document.getElementById("pacientesSelect");
+  const sugerenciasDiv = document.getElementById("resultadosBusqueda");
+
+  // Funciones de pacientes
+  function actualizarSelect(lista) {
+    pacientesSelect.innerHTML = '<option value="">-- Seleccione un paciente --</option>';
+    lista.forEach(p => {
+      const option = document.createElement("option");
+      option.value = p.id;
+      option.textContent = `${p.nombre} - ${p.documento}`;
+      option.dataset.documento = p.documento;
+      option.dataset.telefono = p.telefono || '';
+      pacientesSelect.appendChild(option);
+    });
+  }
+
+  function mostrarSugerencias(lista) {
+    sugerenciasDiv.innerHTML = "";
+    if (lista.length === 0) {
+      sugerenciasDiv.style.display = "none";
+      return;
+    }
+    lista.forEach(p => {
+      const item = document.createElement("div");
+      item.classList.add("item-sugerencia");
+      item.textContent = `${p.nombre} - ${p.documento}`;
+      item.addEventListener("click", () => {
+        buscarPaciente.value = `${p.nombre} - ${p.documento}`;
+        pacientesSelect.value = p.id;
+        document.getElementById("documento").value = p.documento || '';
+        document.getElementById("telefono").value = p.telefono || '';
+        sugerenciasDiv.style.display = "none";
+      });
+      sugerenciasDiv.appendChild(item);
+    });
+    sugerenciasDiv.style.display = "block";
+  }
+
+  buscarPaciente.addEventListener("input", function () {
+    const texto = this.value.toLowerCase().trim();
+    if (!texto) {
+      sugerenciasDiv.style.display = "none";
+      actualizarSelect(pacientesLista);
+      return;
+    }
+    const coincidencias = pacientesLista.filter(p =>
+      p.nombre.toLowerCase().includes(texto) ||
+      String(p.documento).includes(texto)
+    );
+    mostrarSugerencias(coincidencias);
+  });
+
+  // Cargar datos iniciales
+  async function cargarPacientes() {
+    try {
+      const result = await window.api.obtenerPacientes();
+      if (result && result.ok) {
+        pacientesLista = result.pacientes;
+        actualizarSelect(pacientesLista);
+      } else {
+        mostrarMensaje('Error cargando pacientes', 'error');
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  async function cargarEntidades() {
+    try {
+      const result = await window.api.obtenerEntidades();
+      if (result && result.ok) {
+        entidadesLista = result.entidades;
+        const entidadSelect = document.getElementById('entidadSelect');
+        entidadSelect.innerHTML = '<option value="">-- Seleccione una entidad --</option>';
+        entidadesLista.forEach(entidad => {
+          const option = document.createElement('option');
+          option.value = entidad.id;
+          option.textContent = entidad.nombre;
+          entidadSelect.appendChild(option);
+        });
+        
+        // También llenar filtro de entidades
+        const filtroEntidad = document.getElementById('filtroEntidad');
+        filtroEntidad.innerHTML = '<option value="">Todas</option>';
+        entidadesLista.forEach(entidad => {
+          const option = document.createElement('option');
+          option.value = entidad.id;
+          option.textContent = entidad.nombre;
+          filtroEntidad.appendChild(option);
+        });
+      }
+    } catch (error) {
+      console.error('Error:', error);
+    }
+  }
+
+  // Cargar todas las citas
+  async function cargarTodasLasCitas() {
+    try {
+      const result = await window.api.obtenerTodasLasCitas();
+      if (result && result.ok) {
+        todasLasCitas = result.citas;
+        aplicarFiltros();
+      } else {
+        mostrarMensaje('Error cargando citas', 'error');
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      mostrarMensaje('Error al cargar citas', 'error');
+    }
+  }
+
+  // Aplicar filtros
+  function aplicarFiltros() {
+    const filtroFecha = document.getElementById('filtroFecha').value;
+    const filtroEntidad = document.getElementById('filtroEntidad').value;
+    const filtroPrioridad = document.getElementById('filtroPrioridad').value;
+    const searchText = document.getElementById('searchInput').value.toLowerCase();
+
+    citasFiltradas = todasLasCitas.filter(cita => {
+      if (filtroFecha && cita.fecha_cita !== filtroFecha) return false;
+      if (filtroEntidad && cita.entidad_id != filtroEntidad) return false;
+      if (filtroPrioridad !== '') {
+        const esPrioritaria = filtroPrioridad === 'true';
+        if (cita.prioridad !== esPrioritaria) return false;
+      }
+      if (searchText) {
+        const nombreMatch = cita.paciente_nombre?.toLowerCase().includes(searchText);
+        const docMatch = cita.documento?.toLowerCase().includes(searchText);
+        if (!nombreMatch && !docMatch) return false;
+      }
+      return true;
+    });
+
+    paginaActual = 1;
+    renderizarTabla();
+    renderizarPaginador();
+  }
+
+  // Renderizar tabla con paginación
+// Función para formatear fecha a formato local (DD/MM/YYYY)
+function formatearFecha(fechaStr) {
+  if (!fechaStr) return '';
+  try {
+    const fecha = new Date(fechaStr);
+    // Formato: 08/05/2026
+    return fecha.toLocaleDateString('es-CO', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit'
+    });
+  } catch (e) {
+    return fechaStr;
+  }
+}
+
+// Función para formatear hora a formato 12 horas
+function formatearHora(horaStr) {
+  if (!horaStr) return '';
+  try {
+    // Si viene como "14:34:00" o "14:34"
+    let horas, minutos;
+    if (horaStr.includes(':')) {
+      const partes = horaStr.split(':');
+      horas = parseInt(partes[0]);
+      minutos = partes[1];
+    } else {
+      return horaStr;
+    }
+    
+    const periodo = horas >= 12 ? 'PM' : 'AM';
+    let horas12 = horas % 12;
+    horas12 = horas12 === 0 ? 12 : horas12;
+    
+    return `${horas12}:${minutos} ${periodo}`;
+  } catch (e) {
+    return horaStr;
+  }
+}
+
+// Renderizar tabla con formato de fecha y hora
+// Renderizar tabla con botones de texto
+function renderizarTabla() {
+  const tbody = document.getElementById('tablaCitasBody');
+  const inicio = (paginaActual - 1) * registrosPorPagina;
+  const fin = inicio + registrosPorPagina;
+  const citasPagina = citasFiltradas.slice(inicio, fin);
+
+  if (citasPagina.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="9">No hay citas registradas</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = citasPagina.map(cita => {
+    const prioridadClass = cita.prioridad ? 'prioridad-alta' : '';
+    let estadoClass = '';
+    if (cita.estado === 'pendiente') estadoClass = 'badge-pendiente';
+    else if (cita.estado === 'atendida') estadoClass = 'badge-atendida';
+    else if (cita.estado === 'cancelada') estadoClass = 'badge-cancelada';
+    
+    const fechaFormateada = formatearFecha(cita.fecha_cita);
+    const horaFormateada = formatearHora(cita.hora_cita);
+    
+    return `
+      <tr class="${prioridadClass}">
+        <td>${fechaFormateada || ''}</td>
+        <td>${horaFormateada || ''}</td>
+        <td>${cita.paciente_nombre || ''}</td>
+        <td>${cita.documento || ''}</td>
+        <td>${cita.entidad_nombre || ''}</td>
+        <td>${cita.prioridad ? '⭐ Prioritaria' : 'Normal'}</td>
+        <td title="${cita.motivo || ''}">${(cita.motivo || '').substring(0, 30)}${(cita.motivo || '').length > 30 ? '...' : ''}</td>
+        <td><span class="badge ${estadoClass}">${cita.estado || 'pendiente'}</span></td>
+        <td class="acciones-cell">
+          <button class="btn-accion-text btn-editar-text" onclick="editarCita(${cita.id})">Editar</button>
+          <button class="btn-accion-text btn-postergar-text" onclick="postergarCita(${cita.id})">Postergar</button>
+          <button class="btn-accion-text btn-cancelar-text" onclick="cancelarCita(${cita.id})">Cancelar</button>
+        </td>
+      </tr>
+    `;
+  }).join('');
+}
+  function renderizarPaginador() {
+    const totalPaginas = Math.ceil(citasFiltradas.length / registrosPorPagina);
+    const paginadorDiv = document.getElementById('paginador');
+    
+    if (totalPaginas <= 1) {
+      paginadorDiv.innerHTML = '';
+      return;
+    }
+
+    let html = `<button onclick="cambiarPagina(1)" ${paginaActual === 1 ? 'disabled' : ''}>«</button>`;
+    html += `<button onclick="cambiarPagina(${paginaActual - 1})" ${paginaActual === 1 ? 'disabled' : ''}>‹</button>`;
+    
+    for (let i = 1; i <= totalPaginas; i++) {
+      if (i === 1 || i === totalPaginas || (i >= paginaActual - 2 && i <= paginaActual + 2)) {
+        html += `<button onclick="cambiarPagina(${i})" class="${paginaActual === i ? 'active' : ''}">${i}</button>`;
+      } else if (i === paginaActual - 3 || i === paginaActual + 3) {
+        html += `<button disabled>...</button>`;
+      }
+    }
+    
+    html += `<button onclick="cambiarPagina(${paginaActual + 1})" ${paginaActual === totalPaginas ? 'disabled' : ''}>›</button>`;
+    html += `<button onclick="cambiarPagina(${totalPaginas})" ${paginaActual === totalPaginas ? 'disabled' : ''}>»</button>`;
+    
+    paginadorDiv.innerHTML = html;
+  }
+
+  window.cambiarPagina = function(pagina) {
+    paginaActual = pagina;
+    renderizarTabla();
+    renderizarPaginador();
+  };
+
+  // Editar cita (cargar datos en el formulario)
+  window.editarCita = async function(id) {
+    try {
+      const result = await window.api.obtenerCitaPorId(id);
+      if (result && result.ok && result.cita) {
+        const cita = result.cita;
+        // Buscar y seleccionar el paciente
+        const paciente = pacientesLista.find(p => p.id === cita.paciente_id);
+        if (paciente) {
+          pacientesSelect.value = paciente.id;
+          document.getElementById('documento').value = paciente.documento;
+          document.getElementById('telefono').value = paciente.telefono;
+          buscarPaciente.value = `${paciente.nombre} - ${paciente.documento}`;
+        }
+        document.getElementById('entidadSelect').value = cita.entidad_id || '';
+        document.getElementById('fechaCita').value = cita.fecha_cita;
+        document.getElementById('horaCita').value = cita.hora_cita;
+        document.getElementById('tipoAtencion').value = cita.motivo?.split(' - ')[0] || 'Audiometría';
+        document.getElementById('estado').value = cita.estado || 'pendiente';
+        document.getElementById('prioridad').checked = cita.prioridad || false;
+        
+        const motivoPartes = cita.motivo?.split(' - ');
+        document.getElementById('motivo').value = motivoPartes?.slice(1).join(' - ') || '';
+        
+        // Guardar ID para actualizar en lugar de crear nueva
+        formCita.dataset.editandoId = id;
+        document.querySelector('.form-header h2').innerHTML = '✏️ Editando Cita';
+        document.querySelector('.btn-save').innerHTML = '✏️ Actualizar Cita';
+        
+        // Scroll al formulario
+        document.querySelector('.form-sidebar').scrollIntoView({ behavior: 'smooth' });
+      }
+    } catch (error) {
+      mostrarMensaje('Error al cargar cita para editar', 'error');
+    }
+  };
+
+  // Postergar cita
+// Postergar cita
+window.postergarCita = function(id) {
+  console.log('Postergando cita ID:', id); // Para depuración
+  citaSeleccionadaId = id;
+  
+  // Buscar la cita actual para obtener su fecha/hora actual
+  const citaActual = todasLasCitas.find(c => c.id === id);
+  if (citaActual) {
+    document.getElementById('nuevaFecha').value = citaActual.fecha_cita || new Date().toISOString().split('T')[0];
+    document.getElementById('nuevaHora').value = citaActual.hora_cita || '09:00';
+  } else {
+    const hoy = new Date().toISOString().split('T')[0];
+    document.getElementById('nuevaFecha').value = hoy;
+    document.getElementById('nuevaHora').value = '09:00';
+  }
+  
+  document.getElementById('modalPostergar').style.display = 'flex';
+};
+
+// Confirmar postergar - Asegurar que el evento esté bien vinculado
+document.addEventListener('DOMContentLoaded', () => {
+  const confirmarBtn = document.getElementById('confirmarPostergar');
+  if (confirmarBtn) {
+    // Remover event listeners anteriores para evitar duplicados
+    const newConfirmarBtn = confirmarBtn.cloneNode(true);
+    confirmarBtn.parentNode.replaceChild(newConfirmarBtn, confirmarBtn);
+    
+    newConfirmarBtn.addEventListener('click', async () => {
+      console.log('Confirmar postergar clickeado'); // Depuración
+      const nuevaFecha = document.getElementById('nuevaFecha').value;
+      const nuevaHora = document.getElementById('nuevaHora').value;
+      
+      if (!nuevaFecha || !nuevaHora) {
+        mostrarMensaje('Complete la nueva fecha y hora', 'error');
+        return;
+      }
+      
+      if (!citaSeleccionadaId) {
+        mostrarMensaje('Error: No se seleccionó ninguna cita', 'error');
+        return;
+      }
+      
+      try {
+        console.log('Actualizando cita:', citaSeleccionadaId, { fecha_cita: nuevaFecha, hora_cita: nuevaHora });
+        const result = await window.api.actualizarCitaCompleta(citaSeleccionadaId, {
+          fecha_cita: nuevaFecha,
+          hora_cita: nuevaHora
+        });
+        
+        if (result && result.ok) {
+          mostrarMensaje('Cita postergada correctamente', 'exito');
+          document.getElementById('modalPostergar').style.display = 'none';
+          citaSeleccionadaId = null;
+          await cargarTodasLasCitas(); // Recargar la tabla
+        } else {
+          mostrarMensaje('Error al postergar cita: ' + (result?.error || 'Error desconocido'), 'error');
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        mostrarMensaje('Error al postergar la cita', 'error');
+      }
+    });
+  }
+  
+  const cancelarModalBtn = document.getElementById('cancelarModal');
+  if (cancelarModalBtn) {
+    cancelarModalBtn.addEventListener('click', () => {
+      document.getElementById('modalPostergar').style.display = 'none';
+      citaSeleccionadaId = null;
+    });
+  }
+});
+
+// Cancelar cita (BORRAR físicamente de la BD)
+window.cancelarCita = async function(id) {
+  if (confirm('¿Está seguro de ELIMINAR esta cita? Esta acción no se puede deshacer.')) {
+    try {
+      const result = await window.api.eliminarCita(id);
+      if (result && result.ok) {
+        mostrarMensaje('Cita eliminada correctamente', 'exito');
+        await cargarTodasLasCitas(); // Recargar la tabla
+      } else {
+        mostrarMensaje('Error al eliminar cita: ' + (result?.error || 'Error desconocido'), 'error');
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      mostrarMensaje('Error al eliminar la cita', 'error');
+    }
+  }
+};
+
+  // Mostrar mensaje
+  function mostrarMensaje(texto, tipo) {
+    const mensajeDiv = document.getElementById('mensaje');
+    mensajeDiv.textContent = texto;
+    mensajeDiv.className = `mensaje ${tipo}`;
+    mensajeDiv.style.display = 'block';
+    setTimeout(() => {
+      mensajeDiv.style.display = 'none';
+    }, 3000);
+  }
+
+
+
+  
+  // Guardar o actualizar cita
+  document.getElementById('formCita').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const pacienteId = document.getElementById('pacientesSelect').value;
+    if (!pacienteId) {
+      mostrarMensaje('Seleccione un paciente', 'error');
+      return;
+    }
+
+    const entidadId = document.getElementById('entidadSelect').value;
+    if (!entidadId) {
+      mostrarMensaje('Seleccione una entidad', 'error');
+      return;
+    }
+
+    const fechaCita = document.getElementById('fechaCita').value;
+    const horaCita = document.getElementById('horaCita').value;
+    
+    if (!fechaCita || !horaCita) {
+      mostrarMensaje('Complete fecha y hora de la cita', 'error');
+      return;
+    }
+
+    const tipo = document.getElementById('tipoAtencion').value;
+    const motivoTexto = document.getElementById('motivo').value;
+    const motivo = tipo + (motivoTexto ? ' - ' + motivoTexto : '');
+    const estado = document.getElementById('estado').value || 'pendiente';
+    const prioridad = document.getElementById('prioridad').checked;
+
+    const citaData = {
+      paciente_id: parseInt(pacienteId),
+      fecha_cita: fechaCita,
+      entidad_id: parseInt(entidadId),
+      hora_cita: horaCita,
+      motivo: motivo,
+      estado: estado,
+      prioridad: prioridad
+    };
+
+    const editandoId = formCita.dataset.editandoId;
+    
+    try {
+      let result;
+      if (editandoId) {
+        // Actualizar cita existente
+        result = await window.api.actualizarCitaCompleta(editandoId, citaData);
+        if (result && result.ok) {
+          mostrarMensaje('✅ Cita actualizada exitosamente', 'exito');
+          delete formCita.dataset.editandoId;
+          document.querySelector('.form-header h2').innerHTML = '📅 Nueva Cita';
+          document.querySelector('.btn-save').innerHTML = '💾 Guardar Cita';
+        }
+      } else {
+        result = await window.api.crearCita(citaData);
+        if (result && result.ok) {
+          mostrarMensaje('✅ Cita guardada exitosamente', 'exito');
+        }
+      }
+      
+      if (result && result.ok) {
+        // Resetear formulario
+        document.getElementById('formCita').reset();
+        document.getElementById('pacientesSelect').value = '';
+        document.getElementById('documento').value = '';
+        document.getElementById('telefono').value = '';
+        document.getElementById('entidadSelect').value = '';
+        document.getElementById('tipoAtencion').value = "Audiometría";
+        document.getElementById('estado').value = "pendiente";
+        document.getElementById('motivo').value = "";
+        document.getElementById('observaciones').value = "";
+        document.getElementById('prioridad').checked = false;
+        buscarPaciente.value = '';
+        
+        await cargarTodasLasCitas();
+      } else {
+        mostrarMensaje('Error: ' + result?.error, 'error');
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      mostrarMensaje('Error al guardar la cita', 'error');
+    }
+  });
+
+  // Confirmar postergar
+  document.getElementById('confirmarPostergar').addEventListener('click', async () => {
+    const nuevaFecha = document.getElementById('nuevaFecha').value;
+    const nuevaHora = document.getElementById('nuevaHora').value;
+    
+    if (!nuevaFecha || !nuevaHora) {
+      alert('Complete la nueva fecha y hora');
+      return;
+    }
+    
+    try {
+      const result = await window.api.actualizarCitaCompleta(citaSeleccionadaId, {
+        fecha_cita: nuevaFecha,
+        hora_cita: nuevaHora
+      });
+      if (result && result.ok) {
+        mostrarMensaje('Cita postergada correctamente', 'exito');
+        document.getElementById('modalPostergar').style.display = 'none';
+        await cargarTodasLasCitas();
+      } else {
+        mostrarMensaje('Error al postergar cita', 'error');
+      }
+    } catch (error) {
+      mostrarMensaje('Error al postergar cita', 'error');
+    }
+  });
+
+  document.getElementById('cancelarModal').addEventListener('click', () => {
+    document.getElementById('modalPostergar').style.display = 'none';
+  });
+
+  // Event listeners para filtros
+  document.getElementById('filtroFecha').addEventListener('change', aplicarFiltros);
+  document.getElementById('filtroEntidad').addEventListener('change', aplicarFiltros);
+  document.getElementById('filtroPrioridad').addEventListener('change', aplicarFiltros);
+  document.getElementById('btnBuscar').addEventListener('click', aplicarFiltros);
+  document.getElementById('btnLimpiarBusqueda').addEventListener('click', () => {
+    document.getElementById('searchInput').value = '';
+    aplicarFiltros();
+  });
+  document.getElementById('searchInput').addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') aplicarFiltros();
+  });
+
+  // Autocompletar datos del paciente seleccionado
+  document.getElementById('pacientesSelect').addEventListener('change', (e) => {
+    const selected = e.target.selectedOptions[0];
+    if (selected && selected.value) {
+      document.getElementById('documento').value = selected.dataset.documento || '';
+      document.getElementById('telefono').value = selected.dataset.telefono || '';
+    } else {
+      document.getElementById('documento').value = '';
+      document.getElementById('telefono').value = '';
+    }
+  });
+
+  // Fecha mínima
+  const hoy = new Date().toISOString().split('T')[0];
+  document.getElementById('fechaCita').min = hoy;
+  document.getElementById('nuevaFecha').min = hoy;
+
+  // Inicializar
+  async function init() {
+    await cargarPacientes();
+    await cargarEntidades();
+    await cargarTodasLasCitas();
+  }
+  
+  init();
+
+  // Botón volver
+  const volverBtn = document.getElementById('btnVolverDashboard');
+  if (volverBtn) {
+    volverBtn.addEventListener('click', () => {
+      if (window.api && typeof window.api.volverDashboard === 'function') {
+        window.api.volverDashboard();
+      } else {
+        alert("Volver al Dashboard");
+      }
+    });
+  }
+
+  // Fallback logo
+  const logoImg = document.querySelector('.logo-empresa-top img');
+  if (logoImg) {
+    logoImg.onerror = function() {
+      this.style.display = 'none';
+      const fallbackDiv = document.getElementById('fallbackLogo');
+      if (fallbackDiv) fallbackDiv.style.display = 'block';
+    };
+  }
+
+  document.getElementById('btnCitasSemana')?.addEventListener('click', () => {
+  window.api?.navegar('realizadasvistasecretaria.html');
+});
+
+
+
+// ============================================
+// 🟢 CONTROL DE POSTGRESQL DESDE LA APP
+// ============================================
+
+const postgresStatus = document.getElementById('postgresStatus');
+const btnIniciarPostgres = document.getElementById('btnIniciarPostgres');
+
+// Función para verificar el estado de PostgreSQL
+async function verificarPostgreSQL() {
+  try {
+    const result = await window.api.verificarPostgres();
+    if (result && result.running) {
+      postgresStatus.textContent = '✅ PostgreSQL activo';
+      postgresStatus.style.background = '#d1fae5';
+      postgresStatus.style.color = '#065f46';
+      btnIniciarPostgres.style.display = 'none';
+    } else {
+      postgresStatus.textContent = 'Verificado';
+      postgresStatus.style.background = '#fee2e2';
+      postgresStatus.style.color = '#991b1b';
+      btnIniciarPostgres.style.display = 'inline-flex';
+    }
+  } catch (error) {
+    console.error('Error verificando PostgreSQL:', error);
+    postgresStatus.textContent = '⚠️ No se pudo verificar';
+    postgresStatus.style.background = '#fef3c7';
+    postgresStatus.style.color = '#92400e';
+  }
+}
+
+// Función para iniciar PostgreSQL
+async function iniciarPostgreSQL() {
+  btnIniciarPostgres.textContent = '⏳ Iniciando...';
+  btnIniciarPostgres.disabled = true;
+  postgresStatus.textContent = '⏳ Iniciando servicio...';
+  postgresStatus.style.background = '#fef3c7';
+  postgresStatus.style.color = '#92400e';
+  
+  try {
+    const result = await window.api.iniciarPostgres();
+    if (result && result.success) {
+      postgresStatus.textContent = '✅ PostgreSQL iniciado correctamente';
+      postgresStatus.style.background = '#d1fae5';
+      postgresStatus.style.color = '#065f46';
+      btnIniciarPostgres.style.display = 'none';
+      mostrarMensaje('✅ PostgreSQL iniciado correctamente', 'exito');
+    } else {
+      postgresStatus.textContent = '❌ Error al iniciar';
+      postgresStatus.style.background = '#fee2e2';
+      postgresStatus.style.color = '#991b1b';
+      mostrarMensaje('❌ Error al iniciar PostgreSQL: ' + (result?.message || 'Error desconocido'), 'error');
+    }
+  } catch (error) {
+    console.error('Error:', error);
+    postgresStatus.textContent = '❌ Error al iniciar';
+    postgresStatus.style.background = '#fee2e2';
+    postgresStatus.style.color = '#991b1b';
+    mostrarMensaje('❌ Error al iniciar PostgreSQL', 'error');
+  }
+  
+  btnIniciarPostgres.textContent = '🔄 Iniciar PostgreSQL';
+  btnIniciarPostgres.disabled = false;
+}
+
+// Evento del botón
+btnIniciarPostgres.addEventListener('click', iniciarPostgreSQL);
+
+// Verificar estado al cargar la página
+verificarPostgreSQL();
+
+// Verificar cada 30 segundos (por si el servicio se cae)
+setInterval(verificarPostgreSQL, 30000);
+</script>
+ <script src="../renderer/focus-fix.js"></script>
+
+</body>
+</html>

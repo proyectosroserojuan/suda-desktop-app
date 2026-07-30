@@ -1,0 +1,2151 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Logoaudiometría Clínica - Curva de Discriminación Auditiva</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="logoaudiometria-functions.js"></script>
+  <style>
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background: #ffffff;
+    font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, sans-serif;
+    padding: 28px 32px;
+    color: #1e293b;
+}
+
+.logo-empresa-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+.logo-empresa-top img {
+    height: 70px;
+    object-fit: contain;
+    border-radius: 12px;
+}
+
+.logo-texto-temporal {
+    font-weight: 700;
+    font-size: 1.2rem;
+    color: #001e81;
+}
+.loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.7);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+}
+
+.loading-content {
+    background: white;
+    padding: 30px;
+    border-radius: 12px;
+    text-align: center;
+}
+
+.spinner {
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid #1e3a8a;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 15px;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.btn-grabar {
+    background: #27ae60;
+    font-size: 1.1rem;
+    padding: 12px 24px;
+}
+
+.btn-grabar:hover {
+    background: #219a52;
+}
+.logo-texto-temporal span {
+    display: block;
+    font-size: 0.7rem;
+    color: #475569;
+}
+
+.btn-back-floating {
+    background: #1e3a8a;
+    color: white;
+    border: none;
+    padding: 10px 24px;
+    border-radius: 40px;
+    font-weight: 600;
+    cursor: pointer;
+    font-size: 0.85rem;
+    transition: all 0.2s;
+    margin-bottom: 20px;
+}
+
+.btn-rehacer {
+    background: #5a5856 !important;
+    color: white !important;
+    border: none !important;
+    padding: 6px 12px !important;
+    border-radius: 6px !important;
+    cursor: pointer !important;
+    font-size: 12px !important;
+    margin: 0 !important;
+    transition: all 0.2s ease !important;
+}
+
+.btn-rehacer:hover {
+    background: #b61712 !important;
+    transform: translateY(-1px) !important;
+}
+
+.btn-back-floating:hover {
+    background: #0f2b4d;
+    transform: translateY(-1px);
+}
+
+.logo-header {
+    text-align: center;
+    margin-bottom: 32px;
+}
+
+.logo-header h1 {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #001e81;
+    margin-bottom: 8px;
+}
+
+.logo-header p {
+    color: #475569;
+    font-weight: 500;
+    font-size: 0.95rem;
+}
+
+.two-columns {
+    display: block;  /* ← ELIMINA EL GRID, SOLO 1 COLUMNA */
+}
+
+.data-panel {
+    background: #f8f9fa;
+    padding: 20px;
+    border-radius: 12px;
+}
+
+.ear-section {
+    margin-bottom: 30px;
+    padding: 15px;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.ear-section.od {
+    border-left: 4px solid #e74c3c;
+}
+
+.ear-section.oi {
+    border-left: 4px solid #3498db;
+}
+
+.ear-title.od {
+    color: #e74c3c;
+    font-weight: 600;
+    margin-bottom: 15px;
+}
+
+.ear-title.oi {
+    color: #3498db;
+    font-weight: 600;
+    margin-bottom: 15px;
+}
+
+.input-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+    margin-bottom: 15px;
+}
+
+.input-field {
+    display: flex;
+    flex-direction: column;
+}
+
+.input-field label {
+    font-size: 12px;
+    font-weight: bold;
+    margin-bottom: 5px;
+    color: #555;
+}
+
+.input-field label small {
+    font-weight: normal;
+    color: #888;
+}
+
+.input-field input {
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 14px;
+    text-align: center;
+}
+
+.input-field input:focus {
+    outline: none;
+    border-color: #3498db;
+}
+
+button {
+    background: #3498db;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: bold;
+    margin-top: 10px;
+    margin-right: 10px;
+}
+
+button:hover {
+    background: #2980b9;
+}
+
+button.reset-btn {
+    background: #95a5a6;
+}
+
+button.reset-btn:hover {
+    background: #7f8c8d;
+}
+/* ============================================ */
+/* CONTENEDOR DEL CHART - CON ESCALA DINÁMICA   */
+/* Mantiene tus propiedades de transform: scale() */
+/* ============================================ */
+.chart-container {
+    height: 300px;
+    width: 85%;
+    max-width: 1200px;
+    margin: 0 auto;
+    position: relative;
+    overflow: hidden;
+    
+}
+
+/* El canvas se escala automáticamente */
+#speechChart {
+    display: block;
+    width: 100% !important;
+    height: 100% !important;
+    transform-origin: center center;
+    transition: transform 0.3s ease;
+}
+.symbols-panel {
+    margin-top: 18px;
+    padding: 14px;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+.symbol-btn {
+    background: #ffffff !important;
+    color: #334155 !important;
+    border: 1px solid #cbd5e1 !important;
+    padding: 8px 14px !important;
+    border-radius: 10px !important;
+    font-size: 14px !important;
+    font-weight: 600 !important;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin: 4px;
+    min-width: 52px;
+    text-align: center;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+}
+
+.symbol-btn:hover {
+    background: #f8fafc !important;
+    border-color: #94a3b8 !important;
+    transform: translateY(-1px);
+}
+
+
+
+.legend {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    margin-top: 20px;
+    padding: 10px;
+    background: #f8fafc;
+    border-radius: 8px;
+    flex-wrap: wrap;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+}
+
+.legend-color {
+    width: 30px;
+    height: 3px;
+}
+
+.results {
+    margin-top: 20px;
+    padding: 15px;
+    background: #e8f4fd;
+    border-radius: 8px;
+}
+
+.diagnostico-section {
+    margin-top: 20px;
+    padding: 15px;
+    background: white;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+}
+
+.diagnostico-section h4 {
+    color: #1e3a8a;
+    margin-bottom: 12px;
+    font-size: 0.9rem;
+}
+
+.diagnostico-input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 0.85rem;
+    resize: vertical;
+}
+
+.nr-btn {
+    width: 40px;
+    min-width: 40px;
+    padding: 0;
+    font-size: 18px;
+    background: #fff;
+    color: #111;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.nr-btn.active {
+    background: #1e3a8a;
+    color: white;
+}
+.diagnostico-input:focus {
+    outline: none;
+    border-color: #3498db;
+}
+
+@media (max-width: 900px) {
+    .two-columns {
+        grid-template-columns: 1fr;
+    }
+    body {
+        padding: 20px;
+    }
+}
+
+
+
+  </style>
+</head>
+<body>
+    <div class="loading-overlay" id="loadingOverlay">
+    <div class="loading-content">
+        <div class="spinner"></div>
+        <p>Guardando y generando PDF...</p>
+    </div>
+</div>
+
+    <button class="btn-back-floating" id="btnVolverFloating">← Volver al Dashboard</button>
+
+<div class="logo-empresa-top">
+    <img src="../img/saninlogo.jpg" alt="Logo U.D.A." onerror="this.style.display='none'">
+    <div class="logo-texto-temporal">
+        <strong>AUDIOLOGÍA CLÍNICA</strong>
+        <span>Especialistas en Audición</span>
+    </div>
+</div>
+
+<div class="logo-header">
+<div class="data-panel" style="margin-bottom: 25px;" id="pacienteInfo">
+  <h3>Datos de la Cita</h3>
+  <div id="infoPacienteCargada">
+    Cargando datos del paciente...
+  </div>
+</div>
+    
+</div>
+<div class="container">
+  <h1> LOGOAUDIOMETRÍA</h1>
+
+  <!-- ============================================ -->
+  <!-- CONTENEDOR DE BOTONES SUPERIOR (TOOLBAR)     -->
+  <!-- ============================================ -->
+  <div style="display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 25px; padding: 15px; background: #f8f9fa; border-radius: 12px; border: 1px solid #e2e8f0;">
+    
+    <button id="drawODBtn" style="margin:0;">
+        🔴 Dibujar OD
+    </button>
+
+    <button id="drawOIBtn" style="margin:0;">
+        🔵 Dibujar OI
+    </button>
+
+    <button id="clearManualBtn" style="margin:0;">
+        🗑 Limpiar puntos manuales
+    </button>
+
+    <button id="resetBtn" class="reset-btn" style="margin:0;">
+        🗑 Restablecer Valores
+    </button>
+
+    <button id="grabarBtn" class="btn-grabar" style="margin:0;">
+        💾 GRABAR Y GENERAR PDF
+    </button>
+
+  </div>
+
+  <div class="two-columns">
+    <div class="data-panel">
+ 
+      <!-- ============================================ -->
+      <!-- CONTENEDOR DE OÍDOS (OI y OD lado a lado)    -->
+      <!-- ============================================ -->
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 25px;">
+        
+        <!-- OÍDO DERECHO -->
+        <div class="ear-section od">
+         <div class="ear-title od">🔴 OÍDO DERECHO (OD)</div>
+          <div class="input-grid">
+            <div class="input-field">
+              <label>U. Voz <small></small></label>
+         <div style="display:flex; gap:6px;">
+      <input type="number" id="od_urv">
+      <button
+          type="button"
+          class="nr-btn"
+          data-ear="od"
+          data-field="urv">
+          ↓
+      </button>
+  </div>
+            </div>
+
+
+            <div class="input-field">
+              <label>U. Palabra <small></small></label>
+         <div style="display:flex; gap:6px;">
+      <input type="number" id="od_upalabra">
+
+      <button
+          type="button"
+          class="nr-btn"
+          data-ear="od"
+          data-field="upalabra">
+          ↓
+      </button>
+  </div>
+            </div>
+            <div class="input-field">
+              <label>U. Discriminación <small></small></label>
+          <div style="display:flex; gap:6px;">
+      <input type="number" id="od_udisc">
+      <button
+          type="button"
+          class="nr-btn"
+          data-ear="od"
+          data-field="udisc">
+          ↓
+      </button>
+  </div>
+            </div>
+            <div class="input-field">
+              <label>% Discriminación <small></small></label>
+      <div style="display:flex; gap:6px;">
+      <input type="number" id="od_pmax" min="0" max="100">
+      <button
+          type="button"
+          class="nr-btn"
+          data-ear="od"
+          data-field="pmax">
+          ↓
+      </button>
+  </div>
+            </div>
+
+            <!-- OÍDO DERECHO - Agregar después del campo % Discriminación -->
+  <div class="input-field">
+      <label>% Respuesta <small></small></label>
+      <div style="display:flex; gap:6px;">
+          <input type="number" id="od_porcentaje_real" min="0" max="100" step="5" placeholder="Ej: 20, 30, 40">
+         
+      </div>
+      <small style="color: #666; font-size: 10px;"></small>
+  </div>
+
+  <!-- Dentro de OÍDO DERECHO, después del input-grid -->
+  <div style="display: flex; justify-content: flex-end; margin-top: 10px;">
+      <button type="button" class="btn-rehacer" data-ear="od" style="background: #8b8b8b; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 12px; margin: 0;">
+          🔄 Rehacer OD
+      </button>
+  </div>
+          </div>
+        </div>
+        
+        <!-- OÍDO IZQUIERDO -->
+        <div class="ear-section oi">
+         <div class="ear-title oi">🔵 OÍDO IZQUIERDO (OI)</div>
+          <div class="input-grid">
+            <div class="input-field">
+              <label>U. Voz <small></small></label>
+           <div style="display:flex; gap:6px;">
+      <input type="number" id="oi_urv">
+      <button
+          type="button"
+          class="nr-btn"
+          data-ear="oi"
+          data-field="urv">
+          ↓
+      </button>
+  </div>
+            </div>
+            <div class="input-field">
+              <label>U. Palabra <small></small></label>
+  <div style="display:flex; gap:6px;">
+      <input type="number" id="oi_upalabra">
+      <button
+          type="button"
+          class="nr-btn"
+          data-ear="oi"
+          data-field="upalabra">
+          ↓
+      </button>
+  </div>
+            </div>
+            <div class="input-field">
+              <label>U. Discriminación <small></small></label>
+   <div style="display:flex; gap:6px;">
+      <input type="number" id="oi_udisc">
+      <button
+          type="button"
+          class="nr-btn"
+          data-ear="oi"
+          data-field="udisc">
+          ↓
+      </button>
+  </div>
+            </div>
+            <div class="input-field">
+              <label>% Discriminación <small></small></label>
+  <div style="display:flex; gap:6px;">
+      <input type="number" id="oi_pmax" min="0" max="100">
+      <button
+          type="button"
+          class="nr-btn"
+          data-ear="oi"
+          data-field="pmax">
+          ↓
+      </button>
+  </div>
+            </div>
+
+            <!-- OÍDO IZQUIERDO - Agregar después del campo % Discriminación -->
+  <div class="input-field">
+      <label>% Respuesta<small></small></label>
+      <div style="display:flex; gap:6px;">
+          <input type="number" id="oi_porcentaje_real" min="0" max="100" step="5" placeholder="Ej: 20, 30, 40">
+          
+      </div>
+      <small style="color: #666; font-size: 10px;"></small>
+  </div>
+
+  <div style="display: flex; justify-content: flex-end; margin-top: 10px;">
+      <button type="button" class="btn-rehacer" data-ear="oi" style="background: #727272; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 12px; margin: 0;">
+          🔄 Rehacer OI
+      </button>
+  </div>
+          </div>
+        </div>
+        
+      </div>
+
+      <!-- ============================================ -->
+      <!-- CONTENEDOR DEL CHART (ancho completo)        -->
+      <!-- ============================================ -->
+      <div style="width: 100%; margin-bottom: 25px;">
+        <div class="chart-container">
+          <canvas id="speechChart"></canvas>
+        </div>
+      </div>
+
+      <!-- ============================================ -->
+      <!-- CONTENEDOR DE SÍMBOLOS + DIAGNÓSTICOS        -->
+      <!-- (2 columnas: símbolos izquierda, diagnósticos derecha) -->
+      <!-- ============================================ -->
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+        
+        <!-- COLUMNA IZQUIERDA: SÍMBOLOS -->
+        <div style="display: flex; flex-direction: column; gap: 15px;">
+          
+          <!-- SÍMBOLOS OÍDO DERECHO -->
+          <div class="symbols-panel" style="margin-top: 0;">
+              <h4 style="width:100%; color:#e74c3c;">🔴 Oído Derecho (OD)</h4>
+
+              <button class="symbol-btn" data-ear="od" data-symbol="air">
+                  O<br><small>Conducción aérea</small>
+              </button>
+
+              <button class="symbol-btn" data-ear="od" data-symbol="nr">
+                  ↘O<br><small>Ausencia de respuesta</small>
+              </button>
+
+              <button class="symbol-btn" data-ear="od" data-symbol="airMask">
+                  △<br><small>Aérea enmascarada</small>
+              </button>
+
+              <button class="symbol-btn" data-ear="od" data-symbol="boneMask">
+                  [<br><small>Ósea mastoidea enmasc.</small>
+              </button>
+
+              <button class="symbol-btn" data-ear="od" data-symbol="frontMask">
+                  ┐<br><small>Ósea frente enmasc.</small>
+              </button>
+          </div>
+
+          <!-- SÍMBOLOS OÍDO IZQUIERDO -->
+          <div class="symbols-panel" style="margin-top: 0;">
+              <h4 style="width:100%; color:#3498db;">🔵 Oído Izquierdo (OI)</h4>
+
+              <button class="symbol-btn" data-ear="oi" data-symbol="air">
+                  X<br><small>Conducción aérea</small>
+              </button>
+
+              <button class="symbol-btn" data-ear="oi" data-symbol="nr">
+                  ↙X<br><small>Ausencia de respuesta</small>
+              </button>
+
+              <button class="symbol-btn" data-ear="oi" data-symbol="airMask">
+                  □<br><small>Aérea enmascarada</small>
+              </button>
+
+              <button class="symbol-btn" data-ear="oi" data-symbol="boneMask">
+                  ]<br><small>Ósea mastoidea enmasc.</small>
+              </button>
+
+              <button class="symbol-btn" data-ear="oi" data-symbol="frontMask">
+                  ┌<br><small>Ósea frente enmasc.</small>
+              </button>
+          </div>
+          
+        </div>
+
+        <!-- COLUMNA DERECHA: DIAGNÓSTICOS + OTOSCOPIA -->
+        <div style="display: flex; flex-direction: column; gap: 15px;">
+          
+          <!-- Diagnóstico OD -->
+          <div class="diagnostico-section" style="margin-top: 0;">
+              <h4 style="color: #e74c3c;">🔴 Diagnóstico Oído Derecho (OD)</h4>
+              <textarea id="diagnostico_od" class="diagnostico-input" rows="3" placeholder="Escriba aquí el diagnóstico específico para oído derecho..."></textarea>
+          </div>
+
+          <!-- Diagnóstico OI -->
+          <div class="diagnostico-section" style="margin-top: 0;">
+              <h4 style="color: #3498db;">🔵 Diagnóstico Oído Izquierdo (OI)</h4>
+              <textarea id="diagnostico_oi" class="diagnostico-input" rows="3" placeholder="Escriba aquí el diagnóstico específico para oído izquierdo..."></textarea>
+          </div>
+
+          <!-- Otoscopia -->
+          <div class="diagnostico-section" style="margin-top: 0;">
+              <h4>🔍 OTOSCOPIA</h4>
+              <textarea 
+                  id="otoscopia_logoaudiometria" 
+                  class="diagnostico-input" 
+                  rows="3" 
+                  placeholder="Describa los hallazgos de la exploración otoscópica:"
+              ></textarea>
+          </div>
+
+          <!-- Diagnóstico General -->
+          <div class="diagnostico-section" style="margin-top: 0;">
+              <h4>📋 Diagnóstico General</h4>
+              <textarea id="diagnostico" class="diagnostico-input" rows="3" placeholder="Escriba aquí el diagnóstico del paciente..."></textarea>
+          </div>
+          
+        </div>
+        
+      </div>
+
+    </div>
+    
+    <!-- ESTA COLUMNA DERECHA YA NO SE USA, PERO LA DEJAMOS VACÍA PARA MANTENER LA ESTRUCTURA -->
+    <div></div>
+    
+  </div>
+</div>
+<script>
+
+    // ============================================
+// DETECTAR SI VIENE DE AudioLogo.html
+// ============================================
+document.addEventListener('DOMContentLoaded', function() {
+    // Leer el parámetro de la URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const modo = urlParams.get('modo');
+    
+    // Si viene de AudioLogo (modo combinado), ocultar el botón de grabar
+    if (modo === 'combinado') {
+        const btnGrabar = document.getElementById('grabarBtn');
+        if (btnGrabar) {
+            btnGrabar.style.display = 'none';
+            console.log('🔒 Botón de grabar ocultado (modo combinado)');
+        }
+        
+        // También ocultar el botón "Restablecer Valores" si quieres
+        const resetBtn = document.getElementById('resetBtn');
+        if (resetBtn) {
+            resetBtn.style.display = 'none';
+        }
+    }
+});
+    
+
+function earTieneDatos(ear) {
+
+    const tieneValores = [
+        document.getElementById(`${ear}_urv`).value,
+        document.getElementById(`${ear}_upalabra`).value,
+        document.getElementById(`${ear}_udisc`).value,
+        document.getElementById(`${ear}_pmax`).value
+    ].some(v => v !== "" && v !== null);
+
+    const tieneNR =
+        noResponseFlags[ear].urv ||
+        noResponseFlags[ear].upalabra ||
+        noResponseFlags[ear].udisc ||
+        noResponseFlags[ear].pmax;
+
+    return tieneValores || tieneNR;
+}
+function cargarPacienteSeleccionado() {
+  const data = localStorage.getItem("pacienteActual");
+  const citaData = localStorage.getItem("citaActual");
+
+  if (!data) {
+    document.getElementById("infoPacienteCargada").innerHTML = `
+      <div class="input-field">
+        <label>No hay paciente seleccionado</label>
+        <input type="text" value="Seleccione un paciente desde citas" readonly>
+      </div>`;
+    return;
+  }
+
+  const paciente = JSON.parse(data);
+  const cita = citaData ? JSON.parse(citaData) : null;
+
+  // Mostrar información de depuración
+  console.log('Paciente cargado:', paciente);
+  console.log('Cita cargada:', cita);
+
+  // Si el paciente no tiene ID, intentar obtenerlo desde otra clave
+  if (!paciente.id && paciente.id_paciente) {
+    paciente.id = paciente.id_paciente;
+  }
+  
+  if (!paciente.id && paciente.paciente_id) {
+    paciente.id = paciente.paciente_id;
+  }
+
+  // Si la cita no tiene ID, intentar obtenerlo
+  if (cita && !cita.id && cita.id_cita) {
+    cita.id = cita.id_cita;
+  }
+
+  // Guardar nuevamente con los IDs correctos
+  if (paciente.id) {
+    localStorage.setItem("pacienteActual", JSON.stringify(paciente));
+  }
+  
+  if (cita && cita.id) {
+    localStorage.setItem("citaActual", JSON.stringify(cita));
+  }
+
+  // Mostrar los datos en la interfaz
+  document.getElementById("infoPacienteCargada").innerHTML = `
+    <div class="input-grid" style="grid-template-columns: repeat(3, 1fr);">
+      <div class="input-field">
+        <label>Paciente</label>
+        <input type="text" value="${paciente.nombre || ''}" readonly>
+      </div>
+      <div class="input-field">
+        <label>Cédula</label>
+        <input type="text" value="${paciente.documento || ''}" readonly>
+      </div>
+      <div class="input-field">
+        <label>Fecha de cita</label>
+        <input type="text" value="${cita && cita.fecha_cita ? new Date(cita.fecha_cita).toLocaleDateString('es-ES') : (paciente.fecha ? new Date(paciente.fecha).toLocaleDateString('es-ES') : 'No especificada')}" readonly>
+      </div>
+    </div>
+
+  `;
+}
+cargarPacienteSeleccionado();
+
+// ESCALAS PARA LOGOAUDIOMETRÍA
+const SCALE_X_SPEECH = 1.0;  // ← VALOR EXACTO (sin compresión)
+const SCALE_Y_SPEECH = 1.0;  // ← VALOR EXACTO (sin compresión)
+
+// Posiciones personalizadas para el eje X
+const xPositionsSpeech = [
+    0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100, 105, 110, 115
+].map(v => v * SCALE_X_SPEECH);
+const audiologySymbolsPlugin = {
+    id: "audiologySymbolsPlugin",
+
+    afterDatasetsDraw(chart) {
+        const { ctx } = chart;
+
+        function drawArrow(ctx, x1, y1, x2, y2, arrowSize = 8) {
+
+            // Línea
+            ctx.beginPath();
+            ctx.moveTo(x1, y1);
+            ctx.lineTo(x2, y2);
+            ctx.stroke();
+
+            // Ángulo real de la línea
+            const angle = Math.atan2(
+                y2 - y1,
+                x2 - x1
+            );
+
+            // Punta centrada
+            ctx.beginPath();
+            ctx.moveTo(x2, y2);
+
+            ctx.lineTo(
+                x2 - arrowSize * Math.cos(angle - Math.PI / 6),
+                y2 - arrowSize * Math.sin(angle - Math.PI / 6)
+            );
+
+            ctx.lineTo(
+                x2 - arrowSize * Math.cos(angle + Math.PI / 6),
+                y2 - arrowSize * Math.sin(angle + Math.PI / 6)
+            );
+
+            ctx.closePath();
+            ctx.fill();
+        }
+
+        chart.data.datasets.forEach((dataset, datasetIndex) => {
+
+            if (!dataset.customSymbol) return;
+
+            const meta =
+                chart.getDatasetMeta(datasetIndex);
+
+            meta.data.forEach((point) => {
+
+                const x = point.x;
+                const y = point.y;
+
+                const symbol =
+                    dataset.customSymbol;
+
+                const color =
+                    dataset.borderColor;
+
+                ctx.save();
+
+                ctx.font = "bold 22px Arial";
+                ctx.textAlign = "center";
+                ctx.textBaseline = "middle";
+
+                ctx.fillStyle = color;
+                ctx.strokeStyle = color;
+
+                ctx.lineWidth = 2.5;
+
+                // =====================================
+                // NR OI
+                // ↙X
+                // =====================================
+
+                if (
+                    symbol === "↙X" ||
+                    symbol === "NR_OI"
+                ) {
+
+                    const tamañoX = 9;
+
+                    // X
+                    ctx.beginPath();
+                    ctx.moveTo(
+                        x - tamañoX,
+                        y - tamañoX
+                    );
+                    ctx.lineTo(
+                        x + tamañoX,
+                        y + tamañoX
+                    );
+                    ctx.stroke();
+
+                    ctx.beginPath();
+                    ctx.moveTo(
+                        x - tamañoX,
+                        y + tamañoX
+                    );
+                    ctx.lineTo(
+                        x + tamañoX,
+                        y - tamañoX
+                    );
+                    ctx.stroke();
+
+                    // Flecha sale EXACTAMENTE
+                    // desde la esquina inferior derecha
+
+                    const inicioX =
+                        x + tamañoX;
+
+                    const inicioY =
+                        y + tamañoX;
+
+                    const longitud = 22;
+
+                    const finX =
+                        inicioX + longitud;
+
+                    const finY =
+                        inicioY + longitud;
+
+                    drawArrow(
+                        ctx,
+                        inicioX,
+                        inicioY,
+                        finX,
+                        finY,
+                        8
+                    );
+                }
+
+                // =====================================
+                // NR OD
+                // ↘O
+                // =====================================
+
+// =====================================
+// NR OD
+// ↘O
+// =====================================
+
+else if (
+    symbol === "↘O" ||
+    symbol === "NR_OD"
+) {
+
+    // Dibujar O (con un radio más pequeño para que quede compacto)
+    ctx.save();
+    ctx.font = "bold 22px Arial";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillStyle = color;
+    ctx.fillText("O", x, y);
+    ctx.restore();
+
+    // 🔥 Flecha PEGADA al círculo
+    // El radio aproximado de la "O" con font 22px es ~10px
+    const radio = 5;
+    const inicioX = x + radio;      // Borde derecho del círculo
+    const inicioY = y + radio;      // Borde inferior del círculo
+    const longitud = 20;            // Longitud de la flecha
+    const finX = inicioX + longitud;
+    const finY = inicioY + longitud;
+
+    ctx.save();
+    ctx.strokeStyle = color;
+    ctx.fillStyle = color;
+    ctx.lineWidth = 2.5;
+    drawArrow(ctx, inicioX, inicioY, finX, finY, 8);
+    ctx.restore();
+}
+
+                // =====================================
+                // RESTO DE SÍMBOLOS
+                // =====================================
+
+                else {
+
+                    ctx.fillText(
+                        symbol,
+                        x,
+                        y
+                    );
+                }
+
+                ctx.restore();
+            });
+        });
+    }
+};
+let chart;
+
+
+let noResponseFlags = {
+    od: {
+        urv: false,
+        upalabra: false,
+        udisc: false,
+        pmax: false
+    },
+    oi: {
+        urv: false,
+        upalabra: false,
+        udisc: false,
+        pmax: false
+    }
+};
+
+window.noResponseFlags = noResponseFlags;
+/*
+MODELO CLÍNICO CORRECTO
+
+Punto 1 = (U.Voz, 5%)
+Punto 2 = (U.Palabra, 50%)
+Punto 3 = (U.Discriminación, %Discriminación)
+
+NO usamos regresión logística artificial.
+Usamos curva clínica real.
+*/
+
+function getEarValues(ear) {
+
+    let uVoz =
+        parseFloat(document.getElementById(`${ear}_urv`).value) || 15;
+
+    let uPalabra =
+        parseFloat(document.getElementById(`${ear}_upalabra`).value) || 25;
+
+    let uDiscriminacion =
+        parseFloat(document.getElementById(`${ear}_udisc`).value) || 45;
+
+    let porcentaje =
+        parseFloat(document.getElementById(`${ear}_pmax`).value);
+
+    // 🔥 NUEVO: Obtener porcentaje real si existe
+    let porcentajeRealInput = document.getElementById(`${ear}_porcentaje_real`);
+    let porcentajeReal = porcentajeRealInput ? parseFloat(porcentajeRealInput.value) : null;
+
+    if (isNaN(porcentaje)) {
+        porcentaje = 100;
+    }
+
+    // Manejo de Sin Respuesta (NR)
+    if (noResponseFlags[ear].urv) {
+        uVoz = Math.max(uVoz, 100);
+    }
+
+    if (noResponseFlags[ear].upalabra) {
+        uPalabra = Math.max(uPalabra, 100);
+    }
+
+    if (noResponseFlags[ear].udisc) {
+        uDiscriminacion = Math.max(uDiscriminacion, 100);
+    }
+
+    if (noResponseFlags[ear].pmax) {
+        porcentaje = 0;
+        uDiscriminacion = Math.max(uDiscriminacion, 100);
+    }
+
+    // 🔥 NUEVO: Si hay NR en porcentaje_real, forzar a null
+    if (noResponseFlags[ear].porcentaje_real) {
+        porcentajeReal = null;
+    }
+
+    if (porcentaje === 0) {
+        uDiscriminacion = Math.max(uDiscriminacion, 100);
+    }
+
+    let porcentajePalabra = 30; // valor por defecto
+    
+    // 🔥 PRIORIDAD: Si hay porcentaje real ingresado, usarlo directamente
+    if (porcentajeReal !== null && !isNaN(porcentajeReal) && porcentajeReal >= 0 && porcentajeReal <= 100) {
+        porcentajePalabra = porcentajeReal;
+    } else {
+        // Si no hay porcentaje real, usar la lógica automática existente
+        const diferencia = uPalabra - uVoz;
+        
+        // Casos especiales del doctor
+        if ((uVoz === 20 && uPalabra === 30) || (uVoz === 15 && uPalabra === 25)) {
+            porcentajePalabra = 20;
+        }
+        else if (uVoz === 45 && uPalabra === 55) {
+            porcentajePalabra = 30;
+        }
+        else if (uVoz === 65 && uPalabra === 75) {
+            porcentajePalabra = 40;
+        }
+        // Regla general
+        else {
+            if (diferencia <= 5) {
+                porcentajePalabra = 20;
+            }
+            else if (diferencia <= 10) {
+                porcentajePalabra = 30;
+            }
+            else if (diferencia > 10) {
+                porcentajePalabra = 40;
+            }
+            
+            // Ajustes especiales
+            if (uVoz > 50 && diferencia <= 10) {
+                porcentajePalabra = 40;
+            }
+            
+            if (uVoz < 30 && diferencia <= 5) {
+                porcentajePalabra = 20;
+            }
+        }
+    }
+
+    return {
+        uVoz,
+        uPalabra,
+        porcentajePalabra,
+        uDiscriminacion,
+        porcentaje
+    };
+}
+
+// Agregar listener para los nuevos campos
+document.querySelectorAll('[id$="_porcentaje_real"]').forEach(input => {
+    input.addEventListener('input', function() {
+        // Validar que el valor esté entre 0 y 100
+        let valor = parseFloat(this.value);
+        if (!isNaN(valor)) {
+            if (valor < 0) this.value = 0;
+            if (valor > 100) this.value = 100;
+        }
+        updateChart();
+    });
+});
+
+// Extender resetValues para limpiar los nuevos campos
+const resetValuesOriginal = resetValues;
+resetValues = function() {
+    resetValuesOriginal();
+    document.getElementById("od_porcentaje_real").value = "";
+    document.getElementById("oi_porcentaje_real").value = "";
+    // Resetear flags NR
+    noResponseFlags.od.porcentaje_real = false;
+    noResponseFlags.oi.porcentaje_real = false;
+    // Limpiar estilo activo de los botones NR
+    document.querySelectorAll('.nr-btn[data-field="porcentaje_real"]').forEach(btn => {
+        btn.classList.remove('active');
+    });
+};
+
+function generarPuntosClinicos(data, ear) {
+    const sinDiscriminacion =
+        noResponseFlags[ear].udisc ||
+        noResponseFlags[ear].pmax;
+
+    const todoSinRespuesta =
+        noResponseFlags[ear].urv &&
+        noResponseFlags[ear].upalabra &&
+        noResponseFlags[ear].udisc &&
+        noResponseFlags[ear].pmax;
+
+    if (todoSinRespuesta) {
+        return [
+            {
+                x: 100,
+                y: 0
+            }
+        ];
+    }
+
+    if (sinDiscriminacion) {
+        return [
+            {
+                x: data.uVoz,
+                y: 0
+            },
+            {
+                x: data.uPalabra,
+                y: data.porcentajePalabra  // ✅ USAR porcentajePalabra (40-60%)
+            },
+        ];
+    }
+
+    const campos = getCamposValidos(ear);
+    const puntos = [];
+
+    // Punto 1: U.Voz (0%)
+    if (campos.urv) {
+        puntos.push({ x: data.uVoz, y: 0 });
+    }
+
+    // Punto 2: U.Palabra (porcentajePalabra: 40-60%)
+    if (campos.upalabra) {
+        puntos.push({ x: data.uPalabra, y: data.porcentajePalabra });  // ✅ CORREGIDO
+    }
+
+    // Punto 3: U.Discriminación (% final)
+    if (campos.udisc && campos.pmax) {
+        puntos.push({
+            x: data.uDiscriminacion,
+            y: data.porcentaje
+        });
+    }
+
+    return puntos;
+}
+
+function generarCurvaSuave(data, ear) {
+
+    const campos = getCamposValidos(ear);
+    const puntos = [];
+
+    const punto1x = data.uVoz;
+    const punto2x = data.uPalabra;
+    const punto3x = data.uDiscriminacion;
+
+    for (let db = 0; db <= 120; db++) {
+
+        let y = NaN;
+
+        // ❌ Si no hay U.Voz → no dibuja nada
+        if (!campos.urv) {
+            y = NaN;
+        }
+
+        // 🔹 SOLO U.VOZ
+        else if (!campos.upalabra) {
+            if (db === Math.round(punto1x)) {
+                y = 0;
+            } else {
+                y = NaN;
+            }
+        }
+
+        // 🔹 HASTA U.PALABRA (sin U.Discriminación)
+        else if (!campos.udisc) {
+
+            if (db < punto1x) y = NaN;
+            else if (db <= punto2x) {
+                // Curva: 0% → porcentajePalabra
+                y = ((db - punto1x) / (punto2x - punto1x)) * data.porcentajePalabra;
+            }
+            else {
+                y = NaN;
+            }
+        }
+
+        // 🔹 CURVA COMPLETA (con U.Discriminación y %)
+        else if (campos.udisc && campos.pmax) {
+
+            if (db < punto1x) y = NaN;
+
+            // Tramo 1: U.Voz → U.Palabra (0% → porcentajePalabra)
+            else if (db <= punto2x) {
+                y = ((db - punto1x) / (punto2x - punto1x)) * data.porcentajePalabra;
+            }
+
+            // Tramo 2: U.Palabra → U.Discriminación (porcentajePalabra → porcentaje final)
+            else if (db <= punto3x) {
+                y = data.porcentajePalabra + 
+                    ((db - punto2x) / (punto3x - punto2x)) * 
+                    (data.porcentaje - data.porcentajePalabra);
+            }
+
+            else {
+                y = NaN;
+            }
+        }
+
+        // 🔹 HASTA U.DISCRIMINACIÓN (sin % final - usar porcentajePalabra como techo)
+        else if (campos.udisc && !campos.pmax) {
+
+            if (db < punto1x) y = NaN;
+
+            // Tramo 1: U.Voz → U.Palabra (0% → porcentajePalabra)
+            else if (db <= punto2x) {
+                y = ((db - punto1x) / (punto2x - punto1x)) * data.porcentajePalabra;
+            }
+
+            // Tramo 2: U.Palabra → U.Discriminación (porcentajePalabra constante)
+            else if (db <= punto3x) {
+                y = data.porcentajePalabra;
+            }
+
+            else {
+                y = NaN;
+            }
+        }
+
+        puntos.push({
+            x: db,
+            y: y
+        });
+    }
+
+    return puntos;
+}
+function getClinicalInterpretation(name, data) {
+    let texto = `${name}: `;
+
+    if (data.porcentaje >= 90) {
+        texto += `✅ Discriminación normal (${data.porcentaje}%). `;
+    } else if (data.porcentaje >= 70) {
+        texto += `⚠️ Discriminación reducida (${data.porcentaje}%). `;
+    } else {
+        texto += `❌ Discriminación severamente alterada (${data.porcentaje}%). `;
+    }
+
+    if (data.uPalabra > 50) {
+        texto += `U. Palabra elevado (${data.uPalabra} dB).`;
+    } else {
+        texto += `U. Palabra dentro de rango esperado (${data.uPalabra} dB).`;
+    }
+
+    return texto;
+}
+
+function getPointStyle(symbol) {
+    switch (symbol) {
+
+        case "air":
+            return "circle"; // O o X visual
+
+        case "airMask":
+            return "rect"; // □ o △
+
+        case "bone":
+            return "triangle"; // < >
+
+        case "boneMask":
+            return "rectRounded"; // [ ]
+
+        case "frontMask":
+            return "rectRot"; // ┐ ┌
+
+        case "nr":
+            return "line"; // ausencia respuesta
+
+        default:
+            return "circle";
+    }
+}
+
+let activeSymbols = {
+    od: "mcl",   // círculo
+    oi: "air"    // X
+};
+
+
+let drawMode = false;
+
+let manualPoints = {
+    od: [],
+    oi: []
+};
+
+let activeDrawEar = "od";
+
+// Variable para controlar el tiempo de actualización
+let updateTimeout = null;
+let lastUpdateTime = 0;
+let chartInitialized = false;
+
+function initializeChart() {
+    if (chartInitialized) return;
+    
+    const canvas = document.getElementById("speechChart");
+    const ctx = canvas.getContext("2d");
+
+    chart = new Chart(ctx, {
+        type: "scatter",
+        plugins: [audiologySymbolsPlugin],
+        data: { datasets: [] },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            animation: {
+                duration: 500,
+                easing: 'easeOutQuart'
+            },
+            transitions: {
+                active: {
+                    animation: {
+                        duration: 500
+                    }
+                },
+                resize: {
+                    animation: {
+                        duration: 500
+                    }
+                }
+            },
+            plugins: { 
+                legend: { display: false } 
+            },
+            scales: {
+           x: {
+    type: 'linear',
+    min: 0,
+    max: 115 * SCALE_X_SPEECH, // 👈 MULTIPLICAR EL MÁXIMO
+    
+    grid: { 
+        color: '#000000',
+        drawTicks: false,
+        tickColor: '#000000',
+        tickWidth: 2,
+        borderColor: '#000000',
+        borderWidth: 2
+    },
+    ticks: {
+        stepSize: 5 * SCALE_X_SPEECH, // 👈 PASO DE 5 ESCALADO
+        autoSkip: false,
+        maxRotation: 0,
+        minRotation: 0,
+        callback: function(value) {
+            // Mostrar el valor redondeado al múltiplo de 5 más cercano
+            return Math.round(value / 5) * 5;
+        }
+    },
+    title: {
+        display: true,
+        color: '#000000',
+        text: "Intensidad (dB HL)"
+    }
+},
+y: {
+    min: 0,
+    max: 100,  // ← FIJO EN 100 (sin escalar)
+    
+    grid: { 
+        color: '#000000',
+        drawTicks: false,
+        tickColor: '#000000',
+        tickWidth: 2,
+        borderColor: '#000000',
+        borderWidth: 2
+    },
+    ticks: {
+        stepSize: 10,
+        color: '#000000',      
+        callback: function(value) {
+            // Asegurar que no muestre más de 100%
+            if (value > 100) return '';
+            return `${Math.round(value)}%`;
+        }
+    },
+    title: {
+        display: true,
+        color: '#000000',
+        text: "Discriminación (%)"
+    }
+}
+            }
+        }
+    });
+    
+    chartInitialized = true;
+}
+// ============================================
+// FUNCIÓN ACTUALIZAR GRÁFICA (CON ANIMACIÓN SUAVE)
+// ============================================
+function updateChart() {
+    // Inicializar el chart si no existe
+    if (!chartInitialized) {
+        initializeChart();
+        // Esperar a que se inicialice
+        setTimeout(() => updateChart(), 50);
+        return;
+    }
+
+    // 🔥 Debounce para evitar actualizaciones demasiado frecuentes
+    const now = Date.now();
+    if (now - lastUpdateTime < 100) {
+        if (updateTimeout) {
+            clearTimeout(updateTimeout);
+        }
+        updateTimeout = setTimeout(() => {
+            updateChart();
+        }, 100);
+        return;
+    }
+    lastUpdateTime = now;
+
+    // Obtener datos actuales
+    const odActivo = earTieneDatos("od");
+    const oiActivo = earTieneDatos("oi");
+
+    const od = odActivo ? getEarValues("od") : null;
+    const oi = oiActivo ? getEarValues("oi") : null;
+
+    const datasets = [];
+
+    // ======================
+    // OÍDO DERECHO (OD)
+    // ======================
+    if (odActivo) {
+        const odTieneNR = noResponseFlags.od.udisc || noResponseFlags.od.pmax;
+        const odCurve = generarCurvaTodoSinRespuesta("od") ??
+            (odTieneNR ? generarCurvaSinRespuesta(od) : generarCurvaSuave(od, "od"));
+        const odPoints = generarPuntosClinicos(od, "od");
+
+        datasets.push(
+            {
+                label: "OD - Curva Clínica",
+                data: odCurve || [],
+                type: "line",
+                borderColor: "#e74c3c",
+                borderWidth: 3,
+                pointRadius: 0,
+                tension: 0.5,
+                spanGaps: true,
+                fill: false,
+                borderJoinStyle: 'round',
+                borderCapStyle: 'round'
+            },
+            {
+                label: "OD - Puntos clínicos",
+                data: odPoints || [],
+                backgroundColor: "#e74c3c",
+                borderColor: "#e74c3c",
+                pointRadius: 0,
+                customSymbol: getSymbolText("od"),
+                showLine: false
+            }
+        );
+    }
+
+    // ======================
+    // OÍDO IZQUIERDO (OI)
+    // ======================
+    if (oiActivo) {
+        const oiTieneNR = noResponseFlags.oi.udisc || noResponseFlags.oi.pmax;
+        const oiCurve = generarCurvaTodoSinRespuesta("oi") ??
+            (oiTieneNR ? generarCurvaSinRespuesta(oi) : generarCurvaSuave(oi, "oi"));
+        const oiPoints = generarPuntosClinicos(oi, "oi");
+
+        datasets.push(
+            {
+                label: "OI - Curva Clínica",
+                data: oiCurve || [],
+                type: "line",
+                borderColor: "#3498db",
+                borderWidth: 3,
+                pointRadius: 0,
+                tension: 0.5,
+                spanGaps: true,
+                fill: false,
+                borderJoinStyle: 'round',
+                borderCapStyle: 'round'
+            },
+            {
+                label: "OI - Puntos clínicos",
+                data: oiPoints || [],
+                backgroundColor: "#3498db",
+                borderColor: "#3498db",
+                pointRadius: 0,
+                customSymbol: getSymbolText("oi"),
+                showLine: false
+            }
+        );
+    }
+
+    // ======================
+    // PUNTOS MANUALES
+    // ======================
+    if (manualPoints.od.length > 0 && odActivo) {
+        const ultimoPuntoOD = generarPuntosClinicos(od, "od").slice(-1)[0];
+        const puntosConectadosOD = ultimoPuntoOD ? [ultimoPuntoOD, ...manualPoints.od] : manualPoints.od;
+        datasets.push({
+            label: "OD Manual",
+            data: puntosConectadosOD,
+            type: "line",
+            backgroundColor: "#e74c3c",
+            borderColor: "#e74c3c",
+            borderWidth: 2,
+            pointRadius: 0,
+            tension: 0,
+            customSymbol: getSymbolText("od"),
+            showLine: true,
+            borderDash: [5, 3]
+        });
+    }
+
+    if (manualPoints.oi.length > 0 && oiActivo) {
+        const ultimoPuntoOI = generarPuntosClinicos(oi, "oi").slice(-1)[0];
+        const puntosConectadosOI = ultimoPuntoOI ? [ultimoPuntoOI, ...manualPoints.oi] : manualPoints.oi;
+        datasets.push({
+            label: "OI Manual",
+            data: puntosConectadosOI,
+            type: "line",
+            backgroundColor: "#3498db",
+            borderColor: "#3498db",
+            borderWidth: 2,
+            pointRadius: 0,
+            tension: 0,
+            customSymbol: getSymbolText("oi"),
+            showLine: true,
+            borderDash: [5, 3]
+        });
+    }
+
+    // 🔥 ACTUALIZAR LOS DATOS EN VEZ DE RECREAR EL CHART
+    chart.data.datasets = datasets;
+    chart.update('none'); // 👈 CON 'none'
+}
+
+function generarCurvaSinRespuesta(data) {
+    const puntos = [];
+
+    const x1 = data.uVoz;
+    const x2 = data.uPalabra;
+
+    for (let db = 0; db <= 120; db++) {
+        let y = NaN;
+
+        if (db < x1) {
+            y = NaN;
+        }
+        else if (db <= x2) {
+            // ✅ Usar porcentajePalabra
+            y = ((db - x1) / (x2 - x1)) * data.porcentajePalabra;
+        }
+        else {
+            y = NaN;
+        }
+
+        puntos.push({ x: db, y });
+    }
+
+    return puntos;
+}
+
+function generarCurvaTodoSinRespuesta(ear) {
+    const todoSinRespuesta =
+        noResponseFlags[ear].urv &&
+        noResponseFlags[ear].upalabra &&
+        noResponseFlags[ear].udisc &&
+        noResponseFlags[ear].pmax;
+
+    /*
+    CASO CLÍNICO REAL:
+    cuando todo está en ↓
+    NO se dibuja ninguna línea (solo el símbolo con flecha)
+    */
+
+    if (todoSinRespuesta) {
+        // Retornar null para que NO se dibuje ninguna línea
+        return null;
+    }
+
+    return null;
+}
+function getCamposValidos(ear) {
+    return {
+        urv: document.getElementById(`${ear}_urv`).value !== "",
+        upalabra: document.getElementById(`${ear}_upalabra`).value !== "",
+        udisc: document.getElementById(`${ear}_udisc`).value !== "",
+        pmax: document.getElementById(`${ear}_pmax`).value !== ""
+    };
+}
+function getSymbolText(ear) {
+    const todoSinRespuesta =
+        noResponseFlags[ear].urv &&
+        noResponseFlags[ear].upalabra &&
+        noResponseFlags[ear].udisc &&
+        noResponseFlags[ear].pmax;
+
+    /*
+    Si TODO está en sin respuesta
+    usar marcadores especiales dibujados manualmente
+    */
+    if (todoSinRespuesta) {
+        return ear === "od" ? "NR_OD" : "NR_OI";
+    }
+
+    const symbol = activeSymbols[ear];
+
+    const mapOD = {
+        air: "•",
+        nr: "↘O",
+        airMask: "△",
+        bone: "<",
+        boneMask: "[",
+        frontMask: "┐"
+    };
+
+    const mapOI = {
+        air: "x",
+        nr: "↙X",
+        airMask: "□",
+        bone: ">",
+        boneMask: "]",
+        frontMask: "┌"
+    };
+
+    return ear === "od"
+        ? mapOD[symbol] || "O"
+        : mapOI[symbol] || "X";
+}
+// Botón volver
+document.getElementById("btnVolverFloating")?.addEventListener("click", function() {
+    if (window.api && window.api.volverDashboard) {
+        window.api.volverDashboard();
+    } else {
+        alert("Funcionalidad: Volver al dashboard");
+    }
+});
+
+document.addEventListener('DOMContentLoaded', function() {
+        setTimeout(() => {
+        initializeChart();
+    }, 100);
+    const grabarBtn = document.getElementById('grabarBtn');
+    
+    if (grabarBtn) {
+        grabarBtn.addEventListener('click', function() {
+            // Usar la función del objeto exportado
+            if (window.logoaudiometriaFunctions && typeof window.logoaudiometriaFunctions.onGrabarClick === 'function') {
+                window.logoaudiometriaFunctions.onGrabarClick();
+            } else {
+                console.error('Funciones de guardado no encontradas');
+                alert('Error: Las funciones de guardado no están disponibles. Verifica que el archivo logoaudiometria-functions.js esté cargado correctamente.');
+            }
+        });
+    }
+});
+
+function resetValues() {
+    document.getElementById("od_urv").value = "";
+    document.getElementById("od_upalabra").value = "";
+    document.getElementById("od_udisc").value = "";
+    document.getElementById("od_pmax").value = "";
+    document.getElementById("od_porcentaje_real").value = "";
+
+    document.getElementById("oi_urv").value = "";
+    document.getElementById("oi_upalabra").value = "";
+    document.getElementById("oi_udisc").value = "";
+    document.getElementById("oi_pmax").value = "";
+    document.getElementById("oi_porcentaje_real").value = "";
+
+    noResponseFlags.od = { urv: false, upalabra: false, udisc: false, pmax: false, porcentaje_real: false };
+    noResponseFlags.oi = { urv: false, upalabra: false, udisc: false, pmax: false, porcentaje_real: false };
+    
+    document.querySelectorAll('.nr-btn').forEach(btn => {
+        btn.classList.remove('active');
+    });
+
+    manualPoints.od = [];
+    manualPoints.oi = [];
+
+    // 🔥 Limpiar datasets sin destruir el chart
+    if (chart && chartInitialized) {
+        chart.data.datasets = [];
+        chart.update();
+    } else {
+        // Si el chart no existe, inicializarlo vacío
+        initializeChart();
+    }
+}
+
+document.getElementById("resetBtn")
+    .addEventListener("click", resetValues);
+
+
+
+    const audioInputs = [
+    "od_urv",
+    "od_upalabra",
+    "od_udisc",
+    "od_pmax",
+    "oi_urv",
+    "oi_upalabra",
+    "oi_udisc",
+    "oi_pmax"
+];
+
+audioInputs.forEach((id, index) => {
+    const input = document.getElementById(id);
+
+    // borrar al enfocar
+    input.addEventListener("focus", function () {
+        this.select();
+    });
+
+    // actualizar automáticamente
+    input.addEventListener("input", function () {
+        updateChart();
+    });
+
+    // navegación con flechas
+    input.addEventListener("keydown", function (e) {
+        const cols = 2;
+        let nextIndex = index;
+
+        if (e.key === "ArrowRight") {
+            nextIndex = index + 1;
+        }
+
+        if (e.key === "ArrowLeft") {
+            nextIndex = index - 1;
+        }
+
+        if (e.key === "ArrowDown") {
+            nextIndex = index + cols;
+        }
+
+        if (e.key === "ArrowUp") {
+            nextIndex = index - cols;
+        }
+
+        if (
+            nextIndex >= 0 &&
+            nextIndex < audioInputs.length &&
+            nextIndex !== index
+        ) {
+            e.preventDefault();
+            document.getElementById(audioInputs[nextIndex]).focus();
+        }
+    });
+});
+
+resetValues();
+
+
+
+
+document.querySelectorAll(".symbol-btn").forEach(btn => {
+    btn.addEventListener("click", function () {
+        const ear = this.dataset.ear;
+        const symbol = this.dataset.symbol;
+
+        activeSymbols[ear] = symbol;
+
+        updateChart();
+    });
+});
+
+document.querySelectorAll(".nr-btn").forEach(btn => {
+    btn.addEventListener("click", function () {
+        const ear = this.dataset.ear;
+        const field = this.dataset.field;
+
+        noResponseFlags[ear][field] =
+            !noResponseFlags[ear][field];
+
+        this.classList.toggle("active");
+
+        updateChart();
+    });
+});
+
+document.getElementById("drawODBtn")
+.addEventListener("click", () => {
+
+    drawMode = true;
+    activeDrawEar = "od";
+
+    document.body.style.cursor = "crosshair";
+});
+
+document.getElementById("drawOIBtn")
+.addEventListener("click", () => {
+
+    drawMode = true;
+    activeDrawEar = "oi";
+
+    document.body.style.cursor = "crosshair";
+});
+
+document.getElementById("clearManualBtn")
+.addEventListener("click", () => {
+
+    manualPoints.od = [];
+    manualPoints.oi = [];
+
+    updateChart();
+});
+
+document.getElementById("speechChart")
+.addEventListener("click", function(evt) {
+
+    if (!drawMode || !chart) return;
+
+    const points = chart.getElementsAtEventForMode(
+        evt,
+        'nearest',
+        { intersect: false },
+        false
+    );
+
+    const rect = evt.target.getBoundingClientRect();
+
+    const xPixel = evt.clientX - rect.left;
+    const yPixel = evt.clientY - rect.top;
+
+    const xValue = chart.scales.x.getValueForPixel(xPixel);
+    const yValue = chart.scales.y.getValueForPixel(yPixel);
+
+    manualPoints[activeDrawEar].push({
+        x: Number(xValue.toFixed(1)),
+        y: Number(yValue.toFixed(1))
+    });
+
+    updateChart();
+
+    drawMode = false;
+
+    document.body.style.cursor = "default";
+});
+
+// ============================================
+// FUNCIÓN PARA REHACER UN OÍDO ESPECÍFICO
+// ============================================
+
+function rehacerOido(ear) {
+    // Limpiar inputs principales
+    document.getElementById(`${ear}_urv`).value = "";
+    document.getElementById(`${ear}_upalabra`).value = "";
+    document.getElementById(`${ear}_udisc`).value = "";
+    document.getElementById(`${ear}_pmax`).value = "";
+    
+    // Limpiar porcentaje real
+    const porcentajeRealInput = document.getElementById(`${ear}_porcentaje_real`);
+    if (porcentajeRealInput) {
+        porcentajeRealInput.value = "";
+    }
+    
+    // Resetear flags NR para este oído
+    noResponseFlags[ear] = {
+        urv: false,
+        upalabra: false,
+        udisc: false,
+        pmax: false,
+        porcentaje_real: false
+    };
+    
+    // Limpiar estilo activo de los botones NR de este oído
+    document.querySelectorAll(`.nr-btn[data-ear="${ear}"]`).forEach(btn => {
+        btn.classList.remove('active');
+    });
+    
+    // Limpiar puntos manuales de este oído
+    if (manualPoints[ear]) {
+        manualPoints[ear] = [];
+    }
+    
+    // Actualizar la gráfica
+    updateChart();
+    
+    // Mostrar mensaje de confirmación
+    const earNombre = ear === 'od' ? 'Oído Derecho' : 'Oído Izquierdo';
+    console.log(`✅ ${earNombre} rehaceado correctamente`);
+    
+    // Pequeño feedback visual (opcional)
+    const btnRehacer = document.querySelector(`.btn-rehacer[data-ear="${ear}"]`);
+    if (btnRehacer) {
+        const textoOriginal = btnRehacer.innerHTML;
+        btnRehacer.innerHTML = '✓ ¡Rehaceado!';
+        btnRehacer.style.background = '#27ae60';
+        setTimeout(() => {
+            btnRehacer.innerHTML = textoOriginal;
+            btnRehacer.style.background = '#f39c12';
+        }, 1500);
+    }
+}
+
+
+// ============================================
+// AJUSTE DINÁMICO DEL SCALE DEL CHART
+// ============================================
+function ajustarScaleChart() {
+    const container = document.querySelector('.chart-container');
+    const canvas = document.getElementById('speechChart');
+    
+    if (!container || !canvas) return;
+    
+    // Obtener el ancho real disponible del contenedor
+    const containerWidth = container.clientWidth;
+    const containerHeight = container.clientHeight || 300;
+    
+    // Tu escala base definida en CSS (la que usas para 14")
+    const escalaBase = 0.70;
+    
+    // Calcular escala según el ancho disponible
+    // El canvas tiene un tamaño base de ~1200px (ancho original)
+    const anchoBase = 1200;
+    const escalaPorAncho = Math.min(1, containerWidth / anchoBase);
+    
+    // Mantener la proporción pero ajustando la escala
+    // No usar scale menor a 0.40 ni mayor a 1.0
+    let nuevaEscala = Math.max(0.40, Math.min(1.0, escalaBase * (1 + (escalaPorAncho - 0.7) * 1.5)));
+    
+    // Aplicar la escala al canvas
+    canvas.style.transform = `scale(${nuevaEscala})`;
+    
+    // Actualizar Chart.js para que se redibuje correctamente
+    if (chart && chartInitialized) {
+        setTimeout(() => {
+            chart.resize();
+        }, 50);
+    }
+}
+
+// ============================================
+// EVENTOS PARA EJECUTAR EL AJUSTE
+// ============================================
+
+// Cuando la página carga
+document.addEventListener('DOMContentLoaded', function() {
+    setTimeout(ajustarScaleChart, 200);
+});
+
+// Cuando se redimensiona la ventana
+let resizeTimer;
+window.addEventListener('resize', function() {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(ajustarScaleChart, 150);
+});
+
+// Cuando se actualiza el chart
+const updateChartOriginal = updateChart;
+updateChart = function() {
+    updateChartOriginal();
+    setTimeout(ajustarScaleChart, 100);
+};
+
+// Agregar event listeners a los botones de rehacer
+document.querySelectorAll('.btn-rehacer').forEach(btn => {
+    btn.addEventListener('click', function() {
+        const ear = this.dataset.ear;
+        rehacerOido(ear);
+    });
+});
+</script>
+  <script src="../renderer/focus-fix.js"></script>
+
+
+
+
+</body>
+<script>
+// ============================================
+// COMUNICACIÓN CON AudioLogo.html
+// ============================================
+// ============================================
+// COMUNICACIÓN CON AudioLogo.html - CORREGIDO
+// ============================================
+window.addEventListener('message', function(event) {
+    if (event.data.accion === 'obtenerTodoLogoaudiometria') {
+        const urv_od = document.getElementById('od_urv')?.value || null;
+        const urv_oi = document.getElementById('oi_urv')?.value || null;
+        const upalabra_od = document.getElementById('od_upalabra')?.value || null;
+        const upalabra_oi = document.getElementById('oi_upalabra')?.value || null;
+        const udisc_od = document.getElementById('od_udisc')?.value || null;
+        const udisc_oi = document.getElementById('oi_udisc')?.value || null;
+        const pmax_od = document.getElementById('od_pmax')?.value || null;
+        const pmax_oi = document.getElementById('oi_pmax')?.value || null;
+
+        // 🔥 OBTENER LAS BANDERAS NR DESDE noResponseFlags (global)
+        const nr_flags = {
+            od: {
+                urv: window.noResponseFlags?.od?.urv || false,
+                upalabra: window.noResponseFlags?.od?.upalabra || false,
+                udisc: window.noResponseFlags?.od?.udisc || false,
+                pmax: window.noResponseFlags?.od?.pmax || false
+            },
+            oi: {
+                urv: window.noResponseFlags?.oi?.urv || false,
+                upalabra: window.noResponseFlags?.oi?.upalabra || false,
+                udisc: window.noResponseFlags?.oi?.udisc || false,
+                pmax: window.noResponseFlags?.oi?.pmax || false
+            }
+        };
+        
+        const canvas = document.getElementById('speechChart');
+        if (canvas) {
+            html2canvas(canvas, { scale: 2.5, backgroundColor: '#ffffff' }).then(result => {
+                const grafica = result.toDataURL('image/png');
+                
+                event.source.postMessage({
+                    accion: 'obtenerTodoLogoaudiometria',
+                    datos: {
+                        tieneDatos: true,
+                        urv_od: urv_od,
+                        urv_oi: urv_oi,
+                        upalabra_od: upalabra_od,
+                        upalabra_oi: upalabra_oi,
+                        udisc_od: udisc_od,
+                        udisc_oi: udisc_oi,
+                        pmax_od: pmax_od,
+                        pmax_oi: pmax_oi,
+                        diagnostico: document.getElementById('diagnostico')?.value || '',
+                        diagnostico_od: document.getElementById('diagnostico_od')?.value || '',
+                        diagnostico_oi: document.getElementById('diagnostico_oi')?.value || '',
+                        grafica: grafica,
+                        // ✅ AGREGAR LAS BANDERAS NR
+                        nr_flags: nr_flags
+                    }
+                }, '*');
+            }).catch(() => {
+                event.source.postMessage({
+                    accion: 'obtenerTodoLogoaudiometria',
+                    datos: { tieneDatos: false, error: 'Error capturando gráfica' }
+                }, '*');
+            });
+        } else {
+            event.source.postMessage({
+                accion: 'obtenerTodoLogoaudiometria',
+                datos: { tieneDatos: false, error: 'Canvas no encontrado' }
+            }, '*');
+        }
+    }
+});
+</script>
+</html>

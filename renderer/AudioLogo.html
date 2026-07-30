@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Audiología Clínica</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial, sans-serif; background: #f0f2f5; padding: 20px; }
+        
+        .header {
+            background: #ffffff;
+            color: rgb(0, 0, 0);
+            padding: 15px 30px;
+            border-radius: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .tab-btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            background: #e2e8f0;
+            color: #334155;
+            font-size: 1rem;
+        }
+        
+        .tab-btn.active {
+            background: #0084ff;
+            color: white;
+        }
+        
+        .tab-btn.grabar {
+            background: #27ae60;
+            color: white;
+            margin-left: auto;
+        }
+        
+        .tab-btn.grabar:hover { background: #219a52; }
+        
+        .tab-pane {
+            /* CAMBIO IMPORTANTE: En lugar de display:none, usamos position:absolute y opacity */
+            position: absolute;
+            top: 180px; /* Ajusta según tu layout */
+            left: 20px;
+            right: 20px;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease;
+            height: 800px;
+            pointer-events: none;
+        }
+        
+        .tab-pane.active {
+            position: relative;
+            top: auto;
+            left: auto;
+            right: auto;
+            opacity: 1;
+            visibility: visible;
+            pointer-events: auto;
+        }
+        
+        iframe {
+            width: 100%;
+            height: 800px;
+            border: none;
+            border-radius: 8px;
+            background: white;
+        }
+        
+        .loading-overlay {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.7);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+        
+        .loading-content {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            text-align: center;
+        }
+        
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #1e3a8a;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .notificacion {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 15px 30px;
+            border-radius: 8px;
+            color: white;
+            font-weight: bold;
+            z-index: 10001;
+            animation: fadeInOut 3s ease forwards;
+        }
+        
+        .notificacion.exito { background: #27ae60; }
+        .notificacion.error { background: #e74c3c; }
+        
+        @keyframes fadeInOut {
+            0% { opacity: 0; transform: translateX(-50%) translateY(20px); }
+            15% { opacity: 1; transform: translateX(-50%) translateY(0); }
+            85% { opacity: 1; transform: translateX(-50%) translateY(0); }
+            100% { opacity: 0; transform: translateX(-50%) translateY(-20px); }
+        }
+
+        /* Estilos para el modal de resultados */
+#modalResultados button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+}
+#modalResultados button:active {
+  transform: translateY(0px);
+}
+#btnVerResultado:hover { background: #1a4b6e; }
+#btnImprimir:hover { background: #3a5a6a; }
+#btnVerDetalles:hover { background: #4a6a5a; }
+#btnCerrarModal:hover { background: #f0f7ff; }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <h1></h1>
+    <div>Paciente: <strong id="nombrePaciente">--</strong></div>
+</div>
+
+<div class="tabs">
+    <button class="tab-btn active" onclick="cambiarTab('audiometria')">Audiometría Tonal</button>
+    <button class="tab-btn" onclick="cambiarTab('logoaudiometria')">Logoaudiometría</button>
+    <button class="tab-btn grabar" onclick="grabarTodos()">GRABAR AMBOS</button>
+</div>
+
+<div class="tab-pane active" id="audiometria">
+    <iframe src="AudiometriaTonal.html" id="iframeAudiometria"></iframe>
+</div>
+<div class="tab-pane" id="logoaudiometria">
+    <iframe src="Logoaudiometria.html?modo=combinado" id="iframeLogoaudiometria"></iframe>
+</div>
+
+<div id="loadingOverlay" class="loading-overlay">
+    <div class="loading-content">
+        <div class="spinner"></div>
+        <p>Guardando exámenes...</p>
+    </div>
+</div>
+
+<script>
+    // Cambiar pestaña
+    function cambiarTab(tab) {
+        document.querySelectorAll('.tab-pane').forEach(p => {
+            p.classList.remove('active');
+        });
+        document.querySelectorAll('.tab-btn:not(.grabar)').forEach(b => {
+            b.classList.remove('active');
+        });
+        document.getElementById(tab).classList.add('active');
+        document.querySelector(`.tab-btn[onclick="cambiarTab('${tab}')"]`).classList.add('active');
+    }
+    
+    // Cargar paciente
+    function cargarPaciente() {
+        const data = localStorage.getItem('pacienteActual');
+        if (data) {
+            const paciente = JSON.parse(data);
+            document.getElementById('nombrePaciente').textContent = paciente.nombre || '--';
+        }
+    }
+    cargarPaciente();
+    window.addEventListener('storage', cargarPaciente);
+    
+    function mostrarLoading(mostrar) {
+        document.getElementById('loadingOverlay').style.display = mostrar ? 'flex' : 'none';
+    }
+    
+    function mostrarNotificacion(mensaje, esError = false) {
+        const div = document.createElement('div');
+        div.className = `notificacion ${esError ? 'error' : 'exito'}`;
+        div.textContent = mensaje;
+        document.body.appendChild(div);
+        setTimeout(() => div.remove(), 3000);
+    }
+    
+// ============================================
+// GRABAR AMBOS EXÁMENES (CON PDF)
+// ============================================
+async function grabarTodos() {
+    const btn = document.querySelector('.tab-btn.grabar');
+    btn.textContent = '⏳ Guardando...';
+    btn.disabled = true;
+
+    let rutaPDFGenerado = null;
+    let datosParaDetalles = null;
+
+    
+    
+    try {
+        mostrarLoading(true);
+        
+        const pacienteData = localStorage.getItem('pacienteActual');
+        const citaData = localStorage.getItem('citaActual');
+        
+        if (!pacienteData) throw new Error('No hay paciente seleccionado');
+        
+        const paciente = JSON.parse(pacienteData);
+        const cita = citaData ? JSON.parse(citaData) : null;
+        
+        let pacienteId = paciente.id || paciente.id_paciente || paciente.paciente_id;
+        let citaId = cita?.id || cita?.id_cita || cita?.cita_id;
+        
+        if (!pacienteId) throw new Error('ID de paciente no válido');
+        if (!citaId) throw new Error('No hay cita seleccionada');
+        
+        const iframeAudiometria = document.getElementById('iframeAudiometria');
+        const iframeLogoaudiometria = document.getElementById('iframeLogoaudiometria');
+        
+        // Función para obtener datos de un iframe
+        function obtenerDatosDeIframe(iframe, accion) {
+            return new Promise((resolve) => {
+                const handler = (event) => {
+                    if (event.data && event.data.accion === accion) {
+                        window.removeEventListener('message', handler);
+                        resolve(event.data.datos);
+                    }
+                };
+                window.addEventListener('message', handler);
+                iframe.contentWindow.postMessage({ accion: accion }, '*');
+                setTimeout(() => resolve(null), 5000);
+            });
+        }
+        
+        // Obtener datos de Audiometría
+        const datosAudiometria = await obtenerDatosDeIframe(iframeAudiometria, 'obtenerTodoAudiometria');
+        
+        // Obtener datos de Logoaudiometría
+        const datosLogoaudiometria = await obtenerDatosDeIframe(iframeLogoaudiometria, 'obtenerTodoLogoaudiometria');
+        
+        let audiometriaGuardada = false;
+        let logoaudiometriaGuardada = false;
+        
+        // Guardar Audiometría
+        if (datosAudiometria && datosAudiometria.tieneDatos) {
+            const data = {
+                tipo_examen: 'audiometria',
+                paciente_id: parseInt(pacienteId),
+                cita_id: parseInt(citaId),
+                entidad_id: cita?.entidad_id || null,
+                diagnostico_od: datosAudiometria.diagnostico_od || '',
+                diagnostico_oi: datosAudiometria.diagnostico_oi || '',
+                observaciones: datosAudiometria.observaciones || '',
+                otoscopia: datosAudiometria.otoscopia || '',
+                grafica_base64: datosAudiometria.grafica || '',
+                valores_od: datosAudiometria.valores_od || {},
+                valores_oi: datosAudiometria.valores_oi || {},
+                pta_via_aerea_od: datosAudiometria.pta?.od_air || null,
+                pta_via_osea_od: datosAudiometria.pta?.od_bone || null,
+                pta_via_aerea_oi: datosAudiometria.pta?.oi_air || null,
+                pta_via_osea_oi: datosAudiometria.pta?.oi_bone || null
+            };
+            
+            if (window.api?.guardarExamen) {
+                const result = await window.api.guardarExamen(data);
+                if (result && result.ok) {
+                    audiometriaGuardada = true;
+                    console.log('✅ Audiometría guardada, ID:', result.id);
+                }
+            }
+        }
+        
+        // Guardar Logoaudiometría
+        if (datosLogoaudiometria && datosLogoaudiometria.tieneDatos) {
+            const data = {
+                tipo_examen: 'logoaudiometria',
+                paciente_id: parseInt(pacienteId),
+                cita_id: parseInt(citaId),
+                entidad_id: cita?.entidad_id || null,
+                diagnostico: datosLogoaudiometria.diagnostico || '',
+                diagnostico_od: datosLogoaudiometria.diagnostico_od || '',
+                diagnostico_oi: datosLogoaudiometria.diagnostico_oi || '',
+                grafica_base64: datosLogoaudiometria.grafica || '',
+                urv_od: datosLogoaudiometria.urv_od ? parseInt(datosLogoaudiometria.urv_od) : null,
+                urv_oi: datosLogoaudiometria.urv_oi ? parseInt(datosLogoaudiometria.urv_oi) : null,
+                upalabra_od: datosLogoaudiometria.upalabra_od ? parseInt(datosLogoaudiometria.upalabra_od) : null,
+                upalabra_oi: datosLogoaudiometria.upalabra_oi ? parseInt(datosLogoaudiometria.upalabra_oi) : null,
+                udisc_od: datosLogoaudiometria.udisc_od ? parseInt(datosLogoaudiometria.udisc_od) : null,
+                udisc_oi: datosLogoaudiometria.udisc_oi ? parseInt(datosLogoaudiometria.udisc_oi) : null,
+                pmax_od: datosLogoaudiometria.pmax_od ? parseInt(datosLogoaudiometria.pmax_od) : null,
+                pmax_oi: datosLogoaudiometria.pmax_oi ? parseInt(datosLogoaudiometria.pmax_oi) : null
+            };
+            
+            if (window.api?.guardarExamen) {
+                const result = await window.api.guardarExamen(data);
+                if (result && result.ok) {
+                    logoaudiometriaGuardada = true;
+                    console.log('✅ Logoaudiometría guardada, ID:', result.id);
+                }
+            }
+        }
+        
+        // ============================================
+        // 🔥 GENERAR PDF COMBINADO
+        // ============================================
+        const entidadNombre = cita?.entidad_nombre || 'PARTICULAR';
+        let pdfGenerado = false;
+        
+        // Verificar si hay datos o gráficas para el PDF
+        const tieneDatosAudiometria = datosAudiometria && datosAudiometria.tieneDatos;
+        const tieneDatosLogoaudiometria = datosLogoaudiometria && datosLogoaudiometria.tieneDatos;
+        
+        if (tieneDatosAudiometria || tieneDatosLogoaudiometria) {
+            // Preparar datos para PDF de Audiometría
+            const datosPDFAudiometria = {
+                paciente: { nombre: paciente.nombre || '', documento: paciente.documento || '' },
+                cita: { fecha_cita: cita?.fecha_cita || new Date().toISOString().split('T')[0] },
+                valores_od: datosAudiometria?.valores_od || {},
+                valores_oi: datosAudiometria?.valores_oi || {},
+                freqs: ['250', '500', '750', '1000', '1500', '2000', '3000', '4000', '6000', '8000'],
+                diagnostico_od: datosAudiometria?.diagnostico_od || '',
+                diagnostico_oi: datosAudiometria?.diagnostico_oi || '',
+                observaciones: datosAudiometria?.observaciones || '',
+                otoscopia: datosAudiometria?.otoscopia || '',
+                grafica_base64: datosAudiometria?.grafica || '',
+                pta: {
+                    od_air: datosAudiometria?.pta?.od_air || null,
+                    oi_air: datosAudiometria?.pta?.oi_air || null,
+                    od_bone: datosAudiometria?.pta?.od_bone || null,
+                    oi_bone: datosAudiometria?.pta?.oi_bone || null
+                }
+            };
+            
+            // Preparar datos para PDF de Logoaudiometría
+            const datosPDFLogoaudiometria = {
+                paciente: { nombre: paciente.nombre || '', documento: paciente.documento || '' },
+                valores_od: {
+                    urv: datosLogoaudiometria?.urv_od || null,
+                    upalabra: datosLogoaudiometria?.upalabra_od || null,
+                    udisc: datosLogoaudiometria?.udisc_od || null,
+                    pmax: datosLogoaudiometria?.pmax_od || null
+                },
+                valores_oi: {
+                    urv: datosLogoaudiometria?.urv_oi || null,
+                    upalabra: datosLogoaudiometria?.upalabra_oi || null,
+                    udisc: datosLogoaudiometria?.udisc_oi || null,
+                    pmax: datosLogoaudiometria?.pmax_oi || null
+                },
+                diagnostico: datosLogoaudiometria?.diagnostico || '',
+                diagnostico_od: datosLogoaudiometria?.diagnostico_od || '',
+                diagnostico_oi: datosLogoaudiometria?.diagnostico_oi || '',
+                grafica_base64: datosLogoaudiometria?.grafica || '',
+                nr_flags: datosLogoaudiometria?.nr_flags || { od: {}, oi: {} }
+            };
+
+            let pdfResult;
+            
+            // Elegir el manejador según la entidad
+            if (entidadNombre === 'COOSALUD') {
+                if (window.api?.generarPDFCombinadoCoosalud) {
+                    pdfResult = await window.api.generarPDFCombinadoCoosalud(
+                        datosPDFAudiometria, 
+                        datosPDFLogoaudiometria, 
+                        entidadNombre
+                    );
+                }
+            } else {
+                if (window.api?.generarPDFCombinado) {
+                    pdfResult = await window.api.generarPDFCombinado(
+                        datosPDFAudiometria, 
+                        datosPDFLogoaudiometria, 
+                        entidadNombre
+                    );
+                }
+            }
+            
+if (pdfResult && pdfResult.ok) {
+    pdfGenerado = true;
+    rutaPDFGenerado = pdfResult.path;
+    console.log('✅ PDF Combinado generado:', rutaPDFGenerado);
+}
+
+        
+        // ============================================
+        // 📋 PREPARAR DATOS PARA DETALLES
+        // ============================================
+datosParaDetalles = {
+    paciente: paciente.nombre || 'No especificado',
+    documento: paciente.documento || 'No especificado',
+    fecha: cita?.fecha_cita || new Date().toISOString().split('T')[0],
+    entidad: cita?.entidad_nombre || 'Particular',
+    tipo_examen: (tieneDatosAudiometria && tieneDatosLogoaudiometria) ? 'Combinado' : 
+                 (tieneDatosAudiometria ? 'Audiometría' : 
+                 (tieneDatosLogoaudiometria ? 'Logoaudiometría' : 'Sin datos')),
+    observaciones: datosAudiometria?.observaciones || datosLogoaudiometria?.diagnostico || 'Sin observaciones',
+    cita_id: citaId || 'No disponible',
+    
+    // DATOS COMPLETOS DE AUDIOMETRÍA
+    audiometria: datosAudiometria ? {
+        diagnostico_od: datosAudiometria.diagnostico_od || '',
+        diagnostico_oi: datosAudiometria.diagnostico_oi || '',
+        observaciones: datosAudiometria.observaciones || '',
+        otoscopia: datosAudiometria.otoscopia || '',
+        via_aerea: {
+            od: datosAudiometria.valores_od || {},
+            oi: datosAudiometria.valores_oi || {}
+        },
+        via_osea: {
+            od: datosAudiometria.valores_osea_od || {},  // ✅ CORREGIDO
+            oi: datosAudiometria.valores_osea_oi || {}   // ✅ CORREGIDO
+        },
+        pta_od_air: datosAudiometria.pta?.od_air || null,
+        pta_oi_air: datosAudiometria.pta?.oi_air || null,
+        pta_od_bone: datosAudiometria.pta?.od_bone || null,
+        pta_oi_bone: datosAudiometria.pta?.oi_bone || null
+    } : null,
+    
+    // DATOS COMPLETOS DE LOGOAUDIOMETRÍA
+    logoaudiometria: datosLogoaudiometria ? {
+        diagnostico: datosLogoaudiometria.diagnostico || '',
+        diagnostico_od: datosLogoaudiometria.diagnostico_od || '',
+        diagnostico_oi: datosLogoaudiometria.diagnostico_oi || '',
+        urv_od: datosLogoaudiometria.urv_od || null,
+        urv_oi: datosLogoaudiometria.urv_oi || null,
+        upalabra_od: datosLogoaudiometria.upalabra_od || null,
+        upalabra_oi: datosLogoaudiometria.upalabra_oi || null,
+        udisc_od: datosLogoaudiometria.udisc_od || null,
+        udisc_oi: datosLogoaudiometria.udisc_oi || null,
+        pmax_od: datosLogoaudiometria.pmax_od || null,
+        pmax_oi: datosLogoaudiometria.pmax_oi || null
+    } : null
+};
+        
+        // ============================================
+        // 🎯 MOSTRAR MODAL CON RESULTADOS
+        // ============================================
+        if (pdfGenerado && rutaPDFGenerado) {
+            // Guardar la ruta del PDF en una variable global
+            window.rutaPDFActual = rutaPDFGenerado;
+            window.datosExamenActual = datosParaDetalles;
+            
+            // Mostrar el modal
+            const modal = document.getElementById('modalResultados');
+            if (modal) {
+                modal.style.display = 'flex';
+            }
+        }
+        }
+        
+        // Mostrar mensaje final
+           // Mostrar mensaje final (solo notificación si NO se mostró el modal)
+        if (!pdfGenerado || !rutaPDFGenerado) {
+            if (pdfGenerado) {
+                mostrarNotificacion('✅ Exámenes guardados. PDF completo generado');
+            } else if (audiometriaGuardada || logoaudiometriaGuardada) {
+                mostrarNotificacion('✅ Exámenes guardados correctamente');
+            } else {
+                mostrarNotificacion('⚠️ No se guardaron datos', true);
+            }
+        }
+        
+    } catch (error) {
+        console.error('❌ Error:', error);
+        mostrarNotificacion('❌ Error: ' + error.message, true);
+    } finally {
+        mostrarLoading(false);
+        const btn = document.querySelector('.tab-btn.grabar');
+        btn.textContent = 'GRABAR';
+        btn.disabled = false;
+    }
+}
+
+// ============================================
+// 🎯 EVENT LISTENERS PARA EL MODAL
+// ============================================
+
+
+
+// Escuchar evento para mostrar el modal desde main (opcional)
+if (window.api?.onMostrarModal) {
+    window.api.onMostrarModal((data) => {
+        const modal = document.getElementById('modalResultados');
+        if (modal) {
+            if (data.mostrar) {
+                window.rutaPDFActual = data.rutaPDF;
+                modal.style.display = 'flex';
+            } else {
+                modal.style.display = 'none';
+            }
+        }
+    });
+}
+
+// Escuchar comando de impresión desde main
+if (window.api?.onComandoImprimir) {
+    window.api.onComandoImprimir((rutaPDF) => {
+        // Esto es para cuando el sistema operativo envía el comando de impresión
+        console.log('Comando de impresión recibido para:', rutaPDF);
+        // En algunos sistemas, el navegador maneja la impresión automáticamente
+    });
+}
+
+// ============================================
+// 🎯 EVENT LISTENERS PARA EL MODAL
+// ============================================
+
+function inicializarModal() {
+    // Botón: Ver Resultado (abre PDF con app nativa)
+    const btnVerResultado = document.getElementById('btnVerResultado');
+    if (btnVerResultado) {
+        btnVerResultado.addEventListener('click', async function() {
+            const ruta = window.rutaPDFActual;
+            if (ruta) {
+                const result = await window.api.abrirPDFNativo(ruta);
+                if (!result.ok) {
+                    mostrarNotificacion('❌ Error al abrir el PDF: ' + result.error, true);
+                }
+            } else {
+                mostrarNotificacion('⚠️ No hay PDF disponible', true);
+            }
+        });
+    }
+    
+    // Botón: Imprimir Resultado
+    const btnImprimir = document.getElementById('btnImprimir');
+    if (btnImprimir) {
+        btnImprimir.addEventListener('click', async function() {
+            const ruta = window.rutaPDFActual;
+            if (ruta) {
+                const result = await window.api.imprimirPDFNativo(ruta);
+                if (!result.ok) {
+                    mostrarNotificacion('❌ Error al imprimir: ' + result.error, true);
+                }
+            } else {
+                mostrarNotificacion('⚠️ No hay PDF disponible', true);
+            }
+        });
+    }
+    
+    // Botón: Ver Detalles (abre nueva ventana)
+    const btnVerDetalles = document.getElementById('btnVerDetalles');
+    if (btnVerDetalles) {
+        btnVerDetalles.addEventListener('click', function() {
+            const datos = window.datosExamenActual;
+            if (datos) {
+                window.api.abrirVentanaDetalles(datos);
+            } else {
+                mostrarNotificacion('⚠️ No hay datos de detalles disponibles', true);
+            }
+        });
+    }
+    
+    // Botón: Cerrar Modal
+    const btnCerrarModal = document.getElementById('btnCerrarModal');
+    if (btnCerrarModal) {
+        btnCerrarModal.addEventListener('click', function() {
+            const modal = document.getElementById('modalResultados');
+            if (modal) {
+                modal.style.display = 'none';
+            }
+        });
+    }
+    
+    // Cerrar modal con Escape
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            const modal = document.getElementById('modalResultados');
+            if (modal && modal.style.display === 'flex') {
+                modal.style.display = 'none';
+            }
+        }
+    });
+    
+    // Cerrar modal haciendo clic fuera del contenido
+    const modalResultados = document.getElementById('modalResultados');
+    if (modalResultados) {
+        modalResultados.addEventListener('click', function(e) {
+            if (e.target === this) {
+                this.style.display = 'none';
+            }
+        });
+    }
+}
+
+// Inicializar cuando el DOM esté listo
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', inicializarModal);
+} else {
+    inicializarModal();
+}
+</script>
+
+<!-- ========================================== -->
+<!-- MODAL DE RESULTADOS (div flotante)        -->
+<!-- ========================================== -->
+<div id="modalResultados" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.55); z-index:10000; justify-content:center; align-items:center; backdrop-filter:blur(3px);">
+  <div style="background:#ffffff; border-radius:16px; padding:45px 40px 35px; max-width:420px; width:92%; text-align:center; box-shadow:0 30px 80px rgba(0,0,0,0.35);">
+    
+    <!-- Logo de la empresa -->
+    <div style="margin-bottom:25px;">
+
+
+<div style="width:180px; height:100px; margin:0 auto 12px; display:flex; align-items:center; justify-content:center;">
+  <img src="../img/lomodal.png" alt="Logo" style="width:180px; height:100px; object-fit:contain; border-radius:16px; box-shadow:0 4px 20px rgba(44,110,156,0.25);" onerror="this.style.display='none'; this.parentElement.innerHTML='<div style=\'width:180px; height:100px; background:linear-gradient(135deg, #2c6e9c, #1a4b6e); border-radius:20px; display:flex; align-items:center; justify-content:center; box-shadow:0 4px 20px rgba(44,110,156,0.3);\'><span style=\'color:white; font-size:48px; font-weight:700; letter-spacing:2px;\'>SU</span></div>'">
+</div>
+
+      <h3 style="color:#1a2332; margin:0; font-weight:300; font-size:18px; letter-spacing:1.5px;">S.U.D.A </h3>
+      <br>
+<h3 style="color:#1a2332; margin:0; font-weight:300; font-size:18px; letter-spacing:1.5px; font-family: 'Georgia', 'Times New Roman', serif; font-style: italic;">
+  Luis Ignacio Sanin Jurado
+</h3>
+      <div style="width:50px; height:2px; background:#2c6e9c; margin:10px auto 0;"></div>
+    </div>
+    
+    <p style="color:#4a5a6a; font-size:14px; margin-bottom:25px; letter-spacing:0.3px;">Examen guardado correctamente</p>
+    
+    <!-- Botón: Ver Resultado (abre PDF con app nativa) -->
+    <button id="btnVerResultado" style="width:100%; padding:15px; background:#2c6e9c; color:white; border:none; border-radius:8px; font-size:15px; font-weight:600; margin-bottom:12px; cursor:pointer; transition:all 0.25s ease; letter-spacing:0.5px;">
+      Ver Resultado
+    </button>
+    
+    <!-- Botón: Imprimir Resultado -->
+    <button id="btnImprimir" style="width:100%; padding:15px; background:#4a6a7a; color:white; border:none; border-radius:8px; font-size:15px; font-weight:600; margin-bottom:12px; cursor:pointer; transition:all 0.25s ease; letter-spacing:0.5px;">
+      Imprimir Resultado
+    </button>
+    
+    <!-- Botón: Ver Detalles -->
+    <button id="btnVerDetalles" style="width:100%; padding:15px; background:#5a7a6a; color:white; border:none; border-radius:8px; font-size:15px; font-weight:600; margin-bottom:12px; cursor:pointer; transition:all 0.25s ease; letter-spacing:0.5px;">
+      Ver Detalles
+    </button>
+    
+    <!-- Botón: Cerrar -->
+    <button id="btnCerrarModal" style="width:100%; padding:15px; background:#e8edf3; color:#2a3a4a; border:none; border-radius:8px; font-size:15px; font-weight:500; cursor:pointer; transition:all 0.25s ease; letter-spacing:0.5px;">
+      Cerrar
+    </button>
+  </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Audiometría Profesional | AC · BC · UCL · PTA</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background: #eef2f8;
+      font-family: 'Segoe UI', 'Roboto', 'Helvetica Neue', sans-serif;
+      padding: 24px 20px;
+    }
+
+    .audiometro-wrapper {
+      max-width: 1600px;
+      margin: 0 auto;
+    }
+
+    .main-title {
+      text-align: center;
+      font-weight: 700;
+      font-size: 1.8rem;
+      color: #1e2f4e;
+      margin-bottom: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .main-title span {
+      background: #1e2f4e;
+      color: white;
+      font-size: 0.9rem;
+      padding: 4px 14px;
+      border-radius: 40px;
+    }
+
+    .dashboard-layout {
+      display: flex;
+      gap: 28px;
+      flex-wrap: wrap;
+    }
+
+    .left-column {
+      flex: 1.2;
+      min-width: 360px;
+    }
+
+    .right-column {
+      flex: 1;
+      min-width: 550px;
+    }
+
+    .card-panel {
+      background: white;
+      border-radius: 24px;
+      box-shadow: 0 6px 16px rgba(0,0,0,0.05);
+      margin-bottom: 24px;
+      padding: 1.3rem 1.5rem;
+      border: 1px solid #e2edf2;
+    }
+
+    .flex-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      margin-bottom: 14px;
+    }
+    .field-group {
+      flex: 1;
+      min-width: 130px;
+    }
+    .field-group label {
+      display: block;
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      color: #5b6e8c;
+      margin-bottom: 5px;
+    }
+    .field-group input, .field-group select {
+      width: 100%;
+      padding: 8px 12px;
+      border: 1.5px solid #e0e7ed;
+      border-radius: 14px;
+      font-size: 0.85rem;
+      background: #ffffff;
+    }
+
+    .freq-table-container {
+      overflow-x: auto;
+      margin: 12px 0;
+    }
+    .freq-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.8rem;
+      min-width: 750px;
+    }
+    .freq-table th, .freq-table td {
+      padding: 10px 6px;
+      text-align: center;
+      border-bottom: 1px solid #e9f0f5;
+    }
+    .freq-table th {
+      background: #f4f9fe;
+      font-weight: 700;
+      color: #1e5a7a;
+    }
+    .freq-input {
+      width: 70px;
+      padding: 6px 4px;
+      text-align: center;
+      border: 1.5px solid #e2e8f0;
+      border-radius: 16px;
+      font-weight: 500;
+    }
+    .freq-input:focus {
+      border-color: #3b82f6;
+      outline: none;
+    }
+    .masking-checkbox {
+      margin-left: 8px;
+      transform: scale(0.9);
+      cursor: pointer;
+    }
+    .masking-label {
+      font-size: 0.7rem;
+      color: #666;
+      margin-left: 4px;
+    }
+    .ear-label {
+      font-weight: 800;
+      background: #f0f4fa;
+      border-radius: 20px;
+      padding: 4px 10px;
+      display: inline-block;
+      font-size: 0.75rem;
+    }
+
+    .legend-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 24px;
+      margin: 16px 0 8px;
+      padding: 12px;
+      background: #f8fafc;
+      border-radius: 20px;
+    }
+    .legend-symbol {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.75rem;
+    }
+
+    .pta-card {
+      background: #eef3fc;
+      border-radius: 16px;
+      padding: 12px;
+      margin-top: 12px;
+    }
+    .pta-values {
+      display: flex;
+      gap: 24px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .pta-item {
+      text-align: center;
+    }
+    .pta-item .value {
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: #1e5a7a;
+    }
+
+    canvas {
+      display: block;
+      width: 100%;
+      height: auto;
+      background: #ffffff;
+      border-radius: 20px;
+    }
+
+    button {
+      background: #f0f4f9;
+      border: none;
+      padding: 8px 20px;
+      border-radius: 30px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+    button:hover {
+      background: #e4e9f0;
+    }
+
+    @media (max-width: 880px) {
+      .dashboard-layout { flex-direction: column; }
+      .freq-input { width: 55px; }
+    }
+  </style>
+</head>
+<body>
+<div class="audiometro-wrapper">
+  <div class="main-title">
+    🩺 AUDIOMETRÍA CLÍNICA
+    <span>AC · BC · UCL · PTA</span>
+  </div>
+
+  <div class="dashboard-layout">
+    <div class="left-column">
+      <div class="card-panel">
+        <div class="flex-row">
+          <div class="field-group"><label>PACIENTE</label><input type="text" id="nombrePaciente" value="María José Álvarez"></div>
+          <div class="field-group"><label>DOCUMENTO</label><input type="text" id="numDoc" value="1098765432"></div>
+          <div class="field-group"><label>EDAD</label><input type="text" id="edad" value="34"></div>
+        </div>
+        <div class="flex-row">
+          <div class="field-group"><label>ENTIDAD</label><input type="text" id="entidad" value="SALUD TOTAL"></div>
+          <div class="field-group"><label>FECHA</label><input type="date" id="fechaExamen"></div>
+          <div class="field-group"><label>CIUDAD</label><input type="text" id="ciudad" value="Cúcuta"></div>
+        </div>
+        <div class="flex-row">
+          <div class="field-group"><label>OTOSCOPIA</label><input type="text" id="otoscopia" value="CAE permeables, membrana timpánica íntegra"></div>
+        </div>
+      </div>
+
+      <div class="card-panel">
+        <h3 style="margin:0 0 12px 0;">🎧 UMBRALES AUDITIVOS (dB HL)</h3>
+        <div class="freq-table-container">
+          <table class="freq-table" id="audiometryTable">
+            <thead>
+              <tr><th>Frecuencia (Hz)</th><th>125</th><th>250</th><th>500</th><th>1000</th><th>2000</th><th>4000</th><th>8000</th></tr>
+            </thead>
+            <tbody>
+              <!-- Vía Aérea OD (ROJO) -->
+              <tr style="background:#fff5f0;">
+                <td><strong style="color:#e11d48;">🔴 VA OD</strong> <span style="font-size:10px;">(círculo ○)</span></td>
+                <td><input type="number" class="freq-input ac-od" data-freq="125" value="12" step="5"></td>
+                <td><input type="number" class="freq-input ac-od" data-freq="250" value="13" step="5"></td>
+                <td><input type="number" class="freq-input ac-od" data-freq="500" value="15" step="5"></td>
+                <td><input type="number" class="freq-input ac-od" data-freq="1000" value="18" step="5"></td>
+                <td><input type="number" class="freq-input ac-od" data-freq="2000" value="22" step="5"></td>
+                <td><input type="number" class="freq-input ac-od" data-freq="4000" value="35" step="5"></td>
+                <td><input type="number" class="freq-input ac-od" data-freq="8000" value="42" step="5"></td>
+              </tr>
+              <!-- Vía Aérea OI (AZUL) -->
+              <tr style="background:#f0f8ff;">
+                <td><strong style="color:#2563eb;">🔵 VA OI</strong> <span style="font-size:10px;">(aspa ✕)</span></td>
+                <td><input type="number" class="freq-input ac-oi" data-freq="125" value="10" step="5"></td>
+                <td><input type="number" class="freq-input ac-oi" data-freq="250" value="12" step="5"></td>
+                <td><input type="number" class="freq-input ac-oi" data-freq="500" value="14" step="5"></td>
+                <td><input type="number" class="freq-input ac-oi" data-freq="1000" value="16" step="5"></td>
+                <td><input type="number" class="freq-input ac-oi" data-freq="2000" value="20" step="5"></td>
+                <td><input type="number" class="freq-input ac-oi" data-freq="4000" value="30" step="5"></td>
+                <td><input type="number" class="freq-input ac-oi" data-freq="8000" value="38" step="5"></td>
+              </tr>
+              <!-- Vía Ósea OD (ROJO) símbolo [ , con opción de enmascaramiento -->
+              <tr style="background:#fff8e7;">
+                <td>
+                  <strong style="color:#e11d48;">🔴 VO OD</strong> 
+                  <span style="font-size:10px;">(corchete izquierdo [ )</span>
+                  <label class="masking-label">
+                    <input type="checkbox" class="masking-bc-od" data-freq-mask="bc-od"> 🎧 Enmascarado
+                  </label>
+                </td>
+                <td><input type="number" class="freq-input bc-od" data-freq="125" value="" placeholder="—" step="5"></td>
+                <td><input type="number" class="freq-input bc-od" data-freq="250" value="18" step="5"></td>
+                <td><input type="number" class="freq-input bc-od" data-freq="500" value="18" step="5"></td>
+                <td><input type="number" class="freq-input bc-od" data-freq="1000" value="20" step="5"></td>
+                <td><input type="number" class="freq-input bc-od" data-freq="2000" value="24" step="5"></td>
+                <td><input type="number" class="freq-input bc-od" data-freq="4000" value="36" step="5"></td>
+                <td><input type="number" class="freq-input bc-od" data-freq="8000" value="44" step="5"></td>
+              </tr>
+              <!-- Vía Ósea OI (AZUL) símbolo ] , con opción de enmascaramiento -->
+              <tr style="background:#fff8e7;">
+                <td>
+                  <strong style="color:#2563eb;">🔵 VO OI</strong> 
+                  <span style="font-size:10px;">(corchete derecho ] )</span>
+                  <label class="masking-label">
+                    <input type="checkbox" class="masking-bc-oi" data-freq-mask="bc-oi"> 🎧 Enmascarado
+                  </label>
+                </td>
+                <td><input type="number" class="freq-input bc-oi" data-freq="125" value="" placeholder="—" step="5"></td>
+                <td><input type="number" class="freq-input bc-oi" data-freq="250" value="15" step="5"></td>
+                <td><input type="number" class="freq-input bc-oi" data-freq="500" value="15" step="5"></td>
+                <td><input type="number" class="freq-input bc-oi" data-freq="1000" value="18" step="5"></td>
+                <td><input type="number" class="freq-input bc-oi" data-freq="2000" value="22" step="5"></td>
+                <td><input type="number" class="freq-input bc-oi" data-freq="4000" value="32" step="5"></td>
+                <td><input type="number" class="freq-input bc-oi" data-freq="8000" value="40" step="5"></td>
+              </tr>
+              <!-- UCL (Nivel de confort incómodo) -->
+              <tr style="background:#f5eef8;">
+                <td><strong>UCL</strong> <span style="font-size:10px;">(cuadrado ■)</span></td>
+                <td><input type="number" class="freq-input ucl" data-freq="125" value="" placeholder="—" step="5"></td>
+                <td><input type="number" class="freq-input ucl" data-freq="250" value="" placeholder="—" step="5"></td>
+                <td><input type="number" class="freq-input ucl" data-freq="500" value="" placeholder="—" step="5"></td>
+                <td><input type="number" class="freq-input ucl" data-freq="1000" value="95" step="5"></td>
+                <td><input type="number" class="freq-input ucl" data-freq="2000" value="100" step="5"></td>
+                <td><input type="number" class="freq-input ucl" data-freq="4000" value="100" step="5"></td>
+                <td><input type="number" class="freq-input ucl" data-freq="8000" value="" placeholder="—" step="5"></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="legend-grid">
+          <span class="legend-symbol"><span style="display:inline-block; width:20px; height:20px; border-radius:50%; border:2px solid #e11d48;"></span> AC OD (rojo)</span>
+          <span class="legend-symbol"><span style="display:inline-block; width:18px; height:18px; position:relative;"><span style="position:absolute; width:14px; height:2px; background:#2563eb; transform:rotate(45deg); top:8px; left:2px;"></span><span style="position:absolute; width:14px; height:2px; background:#2563eb; transform:rotate(-45deg); top:8px; left:2px;"></span></span> AC OI (azul)</span>
+          <span class="legend-symbol"><span style="font-size:1.2rem; font-weight:bold; color:#e11d48;">[</span> VO OD (rojo, corchete izq)</span>
+          <span class="legend-symbol"><span style="font-size:1.2rem; font-weight:bold; color:#2563eb;">]</span> VO OI (azul, corchete der)</span>
+          <span class="legend-symbol"><span style="font-size:1.2rem; font-weight:bold; color:#e11d48;">◊</span> VO OD enmascarado (rojo, rombo)</span>
+          <span class="legend-symbol"><span style="font-size:1.2rem; font-weight:bold; color:#2563eb;">∆</span> VO OI enmascarado (azul, triángulo)</span>
+          <span class="legend-symbol"><span style="display:inline-block; width:14px; height:14px; background:#9b6b9e;"></span> UCL (cuadrado)</span>
+        </div>
+
+        <div class="flex-row" style="justify-content: space-between; margin-top: 8px;">
+          <button id="resetAllBtn">⟳ Limpiar todos los valores</button>
+          <button id="resetACBtn">Limpiar solo AC</button>
+          <button id="resetBCBtn">Limpiar solo BC</button>
+        </div>
+      </div>
+
+      <div class="card-panel">
+        <h3 style="margin:0 0 12px 0;">📊 PTA (Promedio Tonal Puro)</h3>
+        <div class="pta-card">
+          <div class="pta-values">
+            <div class="pta-item"><div class="value" id="ptaOD">--</div><div>OD (500-1k-2k)</div></div>
+            <div class="pta-item"><div class="value" id="ptaOI">--</div><div>OI (500-1k-2k)</div></div>
+            <div class="pta-item"><div class="value" id="ptaBC_OD">--</div><div>BC OD (500-1k-2k)</div></div>
+            <div class="pta-item"><div class="value" id="ptaBC_OI">--</div><div>BC OI (500-1k-2k)</div></div>
+          </div>
+          <div class="dB-note" style="text-align: center; margin-top: 8px;">* PTA = (500Hz + 1000Hz + 2000Hz) / 3</div>
+        </div>
+      </div>
+
+      <div class="card-panel">
+        <h3 style="margin:0 0 12px 0;">🎙️ LOGOAUDIOMETRÍA</h3>
+        <div class="flex-row" style="gap: 12px;">
+          <div class="field-group"><label>Nivel (dB)</label><input type="number" id="speechLevel" value="65" step="5"></div>
+          <div class="field-group"><label>OD (%)</label><input type="number" id="speechOd" value="92" min="0" max="100"></div>
+          <div class="field-group"><label>OI (%)</label><input type="number" id="speechOi" value="88" min="0" max="100"></div>
+          <div class="field-group"><button id="updateSpeechBtn">Actualizar</button></div>
+        </div>
+        <canvas id="speechCanvas" width="600" height="150" style="width:100%; height:auto; background:#fff; margin-top: 10px; border-radius: 16px; border:1px solid #eef2ff;"></canvas>
+      </div>
+
+      <div class="card-panel">
+        <h3 style="margin:0 0 12px 0;">📝 DIAGNÓSTICO AUDITIVO</h3>
+        <div class="flex-row">
+          <div class="field-group"><label>OÍDO DERECHO</label><input type="text" id="diagOd" value="Hipoacusia neurosensorial leve en frecuencias agudas"></div>
+          <div class="field-group"><label>OÍDO IZQUIERDO</label><input type="text" id="diagOi" value="Hipoacusia neurosensorial leve"></div>
+        </div>
+        <div class="field-group"><label>OBSERVACIONES</label><input type="text" id="observacionesFinal" value="Gap aéreo-óseo dentro de límites normales. UCL conservado."></div>
+      </div>
+    </div>
+
+    <div class="right-column">
+      <div class="card-panel" style="padding: 1rem;">
+        <div class="canvas-header" style="display: flex; justify-content: space-between; margin-bottom: 12px;">
+          <h3 style="margin:0;">📊 AUDIOGRAMA (AC · BC · UCL)</h3>
+          <div style="font-size:0.7rem;">Símbolos según estándar ISO</div>
+        </div>
+        <canvas id="audiogramCanvas" width="750" height="520" style="width:100%; height:auto; background:#fff; border-radius: 20px;"></canvas>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  (function(){
+    const frecuencias = [125, 250, 500, 1000, 2000, 4000, 8000];
+    
+    const canvas = document.getElementById('audiogramCanvas');
+    const ctx = canvas.getContext('2d');
+    canvas.width = 750;
+    canvas.height = 520;
+    let canvasWidth = 750, canvasHeight = 520;
+    
+    const dBMin = -10, dBMax = 120;
+    const margin = { left: 70, right: 30, top: 40, bottom: 55 };
+    let graphW, graphH;
+    
+    function updateMetrics() {
+      graphW = canvasWidth - margin.left - margin.right;
+      graphH = canvasHeight - margin.top - margin.bottom;
+    }
+    
+    function dbToY(db) {
+      let t = (db - dBMin) / (dBMax - dBMin);
+      return Math.min(margin.top + graphH, Math.max(margin.top, margin.top + graphH * t));
+    }
+    
+    function freqToX(idx) {
+      let step = graphW / (frecuencias.length - 1);
+      return margin.left + (idx * step);
+    }
+    
+    function getValuesByClass(className) {
+      let inputs = document.querySelectorAll(`.${className}`);
+      let values = [];
+      frecuencias.forEach(freq => {
+        let input = Array.from(inputs).find(inp => inp.getAttribute('data-freq') == freq);
+        if(input && input.value !== "") {
+          let num = Number(input.value);
+          values.push(isNaN(num) ? null : num);
+        } else values.push(null);
+      });
+      return values;
+    }
+    
+    function getMaskingStatus(className) {
+      let checkboxes = document.querySelectorAll(`.${className}`);
+      let masking = [];
+      frecuencias.forEach(freq => {
+        let cb = Array.from(checkboxes).find(chk => chk.getAttribute('data-freq-mask') === className);
+        if(cb) {
+          masking.push(cb.checked);
+        } else masking.push(false);
+      });
+      return masking;
+    }
+    
+    function dibujarCuadricula() {
+      ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+      ctx.save();
+      for(let dB = -10; dB <= 120; dB += 10) {
+        let y = dbToY(dB);
+        if(y < margin.top || y > margin.top+graphH) continue;
+        ctx.beginPath();
+        ctx.moveTo(margin.left, y);
+        ctx.lineTo(margin.left+graphW, y);
+        ctx.strokeStyle = (dB === 0 || dB === 20 || dB === 40 || dB === 60 || dB === 80 || dB === 100) ? "#8696b0" : "#d9e1ec";
+        ctx.lineWidth = (dB === 0) ? 1.6 : 0.5;
+        ctx.stroke();
+        ctx.fillStyle = "#2c3e66";
+        ctx.font = "9px 'Segoe UI'";
+        ctx.fillText(`${dB}`, margin.left-24, y+3);
+      }
+      for(let i=0; i<frecuencias.length; i++) {
+        let x = freqToX(i);
+        ctx.beginPath();
+        ctx.moveTo(x, margin.top);
+        ctx.lineTo(x, margin.top+graphH);
+        ctx.strokeStyle = "#cbd5e1";
+        ctx.lineWidth = (i===3 || i===4) ? 1.2 : 0.5;
+        ctx.stroke();
+        let label = frecuencias[i] >= 1000 ? `${frecuencias[i]/1000}kHz` : `${frecuencias[i]}Hz`;
+        ctx.fillStyle = "#1f3a5f";
+        ctx.font = "bold 10px 'Segoe UI'";
+        ctx.fillText(label, x-18, margin.top+graphH+22);
+      }
+      ctx.font = "bold 9px 'Segoe UI'";
+      ctx.fillStyle = "#2c4c7a";
+      ctx.fillText("Frecuencia (Hz)", margin.left+graphW/2-45, margin.top+graphH+45);
+      ctx.save();
+      ctx.translate(22, margin.top+graphH/2);
+      ctx.rotate(-Math.PI/2);
+      ctx.fillText("Nivel auditivo (dB HL)", -45, 0);
+      ctx.restore();
+      ctx.strokeStyle = "#3a5683";
+      ctx.lineWidth = 1.5;
+      ctx.strokeRect(margin.left, margin.top, graphW, graphH);
+      ctx.restore();
+    }
+    
+    function dibujarCurvaConSimbolos(datos, color, tipoSimbolo, conectar = true, esEnmascarado = false) {
+      if(!datos || datos.length !== frecuencias.length) return;
+      let puntos = [];
+      for(let i=0; i<frecuencias.length; i++) {
+        if(datos[i] !== null && !isNaN(datos[i])) {
+          puntos.push({x: freqToX(i), y: dbToY(datos[i]), idx: i});
+        }
+      }
+      if(conectar && puntos.length > 1) {
+        ctx.beginPath();
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 2;
+        ctx.moveTo(puntos[0].x, puntos[0].y);
+        for(let i=1; i<puntos.length; i++) ctx.lineTo(puntos[i].x, puntos[i].y);
+        ctx.stroke();
+      }
+      for(let p of puntos) {
+        ctx.strokeStyle = color;
+        ctx.fillStyle = "#ffffff";
+        ctx.lineWidth = 2;
+        
+        // Si está enmascarado, usar símbolos especiales
+        if(esEnmascarado && tipoSimbolo === "bracketL") {
+          // Rombo para OD enmascarada ◊
+          ctx.beginPath();
+          for(let ang = 0; ang < 2 * Math.PI; ang += Math.PI/2) {
+            let xOff = Math.cos(ang + Math.PI/4) * 6;
+            let yOff = Math.sin(ang + Math.PI/4) * 6;
+            if(ang === 0) ctx.moveTo(p.x + xOff, p.y + yOff);
+            else ctx.lineTo(p.x + xOff, p.y + yOff);
+          }
+          ctx.closePath();
+          ctx.fillStyle = "#ffffff";
+          ctx.fill();
+          ctx.stroke();
+        } 
+        else if(esEnmascarado && tipoSimbolo === "bracketR") {
+          // Triángulo para OI enmascarada ∆
+          ctx.beginPath();
+          ctx.moveTo(p.x, p.y - 7);
+          ctx.lineTo(p.x + 6, p.y + 5);
+          ctx.lineTo(p.x - 6, p.y + 5);
+          ctx.closePath();
+          ctx.fillStyle = "#ffffff";
+          ctx.fill();
+          ctx.stroke();
+        }
+        else if(tipoSimbolo === "circle") {
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, 6, 0, 2*Math.PI);
+          ctx.stroke();
+          ctx.fill();
+        } 
+        else if(tipoSimbolo === "cross") {
+          ctx.beginPath();
+          ctx.moveTo(p.x-6, p.y-6);
+          ctx.lineTo(p.x+6, p.y+6);
+          ctx.moveTo(p.x+6, p.y-6);
+          ctx.lineTo(p.x-6, p.y+6);
+          ctx.stroke();
+        } 
+        else if(tipoSimbolo === "bracketL") {
+          ctx.font = "bold 16px monospace";
+          ctx.fillStyle = color;
+          ctx.fillText("[", p.x-7, p.y+5);
+        } 
+        else if(tipoSimbolo === "bracketR") {
+          ctx.font = "bold 16px monospace";
+          ctx.fillStyle = color;
+          ctx.fillText("]", p.x-4, p.y+5);
+        } 
+        else if(tipoSimbolo === "square") {
+          ctx.fillStyle = color;
+          ctx.fillRect(p.x-5, p.y-5, 10, 10);
+        }
+      }
+    }
+    
+    function calcularPTA() {
+      const freqsPTA = [500, 1000, 2000];
+      function getAvg(selector) {
+        let inputs = document.querySelectorAll(selector);
+        let sum = 0, count = 0;
+        freqsPTA.forEach(freq => {
+          let inp = Array.from(inputs).find(i => i.getAttribute('data-freq') == freq);
+          if(inp && inp.value !== "" && !isNaN(Number(inp.value))) {
+            sum += Number(inp.value);
+            count++;
+          }
+        });
+        return count === 3 ? Math.round(sum/3) : null;
+      }
+      let ptaOD = getAvg('.ac-od');
+      let ptaOI = getAvg('.ac-oi');
+      let ptaBCOD = getAvg('.bc-od');
+      let ptaBCOI = getAvg('.bc-oi');
+      document.getElementById('ptaOD').innerText = ptaOD !== null ? ptaOD + " dB" : "---";
+      document.getElementById('ptaOI').innerText = ptaOI !== null ? ptaOI + " dB" : "---";
+      document.getElementById('ptaBC_OD').innerText = ptaBCOD !== null ? ptaBCOD + " dB" : "---";
+      document.getElementById('ptaBC_OI').innerText = ptaBCOI !== null ? ptaBCOI + " dB" : "---";
+    }
+    
+    function renderizarAudiograma() {
+      updateMetrics();
+      dibujarCuadricula();
+      
+      let acOD = getValuesByClass('ac-od');
+      let acOI = getValuesByClass('ac-oi');
+      let bcOD = getValuesByClass('bc-od');
+      let bcOI = getValuesByClass('bc-oi');
+      let ucl = getValuesByClass('ucl');
+      
+      // Obtener estados de enmascaramiento
+      let maskingOD = document.querySelector('.masking-bc-od')?.checked || false;
+      let maskingOI = document.querySelector('.masking-bc-oi')?.checked || false;
+      
+      // AC: ROJO para OD, AZUL para OI
+      dibujarCurvaConSimbolos(acOD, "#e11d48", "circle", true, false);
+      dibujarCurvaConSimbolos(acOI, "#2563eb", "cross", true, false);
+      
+      // BC: ROJO para OD, AZUL para OI, con símbolos especiales si están enmascarados
+      dibujarCurvaConSimbolos(bcOD, "#e11d48", "bracketL", true, maskingOD);
+      dibujarCurvaConSimbolos(bcOI, "#2563eb", "bracketR", true, maskingOI);
+      
+      dibujarCurvaConSimbolos(ucl, "#9b6b9e", "square", false, false);
+      
+      calcularPTA();
+    }
+    
+    const speechCanvas = document.getElementById('speechCanvas');
+    const sCtx = speechCanvas.getContext('2d');
+    speechCanvas.width = 600;
+    speechCanvas.height = 150;
+    
+    function dibujarSpeech() {
+      let nivel = parseInt(document.getElementById('speechLevel').value) || 60;
+      let odPct = parseInt(document.getElementById('speechOd').value) || 85;
+      let oiPct = parseInt(document.getElementById('speechOi').value) || 80;
+      sCtx.clearRect(0,0,speechCanvas.width,speechCanvas.height);
+      sCtx.fillStyle = "#fff";
+      sCtx.fillRect(0,0,speechCanvas.width,speechCanvas.height);
+      sCtx.strokeStyle = "#b9c4da";
+      for(let p=0; p<=100; p+=20) {
+        let y = 115 - (p * 0.9);
+        sCtx.beginPath();
+        sCtx.moveTo(45, y);
+        sCtx.lineTo(555, y);
+        sCtx.stroke();
+        sCtx.fillStyle = "#5b6e8c";
+        sCtx.fillText(`${p}%`, 18, y+3);
+      }
+      let xLevel = 45 + (nivel/120)*510;
+      xLevel = Math.min(555, Math.max(45, xLevel));
+      let yOd = 115 - (odPct * 0.9);
+      let yOi = 115 - (oiPct * 0.9);
+      sCtx.beginPath();
+      sCtx.arc(xLevel, yOd, 6, 0, 2*Math.PI);
+      sCtx.strokeStyle = "#e11d48";
+      sCtx.stroke();
+      sCtx.fillStyle = "#e11d48";
+      sCtx.fillText("OD", xLevel+8, yOd-3);
+      sCtx.beginPath();
+      sCtx.moveTo(xLevel-5, yOi-5);
+      sCtx.lineTo(xLevel+5, yOi+5);
+      sCtx.moveTo(xLevel+5, yOi-5);
+      sCtx.lineTo(xLevel-5, yOi+5);
+      sCtx.strokeStyle = "#2563eb";
+      sCtx.stroke();
+      sCtx.fillStyle = "#2563eb";
+      sCtx.fillText("OI", xLevel+8, yOi-3);
+    }
+    
+    function bindEvents() {
+      document.querySelectorAll('.freq-input').forEach(inp => {
+        inp.addEventListener('input', () => renderizarAudiograma());
+      });
+      document.querySelectorAll('.masking-bc-od, .masking-bc-oi').forEach(chk => {
+        chk.addEventListener('change', () => renderizarAudiograma());
+      });
+      document.getElementById('resetAllBtn').addEventListener('click', () => {
+        document.querySelectorAll('.freq-input').forEach(inp => inp.value = '');
+        document.querySelectorAll('.masking-bc-od, .masking-bc-oi').forEach(chk => chk.checked = false);
+        renderizarAudiograma();
+      });
+      document.getElementById('resetACBtn').addEventListener('click', () => {
+        document.querySelectorAll('.ac-od, .ac-oi').forEach(inp => inp.value = '');
+        renderizarAudiograma();
+      });
+      document.getElementById('resetBCBtn').addEventListener('click', () => {
+        document.querySelectorAll('.bc-od, .bc-oi, .ucl').forEach(inp => inp.value = '');
+        document.querySelectorAll('.masking-bc-od, .masking-bc-oi').forEach(chk => chk.checked = false);
+        renderizarAudiograma();
+      });
+      document.getElementById('updateSpeechBtn').addEventListener('click', dibujarSpeech);
+      document.getElementById('speechLevel').addEventListener('input', dibujarSpeech);
+      document.getElementById('speechOd').addEventListener('input', dibujarSpeech);
+      document.getElementById('speechOi').addEventListener('input', dibujarSpeech);
+    }
+    
+    function setFecha() {
+      let f = document.getElementById('fechaExamen');
+      if(f) f.value = new Date().toISOString().slice(0,10);
+    }
+    
+    function iniciar() {
+      updateMetrics();
+      renderizarAudiograma();
+      bindEvents();
+      setFecha();
+      dibujarSpeech();
+    }
+    iniciar();
+  })();
+</script>
+</body>
+</html>

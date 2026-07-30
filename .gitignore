@@ -1,0 +1,78 @@
+﻿# Dependencias
+node_modules/
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Build y distribución
+dist/
+release/
+out/
+build/
+app-build/
+.tmp/
+cache/
+
+# Electron builder
+electron-builder-output/
+electron-builder-cache/
+*.blockmap
+latest.yml
+latest-mac.yml
+latest-linux.yml
+
+# Archivos binarios y ejecutables
+*.exe
+*.dll
+*.asar
+*.app
+*.dmg
+*.pkg
+*.deb
+*.rpm
+*.snap
+*.zip
+*.7z
+*.tar.gz
+*.iso
+
+# Archivos multimedia
+*.wav
+*.mp3
+*.m4a
+*.mp4
+*.avi
+*.mov
+*.mkv
+*.flac
+*.ogg
+
+# Sistema operativo
+.DS_Store
+Thumbs.db
+desktop.ini
+*.log
+*.tmp
+*.swp
+*.swo
+*~
+
+# Variables de entorno
+.env
+.env.local
+.env.*.local
+
+# IDE
+.vscode/
+.idea/
+*.iml
+.vs/
+*.code-workspace
+
+# Archivos específicos de tu proyecto
+audiometria-app-win32-x64/
+win-unpacked/
+S.U.D.A*.exe
+ffmpeg.dll
+app.asar
+electron.exe

@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Login</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
+</head>
+<body>
+
+  <div class="login-container">
+
+      <!-- ANIMACIÓN LOTTIE ARRIBA -->
+
+
+    <!-- LADO IZQUIERDO -->
+<!-- LADO IZQUIERDO -->
+<div class="login-left">
+  <!-- Animación Lottie -->
+  <div class="lottie-white">
+    <lottie-player 
+      src="../img/listening.json" 
+      background="transparent" 
+      speed="1" 
+      style="width: 200px; height: 200px;" 
+      loop 
+      autoplay>
+    </lottie-player>
+  </div>
+  
+  <!-- TÍTULO CON NEGRILLA Y SOMBRA -->
+  <h1 class="titulo-bienvenida">
+    BIENVENIDO A <strong class="uda-destacado">S.U.D.A</strong><br>
+    <span class="subtitulo-sistema">SISTEMA CLÍNICO DE UNIDAD DIAGNÓSTICA AUDITIVA</span>
+  </h1>
+  
+  <p class="nombre-licenciado">LUIS IGNACIO SANÍN</p>
+</div>
+
+    <!-- LADO DERECHO -->
+<div class="login-right">
+
+     <!-- CONTENEDOR DEL LOGO HORIZONTAL -->
+      <div class="logo-container">
+      <div class="audiologo-info">
+  <div class="nombre-curvo">Luis Ignacio Sanín Jurado</div>
+  <div class="titulo-serio">Audiólogo Clínico y Laboral</div>
+</div>
+     <img src="../img/saninlogo.jpg" alt="Logo U.D.A.">
+      </div>
+
+  
+  <div class="login-card">
+    <h2>Iniciar sesión</h2>
+
+    <input id="username" type="text" placeholder="Usuario" />
+    <input id="password" type="password" placeholder="Contraseña" />
+
+    <button onclick="login()">Ingresar</button>
+
+    <br><br>
+    <a href="crearUsuario.html">Crear usuario</a>
+  </div>
+
+</div>
+
+  </div>
+
+  <script src="login.js"></script>
+   <script src="../renderer/focus-fix.js"></script>
+</body>
+</html>

@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Citas - Audiólogo</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #f0f2f5;
+      padding: 2rem;
+    }
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    .header {
+      background: white;
+      padding: 1rem 2rem;
+      border-radius: 12px;
+      margin-bottom: 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    h1 {
+      color: #2d3748;
+    }
+    .btn-volver {
+      background: #667eea;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    .selector-paciente {
+      background: white;
+      padding: 1.5rem;
+      border-radius: 12px;
+      margin-bottom: 2rem;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .selector-paciente h3 {
+      margin-bottom: 1rem;
+      color: #2d3748;
+    }
+    select {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      font-size: 1rem;
+      margin-bottom: 1rem;
+    }
+    .citas-lista {
+      background: white;
+      padding: 1.5rem;
+      border-radius: 12px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .cita-item {
+      border-bottom: 1px solid #e2e8f0;
+      padding: 1rem;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    .cita-item:hover {
+      background: #f7fafc;
+    }
+    .cita-item:last-child {
+      border-bottom: none;
+    }
+    .cita-fecha {
+      font-weight: bold;
+      color: #2d3748;
+    }
+    .cita-estado {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      margin-top: 5px;
+    }
+    .estado-pendiente {
+      background: #fed7d7;
+      color: #c53030;
+    }
+    .estado-atendida {
+      background: #c6f6d5;
+      color: #276749;
+    }
+    .datos-paciente {
+      background: #edf2f7;
+      padding: 1rem;
+      border-radius: 8px;
+      margin-top: 1rem;
+      display: none;
+    }
+    .datos-paciente.visible {
+      display: block;
+    }
+    button {
+      background: #48bb78;
+      color: white;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+    .acciones {
+      margin-top: 1rem;
+      display: flex;
+      gap: 10px;
+    }
+    .btn-audiometria {
+      background: #4299e1;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>📅 Gestión de Citas - Audiólogo</h1>
+      <button class="btn-volver" onclick="volver()">← Volver al Dashboard</button>
+    </div>
+
+    <div class="selector-paciente">
+      <h3>Seleccione un paciente para ver sus citas:</h3>
+      <select id="selectPaciente">
+        <option value="">-- Seleccione un paciente --</option>
+      </select>
+    </div>
+
+    <div class="citas-lista" id="citasLista">
+      <p style="color: #718096; text-align: center;">Seleccione un paciente para ver sus citas</p>
+    </div>
+  </div>
+
+  <script>
+    let pacientes = [];
+
+    async function cargarPacientes() {
+      try {
+        const res = await window.api.obtenerPacientes();
+        if (res.ok) {
+          pacientes = res.pacientes;
+          const select = document.getElementById('selectPaciente');
+          select.innerHTML = '<option value="">-- Seleccione un paciente --</option>';
+          
+          pacientes.forEach(paciente => {
+            const option = document.createElement('option');
+            option.value = paciente.id;
+            option.textContent = `${paciente.nombre} - ${paciente.documento}`;
+            select.appendChild(option);
+          });
+        }
+      } catch (error) {
+        console.error('Error cargando pacientes:', error);
+      }
+    }
+
+    async function cargarCitas(pacienteId) {
+      const paciente = pacientes.find(p => p.id == pacienteId);
+      const citasLista = document.getElementById('citasLista');
+      
+      if (!paciente) {
+        citasLista.innerHTML = '<p style="color: #718096; text-align: center;">Seleccione un paciente válido</p>';
+        return;
+      }
+      
+      try {
+        const res = await window.api.obtenerCitasPorPaciente(pacienteId);
+        if (res.ok && res.citas.length > 0) {
+          citasLista.innerHTML = `
+            <h3>Citas de ${paciente.nombre}</h3>
+            ${res.citas.map(cita => `
+              <div class="cita-item" data-cita-id="${cita.id}">
+                <div class="cita-fecha">📅 ${cita.fecha} - ${cita.hora}</div>
+                <div>Motivo: ${cita.motivo || 'No especificado'}</div>
+                <div>
+                  Estado: 
+                  <span class="cita-estado ${cita.estado === 'pendiente' ? 'estado-pendiente' : 'estado-atendida'}">
+                    ${cita.estado}
+                  </span>
+                </div>
+                <div class="datos-paciente" id="datos-${cita.id}">
+                  <strong>Datos del Paciente:</strong><br>
+                  📝 Nombre: ${paciente.nombre}<br>
+                  🆔 Documento: ${paciente.documento}<br>
+                  📅 Fecha Nacimiento: ${paciente.fecha_nacimiento || 'No registrada'}<br>
+                  📞 Teléfono: ${paciente.telefono || 'No registrado'}<br>
+                  ✉️ Email: ${paciente.email || 'No registrado'}<br>
+                  📍 Dirección: ${paciente.direccion || 'No registrada'}
+                </div>
+                <div class="acciones">
+                  <button onclick="toggleDatos(${cita.id})">Ver Datos del Paciente</button>
+                  <button class="btn-audiometria" onclick="iniciarAudiometria(${cita.id}, ${pacienteId})">Iniciar Audiometría</button>
+                </div>
+              </div>
+            `).join('')}
+          `;
+        } else {
+          citasLista.innerHTML = `
+            <h3>Citas de ${paciente.nombre}</h3>
+            <p style="color: #718096;">No hay citas registradas para este paciente</p>
+            <button onclick="crearCita(${pacienteId})">➕ Crear nueva cita</button>
+          `;
+        }
+      } catch (error) {
+        console.error('Error cargando citas:', error);
+        citasLista.innerHTML = '<p style="color: red;">Error al cargar las citas</p>';
+      }
+    }
+
+    function toggleDatos(citaId) {
+      const datosDiv = document.getElementById(`datos-${citaId}`);
+      datosDiv.classList.toggle('visible');
+    }
+
+    function iniciarAudiometria(citaId, pacienteId) {
+      // Guardar en localStorage qué paciente seleccionar
+      localStorage.setItem('pacienteSeleccionado', pacienteId);
+      window.api.navegar('AudiometríaTonalCompleta.html');
+    }
+
+    function crearCita(pacienteId) {
+      window.api.navegar('citas.html');
+    }
+
+    function volver() {
+      window.api.navegar('dashboard.html');
+    }
+
+    document.getElementById('selectPaciente').addEventListener('change', (e) => {
+      if (e.target.value) {
+        cargarCitas(e.target.value);
+      } else {
+        document.getElementById('citasLista').innerHTML = '<p style="color: #718096; text-align: center;">Seleccione un paciente para ver sus citas</p>';
+      }
+    });
+
+    cargarPacientes();
+  </script>
+</body>
+</html>

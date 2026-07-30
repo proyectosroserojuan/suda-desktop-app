@@ -1,0 +1,145 @@
+
+:root {
+  --primary: #2563eb;      /* azul médico */
+  --secondary: #10b981;    /* verde clínico */
+  --bg: #f4f7fb;           /* fondo suave */
+  --card-bg: #ffffff;
+  --border: #e5e7eb;
+  --text-main: #1f2937;
+  --text-muted: #6b7280;
+}
+
+
+* {
+  box-sizing: border-box;
+  font-family: 'Segoe UI', Arial, sans-serif;
+}
+
+body {
+  margin: 0;
+  background: linear-gradient(180deg, #f4f7fb, #eef2ff);
+  min-height: 100vh;
+}
+
+/* CONTENEDOR */
+.page {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 40px;
+}
+
+/* TARJETA */
+.card {
+  background: white;
+  width: 100%;
+  max-width: 720px;
+  padding: 36px;
+  border-radius: 14px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+  border: 1px solid var(--border);
+}
+
+/* TITULOS */
+.card h2 {
+  margin: 0;
+  color: var(--text-main);
+  font-weight: 600;
+}
+
+.subtitle {
+  margin-top: 6px;
+  margin-bottom: 28px;
+  color: var(--text-muted);
+  font-size: 14px;
+}
+
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: 30px; /* separa tarjetas */
+}
+
+/* tarjeta secundaria */
+.card.secondary {
+  border-left: 6px solid var(--secondary);
+}
+
+/* detalle visual */
+.card h2::after {
+  content: "";
+  display: block;
+  width: 40px;
+  height: 3px;
+  background: var(--primary);
+  margin-top: 8px;
+  border-radius: 4px;
+}
+
+
+/* FORMULARIO */
+.form {
+  display: flex;
+  flex-direction: column;
+}
+
+/* FILAS DOBLES */
+.row {
+  display: flex;
+  gap: 15px;
+}
+
+.group {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 15px;
+  flex: 1;
+}
+
+.group label {
+  font-size: 13px;
+  margin-bottom: 6px;
+  color: #444;
+}
+
+/* INPUTS */
+.group input,
+.group textarea,
+.group select {
+  padding: 12px 14px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  font-size: 14px;
+  transition: border 0.2s ease, box-shadow 0.2s ease;
+}
+
+.group input:focus,
+.group textarea:focus,
+.group select:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(42,82,152,0.12);
+}
+textarea {
+  resize: none;
+  min-height: 90px;
+}
+
+/* BOTÓN */
+.btn-primary {
+  margin-top: 24px;
+  padding: 14px;
+  background: var(--primary);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s ease, box-shadow 0.2s ease;
+}
+
+.btn-primary:hover {
+  background: #1e3c72;
+  box-shadow: 0 6px 14px rgba(0,0,0,0.12);
+}

@@ -1,0 +1,170 @@
+/* RESET BÁSICO */
+* {
+  box-sizing: border-box;
+  font-family: 'Segoe UI', Arial, sans-serif;
+}
+
+/* FONDO GENERAL */
+body {
+  margin: 0;
+  background: #f5f7fa;
+}
+
+#buscarPaciente {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 14px;
+  font-size: 0.9rem;
+  margin-bottom: 10px;
+  font-family: inherit;
+}
+
+#buscarPaciente:focus {
+  border-color: #3b82f6;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(59,130,246,0.15);
+}
+.container {
+  max-width: 520px;
+  margin: 60px auto; /* 👈 separa del top */
+  padding: 0 15px;
+}
+
+.resultados-busqueda {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: white;
+  border: 1px solid #dbe2ea;
+  border-radius: 12px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+  max-height: 220px;
+  overflow-y: auto;
+  z-index: 999;
+  display: none;
+  margin-top: 6px;
+}
+
+.item-resultado {
+  padding: 12px 14px;
+  cursor: pointer;
+  border-bottom: 1px solid #f1f5f9;
+  font-size: 0.9rem;
+}
+
+.item-resultado:hover {
+  background: #f8fafc;
+}
+
+.item-resultado:last-child {
+  border-bottom: none;
+}
+.container h2 {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.resultados-busqueda {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: white;
+  border: 1px solid #dbe2ea;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+  max-height: 250px;
+  overflow-y: auto;
+  z-index: 999;
+  display: none;
+  margin-top: 6px;
+}
+
+.item-sugerencia {
+  padding: 12px 14px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.item-sugerencia:hover {
+  background: #f8fafc;
+}
+
+/* CONTENEDOR DEL FORM */
+.form {
+  background: #ffffff;
+  width: 100%;
+  max-width: 460px;
+  padding: 32px;
+  border-radius: 14px;
+  box-shadow: 0 12px 30px rgba(0,0,0,0.08);
+}
+
+/* TÍTULO */
+h2 {
+  margin-top: 0;
+  margin-bottom: 25px;
+  text-align: center;
+  color: #1f2937; /* gris oscuro profesional */
+}
+
+/* GRUPOS */
+.group {
+  margin-bottom: 16px;
+}
+
+.group label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 13px;
+  color: #4b5563;
+}
+
+/* INPUTS */
+.group input,
+.group select,
+.group textarea {
+  width: 100%;
+  padding: 11px 12px;
+  border-radius: 8px;
+  border: 1px solid #d1d5db;
+  font-size: 14px;
+  background: #fff;
+  transition: border 0.2s ease, box-shadow 0.2s ease;
+}
+
+.group textarea {
+  resize: none;
+  min-height: 90px;
+}
+
+/* FOCUS */
+.group input:focus,
+.group select:focus,
+.group textarea:focus {
+  outline: none;
+  border-color: #2563eb; /* azul solo de acento */
+  box-shadow: 0 0 0 2px rgba(37,99,235,0.15);
+}
+
+/* BOTÓN */
+button {
+  width: 100%;
+  margin-top: 10px;
+  padding: 13px;
+  background: #2563eb;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 15px;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+button:hover {
+  background: #1e40af;
+  transform: translateY(-1px);
+}

@@ -1,0 +1,877 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Citas de la Semana | Audiólogo</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+     .cita-prioritaria {
+    border-left: 4px solid #ef4444;
+    background-color: #fef2f2;
+  }
+  
+  /* Para resaltar la fila completa de cita prioritaria */
+  tr.cita-prioritaria-row td:first-child {
+    border-left: 4px solid #ef4444;
+  }
+  
+  tr.cita-prioritaria-row {
+    background-color: #fef2f2;
+    transition: background-color 0.2s;
+  }
+  
+  tr.cita-prioritaria-row:hover {
+    background-color: #fee2e2;
+  }
+  
+  /* Badge de prioridad */
+  .prioridad-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  
+  .prioridad-badge.prioritaria {
+    background-color: #fee2e2;
+    color: #dc2626;
+  }
+  
+  .prioridad-badge.prioritaria::before {
+    content: "⭐";
+    font-size: 0.75rem;
+  }
+  
+  .prioridad-badge.normal {
+    background-color: #e5e7eb;
+    color: #4b5563;
+  }
+  
+  .prioridad-badge.normal::before {
+    content: "○";
+    font-size: 0.75rem;
+  }
+  
+  /* Animación para citas nuevas prioritarias */
+  @keyframes highlightPriority {
+    0% { background-color: #fee2e2; border-left-color: #ef4444; }
+    50% { background-color: #fecaca; border-left-color: #dc2626; }
+    100% { background-color: #fef2f2; border-left-color: #ef4444; }
+  }
+  
+  tr.cita-prioritaria-row.new-priority {
+    animation: highlightPriority 1s ease;
+  }
+
+    body {
+      font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, sans-serif;
+      background: #ffffff;
+      padding: 28px 32px;
+      color: #1e293b;
+    }
+
+    /* Header con logo */
+    .logo-empresa-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+
+    .logo-empresa-top img {
+      height: 70px;
+      object-fit: contain;
+      border-radius: 12px;
+    }
+
+    .logo-texto-temporal {
+      font-weight: 700;
+      font-size: 1.2rem;
+      color: #001e81;
+    }
+
+    .logo-texto-temporal span {
+      display: block;
+      font-size: 0.7rem;
+      color: #475569;
+    }
+
+    .btn-dashboard {
+      background: #1e3a8a;
+      color: white;
+      border: none;
+      padding: 10px 24px;
+      border-radius: 40px;
+      font-weight: 600;
+      cursor: pointer;
+      font-size: 0.85rem;
+      transition: all 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+    }
+
+    .btn-dashboard:hover {
+      background: #0f2b4d;
+      transform: translateY(-1px);
+    }
+
+    .logo-header {
+      text-align: center;
+      margin-bottom: 32px;
+    }
+
+    .logo-header h1 {
+      font-size: 2rem;
+      font-weight: 700;
+      color: #001e81;
+      margin-bottom: 8px;
+    }
+
+    .logo-header p {
+      color: #475569;
+      font-weight: 500;
+      font-size: 0.95rem;
+    }
+
+    /* Contenedor principal */
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    /* Buscador */
+    .search-section {
+      background: #f8fafc;
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 24px;
+      border: 1px solid #eef2f6;
+    }
+
+    .search-box {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      max-width: 400px;
+    }
+
+    .search-box input {
+      flex: 1;
+      padding: 12px 16px;
+      border: 1.5px solid #e2e8f0;
+      border-radius: 12px;
+      font-size: 0.9rem;
+      font-family: inherit;
+      transition: all 0.2s;
+    }
+
+    .search-box input:focus {
+      border-color: #3b82f6;
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(59,130,246,0.1);
+    }
+
+    .search-box button {
+      background: #3b82f6;
+      color: white;
+      border: none;
+      padding: 12px 20px;
+      border-radius: 12px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+
+    .search-box button:hover {
+      background: #2563eb;
+    }
+
+    /* Semana actual */
+    .week-header {
+      background: #f1f5f9;
+      border-radius: 16px;
+      padding: 16px 24px;
+      margin-bottom: 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    .week-info h3 {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: #0f172a;
+    }
+
+    .week-info p {
+      color: #475569;
+      font-size: 0.85rem;
+      margin-top: 4px;
+    }
+
+    .week-nav {
+      display: flex;
+      gap: 12px;
+    }
+
+    .week-nav button {
+      background: white;
+      border: 1px solid #e2e8f0;
+      padding: 8px 16px;
+      border-radius: 30px;
+      cursor: pointer;
+      font-weight: 500;
+      transition: all 0.2s;
+    }
+
+    .week-nav button:hover {
+      background: #f1f5f9;
+      border-color: #cbd5e1;
+    }
+
+    /* Tabla de citas */
+    .citas-table {
+      background: white;
+      border-radius: 16px;
+      border: 1px solid #eef2f6;
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    th {
+      text-align: left;
+      padding: 16px 20px;
+      background: #f8fafc;
+      font-weight: 600;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: #4a5b7a;
+      border-bottom: 1px solid #eef2f6;
+    }
+
+    td {
+      padding: 14px 20px;
+      border-bottom: 1px solid #f1f5f9;
+      font-size: 0.85rem;
+    }
+
+    tr:hover {
+      background: #fafcff;
+    }
+
+    .dia-nombre {
+      font-weight: 600;
+      color: #0f172a;
+    }
+
+    .hora {
+      font-family: monospace;
+      font-size: 0.85rem;
+      color: #2563eb;
+      font-weight: 500;
+    }
+
+    .tipo-badge {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.7rem;
+      font-weight: 600;
+    }
+
+    .tipo-Audiometría { background: #dbeafe; color: #1e40af; }
+    .tipo-Logoaudiometria { background: #dcfce7; color: #166534; }
+    .tipo-Impedanciometria { background: #fef3c7; color: #92400e; }
+    .tipo-Control { background: #e0e7ff; color: #3730a3; }
+    .tipo-default { background: #f1f5f9; color: #475569; }
+
+    .estado-badge {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.7rem;
+      font-weight: 600;
+    }
+
+    .estado-pendiente { background: #fef3c7; color: #92400e; }
+    .estado-atendida { background: #dcfce7; color: #166534; }
+    .estado-cancelada { background: #fee2e2; color: #991b1b; }
+
+    .empty-state {
+      text-align: center;
+      padding: 48px;
+      color: #94a3b8;
+    }
+
+    .btn-realizar {
+  background: #1e3a8a;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.8rem;
+  transition: all 0.2s;
+}
+
+.btn-realizar:hover {
+  background: #0f2b4d;
+  transform: translateY(-1px);
+}
+
+    .empty-state i {
+      font-size: 3rem;
+      margin-bottom: 16px;
+    }
+
+    .resultado-busqueda {
+      margin-top: 16px;
+      padding: 12px;
+      background: #e0f2fe;
+      border-radius: 12px;
+      color: #075985;
+      font-size: 0.85rem;
+    }
+/* Botón actualizar */
+.btn-actualizar {
+  background: #10b981;
+  color: white;
+  border: none;
+  padding: 8px 18px;
+  border-radius: 30px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.2s;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-actualizar:hover {
+  background: #059669;
+  transform: scale(1.02);
+}
+
+.btn-actualizar.rotando i {
+  animation: spin 0.8s linear;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+    .btn-nav {
+  background: #f1f5f9;
+  color: #475569;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 40px;
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: all 0.2s;
+}
+.btn-nav.active {
+  background: #2563eb;
+  color: white;
+}
+.btn-nav:hover {
+  transform: translateY(-1px);
+}
+
+    @media (max-width: 768px) {
+      body { padding: 20px 16px; }
+      th, td { padding: 10px 12px; }
+      .search-box { max-width: 100%; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="logo-empresa-top">
+  <img src="../img/saninlogo.jpg" alt="Logo U.D.A." onerror="this.style.display='none'; this.parentElement.innerHTML='<div class=\'logo-texto-temporal\'><strong>AUDIOLOGÍA CLÍNICA</strong><span>Especialistas en Audición</span></div>'">
+  <div class="logo-texto-temporal" style="display: none;" id="fallbackLogo">
+    <strong>AUDIOLOGÍA CLÍNICA</strong>
+    <span>Especialistas en Audición</span>
+  </div>
+  <button class="btn-dashboard" id="btnVolverDashboard">← Volver al Dashboard</button>
+</div>
+
+<div class="logo-header">
+  <h1>CITAS DE LA SEMANA</h1>
+  <p>Consultorio Audiológico - Agenda semanal</p>
+</div>
+
+<div class="container">
+  <!-- Buscador por cédula -->
+  <div class="search-section">
+    <div class="search-box">
+      <i class="fas fa-search" style="color: #94a3b8;"></i>
+      <input type="text" id="searchCedula" placeholder="Buscar paciente por cédula...">
+      <button id="btnBuscar"><i class="fas fa-search"></i> Buscar</button>
+      <button id="btnLimpiarBusqueda" style="background: #64748b;">Limpiar</button>
+    </div>
+    <div id="resultadoBusqueda" class="resultado-busqueda" style="display: none;"></div>
+  </div>
+
+  <!-- Navegación de semanas -->
+  <div class="week-header">
+    <div class="week-info">
+      <h3 id="semanaTitulo">Semana actual</h3>
+      <p id="rangoFechas">Cargando...</p>
+    </div>
+    <div class="week-nav">
+      <button id="prevSemana"><i class="fas fa-chevron-left"></i> Semana anterior</button>
+      <button id="nextSemana">Semana siguiente <i class="fas fa-chevron-right"></i></button>
+      <button id="hoyBtn">Hoy</button>
+      <button id="btnActualizar" style="background: #10b981; color: white; border: none; padding: 8px 16px; border-radius: 30px; cursor: pointer; font-weight: 600; transition: all 0.2s; display: inline-flex; align-items: center; gap: 8px;">
+      <i class="fas fa-sync-alt"></i> 
+    </button>
+    </div>
+  </div>
+
+  <div class="nav-buttons" style="display: flex; gap: 12px; margin-bottom: 24px; justify-content: center;">
+  <button class="btn-nav active" id="btnCitasSemana">Citas de la Semana</button>
+  <button class="btn-nav" id="btnCitasRealizadas">Citas Realizadas</button>
+  <button class="btn-nav" id="btnCitasPendientesNoSemana">Citas Pendientes (No semana)</button>
+</div>
+
+  <!-- Tabla de citas -->
+  <div class="citas-table">
+    <table>
+      <thead>
+        <tr>
+          <th>Fecha</th>
+          <th>Entidad</th>        <!-- NUEVA COLUMNA -->
+          <th>Día</th>
+          <th>Hora</th>
+          <th>Paciente</th>
+          <th>Cédula</th>
+          <th>Tipo de atención</th>
+           <th>Motivo</th>   
+          <th>Estado</th>
+          <th>Prioridad</th>  <!-- NUEVA COLUMNA -->
+         <th>Acción</th>
+        </tr>
+      </thead>
+      <tbody id="citasBody">
+        <tr class="empty-state">
+          <td colspan="7">
+            <i class="fas fa-calendar-week"></i>
+            <p>Cargando citas...</p>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+  // Cambiar a fecha actual
+  let fechaActual = new Date();
+  let todasLasCitas = [];
+  let busquedaActiva = false;
+  let documentoBuscado = null;
+
+  function getStartOfWeek(date) {
+    const d = new Date(date);
+    const day = d.getDay();
+    const diff = (day === 0 ? 6 : day - 1);
+    d.setDate(d.getDate() - diff);
+    d.setHours(0, 0, 0, 0);
+    return d;
+  }
+
+  function getDayName(date) {
+    const days = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+    return days[date.getDay()];
+  }
+
+  function getWeekRange(startDate) {
+    const endDate = new Date(startDate);
+    endDate.setDate(startDate.getDate() + 6);
+    const startStr = startDate.toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric' });
+    const endStr = endDate.toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric' });
+    return `${startStr} - ${endStr}`;
+  }
+
+function obtenerTipoAtencion(motivo) {
+    if (!motivo) return 'No especificado';
+    
+    // 🔥 Verificar primero el tipo combinado (más específico)
+    if (motivo.includes("Audiometria Tonal y Logoadiometria")) {
+        return "Audiometria Tonal y Logoadiometria";
+    }
+    if (motivo.includes("Logoaudiometria")) {
+        return "Logoaudiometria";
+    }
+    if (motivo.includes("Audiometría")) {
+        return "Audiometría";
+    }
+    if (motivo.includes("Impedanciometria")) {
+        return "Impedanciometria";
+    }
+    if (motivo.includes("Control")) {
+        return "Control";
+    }
+    
+    return motivo.split(' - ')[0] || 'Consulta';
+}
+
+  async function cargarCitas() {
+    try {
+      const tbody = document.getElementById('citasBody');
+      tbody.innerHTML = `<tr class="empty-state"><td colspan="10"><i class="fas fa-spinner fa-spin"></i><p>Cargando citas...</p></td></tr>`;
+      
+      if (window.api && window.api.obtenerTodasLasCitas) {
+        const result = await window.api.obtenerTodasLasCitas();
+        if (result.ok) {
+          todasLasCitas = result.citas || [];
+          console.log('✅ Citas cargadas:', todasLasCitas.length);
+        } else {
+          console.error('Error:', result.error);
+          todasLasCitas = [];
+        }
+      }
+      renderizarCitas();
+    } catch (error) {
+      console.error('Error:', error);
+      todasLasCitas = [];
+      renderizarCitas();
+    }
+  }
+
+  // SOLO UNA función renderizarCitas (la correcta)
+  function renderizarCitas() {
+    const startOfWeek = getStartOfWeek(fechaActual);
+    const endOfWeek = new Date(startOfWeek);
+    endOfWeek.setDate(startOfWeek.getDate() + 6);
+    
+    const options = { day: 'numeric', month: 'long', year: 'numeric' };
+    document.getElementById('semanaTitulo').textContent = `Semana del ${startOfWeek.toLocaleDateString('es-ES', options)}`;
+    document.getElementById('rangoFechas').textContent = getWeekRange(startOfWeek);
+
+
+
+    
+     let citasFiltradas = todasLasCitas.filter(cita => {
+      // 🔥 SOLO mostrar citas PENDIENTES (no atendidas ni canceladas)
+      if (cita.estado !== 'pendiente') return false;
+      if (!cita.fecha_cita) return false;
+      const fechaCita = new Date(cita.fecha_cita);
+      fechaCita.setHours(0, 0, 0, 0);
+      return fechaCita >= startOfWeek && fechaCita <= endOfWeek;
+    });
+    
+    if (busquedaActiva && documentoBuscado) {
+      citasFiltradas = citasFiltradas.filter(cita => 
+        cita.documento && cita.documento.toString().includes(documentoBuscado)
+      );
+    }
+    
+    // Ordenar: prioridad primero, luego fecha, luego hora
+    citasFiltradas.sort((a, b) => {
+      if (a.prioridad !== b.prioridad) return (a.prioridad === true) ? -1 : 1;
+      const dateCompare = new Date(a.fecha_cita) - new Date(b.fecha_cita);
+      if (dateCompare !== 0) return dateCompare;
+      return (a.hora_cita || '').localeCompare(b.hora_cita || '');
+    });
+    
+    const tbody = document.getElementById('citasBody');
+    
+    if (citasFiltradas.length === 0) {
+      tbody.innerHTML = `<tr class="empty-state"><td colspan="10"><i class="fas fa-calendar-week"></i><p>No hay citas programadas para esta semana</p></td></tr>`;
+      return;
+    }
+    
+    // CORREGIDO: El orden de las columnas debe coincidir con el <thead>
+    tbody.innerHTML = citasFiltradas.map(cita => {
+      const fecha = new Date(cita.fecha_cita);
+      const tipoAtencion = obtenerTipoAtencion(cita.motivo);
+      const tipoClass = `tipo-${tipoAtencion.replace(/[^a-zA-Z]/g, '')}`;
+      const estado = cita.estado || 'pendiente';
+      const esPrioritaria = cita.prioridad === true;
+      const prioridadClass = esPrioritaria ? 'prioritaria' : 'normal';
+      const prioridadTexto = esPrioritaria ? '⭐ Prioritaria' : 'Normal';
+      const entidadNombre = cita.entidad_nombre || 'No especificada';
+      const rowClass = esPrioritaria ? 'class="cita-prioritaria-row"' : '';
+      const motivoTexto = cita.motivo || 'No especificado';
+      
+      // ORDEN CORRECTO: Fecha, Entidad, Día, Hora, Paciente, Cédula, Tipo, Estado, Prioridad, Acción
+      return `
+        <tr ${rowClass}>
+          <td>${fecha.toLocaleDateString('es-ES')}</td>
+          <td><strong>${entidadNombre}</strong></td>
+          <td class="dia-nombre">${getDayName(fecha)}</td>
+          <td class="hora">${cita.hora_cita || '--:--'}</td>
+          <td><strong>${cita.paciente_nombre || 'N/A'}</strong></td>
+          <td>${cita.documento || 'N/A'}</td>
+          <td><span class="tipo-badge ${tipoClass}">${tipoAtencion}</span></td>
+            <td style="max-width: 200px; word-wrap: break-word;">${motivoTexto}</td> 
+          <td><span class="estado-badge estado-${estado}">${estado === 'pendiente' ? 'Pendiente' : estado}</span></td>
+          <td><span class="prioridad-badge ${prioridadClass}">${prioridadTexto}</span></td>
+          <td>
+            <button class="btn-realizar" onclick='realizarAtencion(${JSON.stringify(cita)})'>
+              Realizar
+            </button>
+            
+          </td>
+        </tr>
+      `;
+    }).join('');
+  }
+  
+  function buscarPorCedula() {
+    const cedula = document.getElementById('searchCedula').value.trim();
+    if (!cedula) {
+      mostrarMensaje('Ingrese una cédula para buscar', 'error');
+      return;
+    }
+    busquedaActiva = true;
+    documentoBuscado = cedula;
+    renderizarCitas();
+    const resultadoDiv = document.getElementById('resultadoBusqueda');
+    resultadoDiv.style.display = 'block';
+    resultadoDiv.innerHTML = `<i class="fas fa-search"></i> Mostrando resultados para: <strong>${cedula}</strong>`;
+  }
+
+  function limpiarBusqueda() {
+    busquedaActiva = false;
+    documentoBuscado = null;
+    document.getElementById('searchCedula').value = '';
+    document.getElementById('resultadoBusqueda').style.display = 'none';
+    renderizarCitas();
+    mostrarMensaje('Búsqueda limpiada', 'exito');
+  }
+
+  function realizarAtencion(cita) {
+    const tipoAtencion = obtenerTipoAtencion(cita.motivo);
+    const pacienteCompleto = {
+        id: cita.paciente_id,
+        nombre: cita.paciente_nombre || "",
+        documento: cita.documento || "",
+        telefono: cita.telefono || "",
+        email: cita.email || "",
+        fecha_nacimiento: cita.fecha_nacimiento || ""
+    };
+    const citaCompleta = {
+        id: cita.id,
+        fecha_cita: cita.fecha_cita || "",
+        hora_cita: cita.hora_cita || "",
+        entidad_id: cita.entidad_id,
+        entidad_nombre: cita.entidad_nombre,
+        motivo: cita.motivo || "",
+        paciente_id: cita.paciente_id,
+        estado: cita.estado || "pendiente",
+        prioridad: cita.prioridad || false
+    };
+    localStorage.setItem("pacienteActual", JSON.stringify(pacienteCompleto));
+    localStorage.setItem("citaActual", JSON.stringify(citaCompleta));
+    
+    // 🆕 Si es el tipo combinado, ir a AudioLogo.html
+    if (tipoAtencion.includes("Audiometria Tonal y Logoadiometria") || 
+        (cita.motivo && cita.motivo.includes("Audiometria Tonal y Logoadiometria"))) {
+        window.location.href = "AudioLogo.html";
+    } 
+    else if (tipoAtencion.includes("Logoaudiometria")) {
+        window.location.href = "logoaudiometria.html";
+    } 
+    else if (tipoAtencion.includes("Audiometría")) {
+        window.location.href = "AudiometriaTonal.html";
+    } 
+    else {
+        alert("Este tipo de atención aún no tiene panel asignado.");
+    }
+}
+
+  function semanaAnterior() {
+    fechaActual.setDate(fechaActual.getDate() - 7);
+    renderizarCitas();
+  }
+  
+  function semanaSiguiente() {
+    fechaActual.setDate(fechaActual.getDate() + 7);
+    renderizarCitas();
+  }
+  
+  function irHoy() {
+    fechaActual = new Date();
+    renderizarCitas();
+  }
+  
+  function mostrarMensaje(texto, tipo) {
+    const msg = document.createElement('div');
+    msg.textContent = texto;
+    msg.style.cssText = `
+      position: fixed; bottom: 20px; right: 20px; padding: 12px 20px;
+      border-radius: 12px; background: ${tipo === 'error' ? '#ef4444' : '#10b981'};
+      color: white; font-weight: 500; z-index: 1000;
+    `;
+    document.body.appendChild(msg);
+    setTimeout(() => msg.remove(), 2000);
+  }
+  
+  // Eventos
+  document.getElementById('btnVolverDashboard')?.addEventListener('click', () => {
+    window.api?.navegar('dashboard.html');
+  });
+  document.getElementById('btnBuscar')?.addEventListener('click', buscarPorCedula);
+  document.getElementById('btnLimpiarBusqueda')?.addEventListener('click', limpiarBusqueda);
+  document.getElementById('prevSemana')?.addEventListener('click', semanaAnterior);
+  document.getElementById('nextSemana')?.addEventListener('click', semanaSiguiente);
+  document.getElementById('hoyBtn')?.addEventListener('click', irHoy);
+  document.getElementById('searchCedula')?.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') buscarPorCedula();
+  });
+    // Eventos de navegación entre vistas (agregar junto a los otros eventos)
+  document.getElementById('btnCitasRealizadas')?.addEventListener('click', () => {
+    window.api?.navegar('citas-realizadas.html');
+  });
+  document.getElementById('btnCitasPendientesNoSemana')?.addEventListener('click', () => {
+    window.api?.navegar('citas-pendientes.html');
+  });
+  
+// ✅ CONFIGURAR RECEPCIÓN DE NUEVAS CITAS
+if (window.api && window.api.onNuevaCita) {
+  window.api.onNuevaCita((citaData) => {
+    console.log('📌 Nueva cita detectada:', citaData);
+    
+    // Mostrar notificación visual
+    mostrarMensaje('📌 Nueva cita registrada: ' + (citaData?.paciente_nombre || ''), 'exito');
+    
+    // ✅ RECARGAR LAS CITAS
+    cargarCitas();
+  });
+}
+
+// ✅ NOTIFICAR QUE ESTA VENTANA ESTÁ ABIERTA (para recibir actualizaciones)
+if (window.api && window.api.notificarCitasWindowAbierta) {
+  window.api.notificarCitasWindowAbierta();
+}
+
+// ✅ CONFIGURAR ACTUALIZACIÓN PERIÓDICA (CADA 30 SEGUNDOS) - OPCIONAL
+let intervaloAutoActualizacion = null;
+
+async function actualizarCitas() {
+  const btn = document.getElementById('btnActualizar');
+  
+  // Agregar animación de rotación
+  btn.classList.add('rotando');
+  btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Actualizando...';
+  btn.disabled = true;
+  
+  try {
+    console.log('🔄 Actualizando citas...');
+    
+    // Recargar citas desde la base de datos
+    if (window.api && window.api.obtenerTodasLasCitas) {
+      const result = await window.api.obtenerTodasLasCitas();
+      if (result.ok) {
+        todasLasCitas = result.citas || [];
+        console.log('✅ Citas actualizadas:', todasLasCitas.length);
+        
+        // Mostrar notificación
+        mostrarMensaje(`✅ ${todasLasCitas.length} citas cargadas`, 'exito');
+        
+        // Renderizar la tabla
+        renderizarCitas();
+      } else {
+        console.error('Error:', result.error);
+        mostrarMensaje('❌ Error al actualizar citas', 'error');
+      }
+    } else {
+      mostrarMensaje('❌ API no disponible', 'error');
+    }
+  } catch (error) {
+    console.error('❌ Error al actualizar:', error);
+    mostrarMensaje('❌ Error al actualizar citas', 'error');
+  } finally {
+    // Restaurar el botón
+    setTimeout(() => {
+      btn.classList.remove('rotando');
+      btn.innerHTML = '<i class="fas fa-sync-alt"></i> Actualizar';
+      btn.disabled = false;
+    }, 500);
+  }
+}
+
+function iniciarAutoActualizacion() {
+  // Limpiar intervalo anterior si existe
+  if (intervaloAutoActualizacion) {
+    clearInterval(intervaloAutoActualizacion);
+  }
+  
+  // Actualizar cada 30 segundos
+  intervaloAutoActualizacion = setInterval(() => {
+    console.log('⏰ Actualización automática...');
+    // Solo si no hay búsqueda activa para no interferir
+    if (!busquedaActiva) {
+      actualizarCitas();
+    }
+  }, 30000); // 30 segundos
+}
+
+function detenerAutoActualizacion() {
+  if (intervaloAutoActualizacion) {
+    clearInterval(intervaloAutoActualizacion);
+    intervaloAutoActualizacion = null;
+  }
+}
+
+// Iniciar auto-actualización
+iniciarAutoActualizacion();
+
+// Detener cuando la página se cierra
+window.addEventListener('beforeunload', function() {
+  detenerAutoActualizacion();
+});
+
+// ============================================
+// FUNCIÓN PARA ACTUALIZAR CITAS
+// ============================================
+
+
+// ✅ Notificar que esta ventana está abierta
+if (window.api && window.api.notificarCitasWindowAbierta) {
+    window.api.notificarCitasWindowAbierta();
+}
+
+  cargarCitas();
+</script>
+<style>
+  @keyframes fadeInOut {
+    0% { opacity: 0; transform: translateX(20px); }
+    15% { opacity: 1; transform: translateX(0); }
+    85% { opacity: 1; transform: translateX(0); }
+    100% { opacity: 0; transform: translateX(20px); }
+  }
+
+  
+</style>
+
+</body>
+</html>

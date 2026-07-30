@@ -1,0 +1,853 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reportes - Clínica Audiométrica</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Arial, sans-serif;
+        }
+
+        body {
+            background: #f5f7fa;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .dashboard-container {
+            display: flex;
+            height: 100vh;
+        }
+
+        .sidebar {
+            width: 260px;
+            background: #ffffff;
+            border-right: 1px solid #e5e7eb;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+
+        .sidebar-logo {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .sidebar-logo img {
+            max-width: 120px;
+            height: auto;
+            margin-bottom: 10px;
+        }
+
+        .sidebar-logo h2 {
+            font-size: 1rem;
+            color: #1f2937;
+            margin-top: 8px;
+        }
+
+        .sidebar-logo span {
+            font-size: 0.7rem;
+            color: #6b7280;
+            display: block;
+        }
+
+        .sidebar nav button {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 8px;
+            background: transparent;
+            border: none;
+            border-radius: 8px;
+            text-align: left;
+            cursor: pointer;
+            font-size: 14px;
+            color: #374151;
+            transition: all 0.2s ease;
+        }
+
+        .sidebar nav button:hover {
+            background: #f3f4f6;
+        }
+
+        .sidebar nav button.active {
+            background: #e0edff;
+            color: #2563eb;
+            font-weight: 500;
+        }
+
+        .content {
+            flex: 1;
+            padding: 30px;
+            overflow-y: auto;
+        }
+
+        .user-info {
+            background: white;
+            padding: 16px 24px;
+            border-radius: 12px;
+            margin-bottom: 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+            border: 1px solid #e5e7eb;
+        }
+
+        .user-info .user-details {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            background: #2563eb;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 18px;
+        }
+
+        .user-info .rol {
+            font-weight: bold;
+            color: #2563eb;
+            background: #e0edff;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+        }
+
+        .logout-btn {
+            background: #ef4444;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 500;
+            transition: background 0.2s;
+        }
+
+        .logout-btn:hover {
+            background: #dc2626;
+        }
+
+        .content h1 {
+            margin-top: 0;
+            margin-bottom: 5px;
+            color: #1f2937;
+            font-size: 1.8rem;
+        }
+
+        .subtitle {
+            margin-bottom: 25px;
+            font-size: 14px;
+            color: #6b7280;
+        }
+
+        .report-card {
+            background: white;
+            border-radius: 14px;
+            border: 1px solid #e5e7eb;
+            padding: 30px;
+            max-width: 800px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+
+        .report-card h2 {
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+            color: #1f2937;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .filter-row {
+            display: flex;
+            gap: 16px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .filter-row label {
+            font-weight: 500;
+            color: #374151;
+            font-size: 14px;
+            min-width: 80px;
+        }
+
+        .filter-row input[type="month"] {
+            padding: 8px 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 14px;
+            background: white;
+            color: #1f2937;
+            flex: 1;
+            min-width: 180px;
+        }
+
+        .filter-row input[type="month"]:focus {
+            outline: none;
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .button-group {
+            display: flex;
+            gap: 12px;
+            margin-top: 8px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 28px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            justify-content: center;
+        }
+
+        .btn-pdf {
+            background: #dc2626;
+            color: white;
+        }
+
+        .btn-pdf:hover {
+            background: #b91c1c;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
+        }
+
+        .btn-excel {
+            background: #16a34a;
+            color: white;
+        }
+
+        .btn-excel:hover {
+            background: #15803d;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(22, 163, 74, 0.3);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none !important;
+            box-shadow: none !important;
+        }
+
+        .btn svg {
+            width: 20px;
+            height: 20px;
+            fill: currentColor;
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 0.8s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .preview-container {
+            margin-top: 24px;
+            background: #f9fafb;
+            border-radius: 10px;
+            padding: 16px;
+            border: 1px solid #e5e7eb;
+            display: none;
+        }
+
+        .preview-container.visible {
+            display: block;
+        }
+
+        .preview-container h3 {
+            font-size: 0.9rem;
+            color: #6b7280;
+            margin-bottom: 10px;
+        }
+
+        .preview-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .stat-total {
+            background: white;
+            padding: 16px;
+            border-radius: 8px;
+            border: 1px solid #e5e7eb;
+            text-align: center;
+        }
+
+        .stat-total .number {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #2563eb;
+        }
+
+        .stat-total .label {
+            font-size: 12px;
+            color: #6b7280;
+            margin-top: 4px;
+        }
+
+        .stat-entidades {
+            background: white;
+            padding: 16px;
+            border-radius: 8px;
+            border: 1px solid #e5e7eb;
+        }
+
+        .stat-entidades .entidad-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 4px 0;
+            border-bottom: 1px solid #f3f4f6;
+            font-size: 14px;
+        }
+
+        .stat-entidades .entidad-item:last-child {
+            border-bottom: none;
+        }
+
+        .stat-entidades .entidad-nombre {
+            color: #374151;
+        }
+
+        .stat-entidades .entidad-cantidad {
+            font-weight: 600;
+            color: #1f2937;
+        }
+
+        .stat-estados {
+            background: white;
+            padding: 16px;
+            border-radius: 8px;
+            border: 1px solid #e5e7eb;
+            grid-column: span 2;
+        }
+
+        .stat-estados .estados-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+            margin-top: 8px;
+        }
+
+        .stat-estados .estado-item {
+            text-align: center;
+            padding: 8px;
+            border-radius: 6px;
+            background: #f8fafc;
+        }
+
+        .stat-estados .estado-item .cantidad {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .stat-estados .estado-item .label {
+            font-size: 11px;
+            color: #6b7280;
+        }
+
+        .estado-pendiente .cantidad { color: #d97706; }
+        .estado-atendida .cantidad { color: #059669; }
+        .estado-cancelada .cantidad { color: #dc2626; }
+        .estado-no_asistio .cantidad { color: #6b7280; }
+
+        @media (max-width: 640px) {
+            .sidebar {
+                width: 200px;
+                padding: 16px;
+            }
+            .content {
+                padding: 16px;
+            }
+            .filter-row {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .filter-row label {
+                min-width: auto;
+            }
+            .button-group {
+                flex-direction: column;
+            }
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+            .preview-stats {
+                grid-template-columns: 1fr;
+            }
+            .stat-estados .estados-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="dashboard-container">
+    <aside class="sidebar">
+        <div class="sidebar-logo">
+            <img src="../img/saninlogo.jpg" alt="Logo U.D.A." onerror="this.style.display='none'; this.parentElement.innerHTML='<h2>🏥 Clínica Auditiva</h2><span>Especialistas en Audición</span>'">
+            <h2>Clínica Auditiva</h2>
+            <span>Especialistas en Audición</span>
+        </div>
+        <nav id="navMenu"></nav>
+    </aside>
+
+    <main class="content">
+        <div class="user-info">
+            <div class="user-details">
+                <div class="user-avatar" id="userAvatar">👤</div>
+                <div>
+                    <span id="userNombre" style="font-weight: 500;"></span>
+                    <span class="rol" id="userRol"></span>
+                </div>
+            </div>
+            <button class="logout-btn" onclick="cerrarSesion()">Cerrar Sesión</button>
+        </div>
+
+        <h1>📊 Reportes de Citas</h1>
+        <p class="subtitle">Genera reportes mensuales de citas por entidad y estado</p>
+
+        <div class="report-card">
+            <h2>Selecciona el mes</h2>
+            <div class="filter-group">
+                <div class="filter-row">
+                    <label for="mesSelector">📅 Mes:</label>
+                    <input type="month" id="mesSelector" value="">
+                </div>
+            </div>
+
+            <div class="button-group">
+                <button class="btn btn-pdf" id="btnPDF" onclick="generarPDF()">
+                    <svg viewBox="0 0 24 24" width="20" height="20"><path d="M20 2H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-8.5 7.5c0 .83-.67 1.5-1.5 1.5H9v2H7.5V7H10c.83 0 1.5.67 1.5 1.5v1zm5 2c0 .83-.67 1.5-1.5 1.5h-2.5V7H15c.83 0 1.5.67 1.5 1.5v3zm4-3H19v1h1.5V11H19v2h-1.5V7h3v1.5zM9 9.5h1v-1H9v1zM4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm10 5.5h1v-3h-1v3z"/></svg>
+                    Exportar a PDF
+                </button>
+                <button class="btn btn-excel" id="btnExcel" onclick="generarExcel()">
+                    <svg viewBox="0 0 24 24" width="20" height="20"><path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zm-1 14.5l-2.5-3.5L12 11.5l-2.5-3.5L11 8l2.5 3.5L16 8l1.5 2.5L15 12l2.5 3.5L16 18l-1.5-2.5L12 18l-1.5-2.5zM13 9V3.5L18.5 9H13z"/></svg>
+                    Exportar a Excel
+                </button>
+            </div>
+
+            <div class="preview-container" id="previewContainer">
+                <h3>📈 Resumen del mes</h3>
+                <div class="preview-stats">
+                    <div class="stat-total">
+                        <div class="number" id="totalCitas">0</div>
+                        <div class="label">Total de citas</div>
+                    </div>
+                    <div class="stat-total">
+                        <div class="number" id="mesActual">-</div>
+                        <div class="label">Mes / Año</div>
+                    </div>
+                    <div class="stat-entidades" id="entidadesList">
+                        <!-- Se llena dinámicamente -->
+                    </div>
+                    <div class="stat-estados" id="estadosList">
+                        <strong style="font-size: 13px; color: #374151;">📌 Por estado:</strong>
+                        <div class="estados-grid" id="estadosGrid">
+                            <!-- Se llena dinámicamente -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<script>
+    let usuarioActual = null;
+    let datosReporte = null;
+
+    const botonesSidebarPorRol = {
+        administrador: [
+            { nombre: '👥 Pacientes', archivo: 'pacientes.html' },
+            { nombre: '📅 Citas', archivo: 'citas.html' },
+            { nombre: '🎧 Audiometrías', archivo: 'audiometria.html' },
+            { nombre: '🔊 Audiometría Tonal', archivo: 'AudiometríaTonalCompleta.html' },
+            { nombre: '🗣️ Logoaudiometría', archivo: 'Logoaudiometria.html' },
+            { nombre: '📊 Impedanciometría', archivo: 'Inpedanciometria.html' },
+            { nombre: '📄 Informes', archivo: 'informes.html' },
+            { nombre: '⚙️ Configuración', archivo: 'configuracion.html' }
+        ],
+        secretaria: [
+            { nombre: '👥 Pacientes', archivo: 'pacientes.html' },
+            { nombre: '📅 Citas', archivo: 'citas.html' },
+            { nombre: '📊 Reportes', archivo: 'reportes.html', active: true }
+        ],
+        audiologo: [
+            { nombre: '📅 Citas Semana', archivo: 'citassemana.html' },
+            { nombre: '🔊 Audiometría Tonal', archivo: 'AudiometriaTonal.html' },
+            { nombre: '🗣️ Logoaudiometría', archivo: 'Logoaudiometria.html' },
+        ]
+    };
+
+    function navegarA(destino) {
+        if (window.api && window.api.navegar) {
+            window.api.navegar(destino);
+        } else {
+            console.error('No se puede navegar: API no disponible');
+        }
+    }
+
+    function cerrarSesion() {
+        navegarA('login.html');
+    }
+
+    function cargarSidebar(rol) {
+        const navMenu = document.getElementById('navMenu');
+        navMenu.innerHTML = '';
+        const botones = botonesSidebarPorRol[rol] || [];
+        botones.forEach(boton => {
+            const btn = document.createElement('button');
+            btn.textContent = boton.nombre;
+            if (boton.active) btn.classList.add('active');
+            btn.onclick = () => navegarA(boton.archivo);
+            navMenu.appendChild(btn);
+        });
+    }
+
+    function getInitials(nombre) {
+        if (!nombre) return '👤';
+        const parts = nombre.split(' ');
+        if (parts.length >= 2) {
+            return (parts[0][0] + parts[1][0]).toUpperCase();
+        }
+        return nombre.substring(0, 2).toUpperCase();
+    }
+
+    // ============================================
+    // FUNCIONES PRINCIPALES CORREGIDAS
+    // ============================================
+
+    async function obtenerTodasLasCitas() {
+        try {
+            const result = await window.api.obtenerTodasLasCitas();
+            if (result.ok) {
+                return result.citas;
+            } else {
+                console.error('Error obteniendo citas:', result.error);
+                return [];
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            return [];
+        }
+    }
+
+    // ✅ CORREGIDO: Filtrar citas por mes y año
+    function filtrarCitasPorMes(citas, mes, año) {
+        return citas.filter(cita => {
+            if (!cita.fecha_cita) return false;
+            const fecha = new Date(cita.fecha_cita);
+            // ✅ CORRECCIÓN: getMonth() devuelve 0-11, mes viene 0-11
+            return fecha.getMonth() === mes && fecha.getFullYear() === año;
+        });
+    }
+
+    // ✅ NUEVO: Generar reporte con conteo por estado
+    function generarReporte(citas, mes, año) {
+        const total = citas.length;
+        
+        // Agrupar por entidad
+        const porEntidad = {};
+        citas.forEach(cita => {
+            const nombreEntidad = cita.entidad_nombre || 'Sin entidad';
+            if (!porEntidad[nombreEntidad]) {
+                porEntidad[nombreEntidad] = 0;
+            }
+            porEntidad[nombreEntidad]++;
+        });
+
+        // ✅ NUEVO: Conteo por estado
+        const porEstado = {
+            pendiente: 0,
+            atendida: 0,
+            cancelada: 0,
+            no_asistio: 0
+        };
+
+        citas.forEach(cita => {
+            const estado = (cita.estado || 'pendiente').toLowerCase();
+            if (porEstado.hasOwnProperty(estado)) {
+                porEstado[estado]++;
+            } else {
+                // Si hay un estado no contemplado, lo contamos como pendiente
+                porEstado.pendiente++;
+            }
+        });
+
+        // Ordenar entidades por cantidad
+        const entidadesOrdenadas = Object.entries(porEntidad)
+            .sort((a, b) => b[1] - a[1])
+            .map(([nombre, cantidad]) => ({ nombre, cantidad }));
+
+        return {
+            total,
+            porEntidad: entidadesOrdenadas,
+            porEstado,
+            mes,
+            año
+        };
+    }
+
+    // ✅ CORREGIDO: Mostrar preview con estados
+    function mostrarPreview(reporte) {
+        const container = document.getElementById('previewContainer');
+        const totalElement = document.getElementById('totalCitas');
+        const mesElement = document.getElementById('mesActual');
+        const entidadesList = document.getElementById('entidadesList');
+        const estadosGrid = document.getElementById('estadosGrid');
+
+        totalElement.textContent = reporte.total;
+
+        const meses = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+        mesElement.textContent = `${meses[reporte.mes]} ${reporte.año}`;
+
+        // Entidades
+        if (reporte.porEntidad.length === 0) {
+            entidadesList.innerHTML = '<p style="color: #6b7280; font-size: 14px;">No hay citas en este mes</p>';
+        } else {
+            entidadesList.innerHTML = `
+                <strong style="font-size: 13px; color: #374151;">🏢 Por entidad:</strong>
+                ${reporte.porEntidad.map(item => `
+                    <div class="entidad-item">
+                        <span class="entidad-nombre">${item.nombre}</span>
+                        <span class="entidad-cantidad">${item.cantidad}</span>
+                    </div>
+                `).join('')}
+            `;
+        }
+
+        // ✅ NUEVO: Estados
+        const estadoLabels = {
+            pendiente: 'Pendiente',
+            atendida: 'Atendida',
+            cancelada: 'Cancelada',
+            no_asistio: 'No asistió'
+        };
+
+        const estadoColors = {
+            pendiente: 'estado-pendiente',
+            atendida: 'estado-atendida',
+            cancelada: 'estado-cancelada',
+            no_asistio: 'estado-no_asistio'
+        };
+
+        estadosGrid.innerHTML = Object.entries(reporte.porEstado).map(([estado, cantidad]) => `
+            <div class="estado-item ${estadoColors[estado] || ''}">
+                <div class="cantidad">${cantidad}</div>
+                <div class="label">${estadoLabels[estado] || estado}</div>
+            </div>
+        `).join('');
+
+        container.classList.add('visible');
+    }
+
+    // ✅ CORREGIDO: Cargar reporte del mes seleccionado
+    async function cargarReporte() {
+        const mesInput = document.getElementById('mesSelector');
+        if (!mesInput.value) {
+            console.warn('No hay mes seleccionado');
+            return null;
+        }
+
+        // ✅ CORRECCIÓN: Parsear correctamente el mes
+        const [año, mes] = mesInput.value.split('-').map(Number);
+        // mes viene 1-12, necesitamos 0-11 para JavaScript
+        const mesIndex = mes - 1;
+
+        console.log(`📊 Cargando reporte: ${año}-${mes} (mesIndex: ${mesIndex})`);
+
+        const todas = await obtenerTodasLasCitas();
+        const filtradas = filtrarCitasPorMes(todas, mesIndex, año);
+        
+        console.log(`📊 Citas encontradas: ${filtradas.length} de ${todas.length} totales`);
+
+        const reporte = generarReporte(filtradas, mesIndex, año);
+
+        datosReporte = {
+            citas: filtradas,
+            reporte: reporte,
+            mes: mesIndex,
+            año: año
+        };
+
+        mostrarPreview(reporte);
+        return datosReporte;
+    }
+
+    // ============================================
+    // GENERAR PDF - CORREGIDO
+    // ============================================
+    async function generarPDF() {
+        const btn = document.getElementById('btnPDF');
+        btn.disabled = true;
+        btn.innerHTML = '<span class="loading-spinner"></span> Generando...';
+
+        try {
+            await cargarReporte();
+
+            if (!datosReporte || datosReporte.citas.length === 0) {
+                alert('No hay citas para el mes seleccionado.');
+                btn.disabled = false;
+                btn.innerHTML = 'Exportar a PDF';
+                return;
+            }
+
+            // ✅ CORREGIDO: Incluir estados en los datos del PDF
+            const datosPDF = {
+                mes: datosReporte.mes,
+                año: datosReporte.año,
+                total: datosReporte.reporte.total,
+                porEntidad: datosReporte.reporte.porEntidad,
+                porEstado: datosReporte.reporte.porEstado
+            };
+
+            console.log('📄 Enviando a generar PDF:', datosPDF);
+
+            const result = await window.api.generarYMostrarPDF(datosPDF, null, 'reporte_citas');
+
+            if (!result || !result.ok) {
+                alert('Error generando PDF: ' + (result?.error || 'Error desconocido'));
+            } else {
+                console.log('✅ PDF generado correctamente:', result.pdfPath);
+            }
+
+        } catch (error) {
+            console.error('Error generando PDF:', error);
+            alert('Error generando PDF: ' + error.message);
+        }
+
+        btn.disabled = false;
+        btn.innerHTML = 'Exportar a PDF';
+    }
+
+    // ============================================
+    // GENERAR EXCEL - CORREGIDO
+    // ============================================
+async function generarExcel() {
+    const btn = document.getElementById('btnExcel');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="loading-spinner"></span> Generando...';
+
+    try {
+        await cargarReporte();
+
+        if (!datosReporte || datosReporte.citas.length === 0) {
+            alert('No hay citas para el mes seleccionado.');
+            btn.disabled = false;
+            btn.innerHTML = 'Exportar a Excel';
+            return;
+        }
+
+        // ✅ Usar el IPC para generar el Excel
+        const result = await window.api.generarExcel({
+            citas: datosReporte.citas,
+            reporte: datosReporte.reporte,
+            mes: datosReporte.mes,
+            año: datosReporte.año
+        });
+
+        if (!result || !result.ok) {
+            alert('Error generando Excel: ' + (result?.error || 'Error desconocido'));
+        } else {
+            console.log('✅ Excel generado correctamente:', result.ruta);
+            alert('✅ Reporte Excel generado exitosamente');
+        }
+
+    } catch (error) {
+        console.error('Error generando Excel:', error);
+        alert('Error generando Excel: ' + error.message);
+    }
+
+    btn.disabled = false;
+    btn.innerHTML = 'Exportar a Excel';
+}
+
+    // ============================================
+    // INICIALIZACIÓN
+    // ============================================
+
+    async function cargarUsuario() {
+        try {
+            if (window.api && window.api.getUsuarioActual) {
+                usuarioActual = await window.api.getUsuarioActual();
+                
+                if (!usuarioActual) {
+                    navegarA('login.html');
+                    return;
+                }
+                
+                document.getElementById('userNombre').textContent = usuarioActual.nombre_completo;
+                document.getElementById('userRol').textContent = usuarioActual.rol.toUpperCase();
+                
+                const avatar = document.getElementById('userAvatar');
+                avatar.textContent = getInitials(usuarioActual.nombre_completo);
+                
+                cargarSidebar(usuarioActual.rol);
+
+                // Configurar mes actual
+                const hoy = new Date();
+                const mesActual = hoy.getFullYear() + '-' + String(hoy.getMonth() + 1).padStart(2, '0');
+                document.getElementById('mesSelector').value = mesActual;
+
+                // Cargar reporte inicial
+                await cargarReporte();
+
+                // Auto-actualizar al cambiar el mes
+                document.getElementById('mesSelector').addEventListener('change', cargarReporte);
+
+            } else {
+                console.error('API no disponible');
+            }
+        } catch (error) {
+            console.error('Error cargando usuario:', error);
+            navegarA('login.html');
+        }
+    }
+
+    // Inicializar
+    cargarUsuario();
+</script>
+</body>
+</html>

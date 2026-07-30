@@ -1,0 +1,1036 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Citas Realizadas | Clínica Audiología</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background: #ffffff;
+      font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, sans-serif;
+      padding: 20px 24px;
+      color: #1e293b;
+    }
+
+    .logo-empresa-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+
+    .logo-empresa-top img {
+      height: 70px;
+      object-fit: contain;
+      border-radius: 12px;
+    }
+
+    .logo-texto-temporal {
+      font-weight: 700;
+      font-size: 1.2rem;
+      color: #001e81;
+    }
+
+    .logo-texto-temporal span {
+      display: block;
+      font-size: 0.7rem;
+      color: #475569;
+    }
+
+    .btn-dashboard {
+      background: #1e3a8a;
+      color: white;
+      border: none;
+      padding: 10px 24px;
+      border-radius: 40px;
+      font-weight: 600;
+      cursor: pointer;
+      font-size: 0.85rem;
+      transition: all 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-dashboard:hover {
+      background: #0f2b4d;
+      transform: translateY(-1px);
+    }
+
+    /* Botones de navegación entre vistas */
+    .nav-buttons {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 24px;
+      justify-content: center;
+    }
+
+    .btn-nav {
+      background: #f1f5f9;
+      color: #475569;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 40px;
+      font-weight: 600;
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: all 0.2s;
+    }
+
+    .btn-nav.active {
+      background: #2563eb;
+      color: white;
+    }
+
+    .btn-nav:hover {
+      transform: translateY(-1px);
+    }
+
+    .btn-nav.active:hover {
+      background: #1d4ed8;
+    }
+
+    .btn-nav:not(.active):hover {
+      background: #e2e8f0;
+    }
+
+    .main-header {
+      text-align: center;
+      margin-bottom: 32px;
+    }
+
+    .main-header h1 {
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: #001e81;
+      margin-bottom: 8px;
+    }
+
+    .main-header p {
+      color: #475569;
+      font-size: 0.9rem;
+    }
+
+    .citas-panel {
+      background: white;
+      border-radius: 20px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      border: 1px solid #e2e8f0;
+      overflow: hidden;
+    }
+
+    .panel-header {
+      background: #ffffff;
+      padding: 16px 20px;
+      border-bottom: 1px solid #e2e8f0;
+    }
+
+    .panel-header h3 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #0f2b4d;
+      margin-bottom: 12px;
+    }
+
+    .filtros {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 16px;
+    }
+
+    .filtro-group {
+      flex: 1;
+      min-width: 140px;
+    }
+
+    .filtro-group label {
+      font-size: 0.7rem;
+      font-weight: 600;
+      color: #64748b;
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    .filtro-group input,
+    .filtro-group select {
+      width: 100%;
+      padding: 6px 10px;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      font-size: 0.8rem;
+    }
+
+    .search-box {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 16px;
+    }
+
+    .search-box input {
+      flex: 1;
+      padding: 8px 12px;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      font-size: 0.85rem;
+    }
+
+    .btn-search {
+      background: #3b82f6;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 0.85rem;
+    }
+
+    .tabla-container {
+      overflow-x: auto;
+      padding: 0 20px 20px 20px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.8rem;
+    }
+
+    th, td {
+      padding: 10px 8px;
+      text-align: left;
+      border-bottom: 1px solid #e2e8f0;
+    }
+
+    th {
+      background: #f8fafc;
+      font-weight: 700;
+      color: #475569;
+      position: sticky;
+      top: 0;
+    }
+
+    tr:hover {
+      background: #f8fafc;
+    }
+
+    .badge {
+      padding: 2px 8px;
+      border-radius: 12px;
+      font-size: 0.7rem;
+      font-weight: 600;
+    }
+
+    .badge-atendida {
+      background: #d1fae5;
+      color: #059669;
+    }
+
+    .paginador {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      padding: 16px;
+      border-top: 1px solid #e2e8f0;
+    }
+
+    .paginador button {
+      padding: 6px 12px;
+      border: 1px solid #e2e8f0;
+      background: white;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.8rem;
+    }
+
+    .paginador button:hover:not(:disabled) {
+      background: #3b82f6;
+      color: white;
+    }
+
+    .paginador button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .paginador .active {
+      background: #3b82f6;
+      color: white;
+    }
+
+    .mensaje {
+      padding: 10px 16px;
+      border-radius: 12px;
+      font-size: 0.8rem;
+      margin-top: 12px;
+      display: none;
+    }
+
+    @media (max-width: 900px) {
+      body { padding: 16px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="logo-empresa-top">
+  <img src="../img/saninlogo.jpg" alt="Logo U.D.A." onerror="this.style.display='none';">
+  <div class="logo-texto-temporal" style="display: none;" id="fallbackLogo">
+    <strong>AUDIOLOGÍA CLÍNICA</strong>
+    <span>Especialistas en Audición</span>
+  </div>
+  <button class="btn-dashboard" id="btnVolverDashboard">← Volver al Dashboard</button>
+</div>
+
+<div class="main-header">
+  <h1>📋 CITAS REALIZADAS</h1>
+  <p>Historial de atenciones completadas</p>
+</div>
+
+<!-- Botones de navegación -->
+<div class="nav-buttons">
+  <button class="btn-nav" id="btnCitasSemana">Citas de la Semana</button>
+  <button class="btn-nav active" id="btnCitasRealizadas">Citas Realizadas</button>
+  <button class="btn-nav" id="btnCitasPendientesNoSemana">Citas Pendientes (No semana)</button>
+</div>
+
+<div class="citas-panel">
+  <div class="panel-header">
+    <h3 id="panelTitle">📋 Citas Atendidas</h3>
+    
+    <div class="filtros">
+      <div class="filtro-group">
+        <label>Filtrar por fecha</label>
+        <input type="date" id="filtroFecha">
+      </div>
+      <div class="filtro-group">
+        <label>Filtrar por entidad</label>
+        <select id="filtroEntidad">
+          <option value="">Todas</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="search-box">
+      <input type="text" id="searchInput" placeholder="🔍 Buscar por nombre o cédula...">
+      <button class="btn-search" id="btnBuscar">Buscar</button>
+      <button class="btn-search" id="btnLimpiarBusqueda" style="background: #64748b;">Limpiar</button>
+    </div>
+  </div>
+
+  <div class="tabla-container">
+    <table>
+      <thead>
+        <tr>
+          <th>Fecha</th><th>Hora</th><th>Paciente</th><th>Documento</th><th>Entidad</th><th>Tipo Atención</th><th>Estado</th> <!--<th>Acciones</th> -->
+        </tr>
+      </thead>
+      <tbody id="tablaCitasBody">
+        <tr><td colspan="8">Cargando citas...</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="paginador" id="paginador"></div>
+</div>
+
+<script>
+  let todasLasCitas = [];
+  let citasFiltradas = [];
+  let paginaActual = 1;
+  const registrosPorPagina = 10;
+  let entidadesLista = [];
+
+  function mostrarMensaje(texto, tipo) {
+    const mensajeDiv = document.getElementById('mensaje');
+    if (mensajeDiv) {
+      mensajeDiv.textContent = texto;
+      mensajeDiv.className = `mensaje ${tipo}`;
+      mensajeDiv.style.display = 'block';
+      setTimeout(() => {
+        mensajeDiv.style.display = 'none';
+      }, 3000);
+    }
+  }
+
+  function formatearFecha(fechaStr) {
+    if (!fechaStr) return '';
+    try {
+      const fecha = new Date(fechaStr);
+      return fecha.toLocaleDateString('es-CO');
+    } catch (e) {
+      return fechaStr;
+    }
+  }
+
+  function formatearHora(horaStr) {
+    if (!horaStr) return '';
+    try {
+      let horas, minutos;
+      if (horaStr.includes(':')) {
+        const partes = horaStr.split(':');
+        horas = parseInt(partes[0]);
+        minutos = partes[1];
+      } else {
+        return horaStr;
+      }
+      const periodo = horas >= 12 ? 'PM' : 'AM';
+      let horas12 = horas % 12;
+      horas12 = horas12 === 0 ? 12 : horas12;
+      return `${horas12}:${minutos} ${periodo}`;
+    } catch (e) {
+      return horaStr;
+    }
+  }
+
+  function obtenerTipoAtencion(motivo) {
+    if (!motivo) return 'No especificado';
+    const tipos = ['Audiometría', 'Logoaudiometria', 'Impedanciometria', 'Control'];
+    for (const tipo of tipos) {
+      if (motivo.includes(tipo)) return tipo;
+    }
+    return motivo.split(' - ')[0] || 'Consulta';
+  }
+
+  async function cargarEntidades() {
+    try {
+      const result = await window.api.obtenerEntidades();
+      if (result && result.ok) {
+        entidadesLista = result.entidades;
+        const filtroEntidad = document.getElementById('filtroEntidad');
+        filtroEntidad.innerHTML = '<option value="">Todas</option>';
+        entidadesLista.forEach(entidad => {
+          const option = document.createElement('option');
+          option.value = entidad.id;
+          option.textContent = entidad.nombre;
+          filtroEntidad.appendChild(option);
+        });
+      }
+    } catch (error) {
+      console.error('Error cargando entidades:', error);
+    }
+  }
+
+  async function cargarCitas() {
+    try {
+      const result = await window.api.obtenerTodasLasCitas();
+      if (result && result.ok) {
+        todasLasCitas = result.citas;
+        aplicarFiltros();
+      } else {
+        mostrarMensaje('Error cargando citas', 'error');
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      mostrarMensaje('Error al cargar citas', 'error');
+    }
+  }
+
+function aplicarFiltros() {
+  const filtroFecha = document.getElementById('filtroFecha').value;
+  const filtroEntidad = document.getElementById('filtroEntidad').value;
+  const searchText = document.getElementById('searchInput').value.toLowerCase();
+
+  console.log('🔍 ========== INICIO BÚSQUEDA ==========');
+  console.log('📝 Texto buscado:', `"${searchText}"`);
+  console.log('📏 Longitud del texto:', searchText.length);
+  console.log('📅 Filtro fecha:', filtroFecha || '(vacío)');
+  console.log('🏢 Filtro entidad:', filtroEntidad || '(vacío)');
+  console.log('📊 Total citas en memoria:', todasLasCitas.length);
+  
+  // Mostrar TODOS los datos de las primeras 2 citas para ver qué campos tienen
+  if (todasLasCitas.length > 0) {
+    console.log('\n📋 EJEMPLO DE DATOS DE CITAS:');
+    todasLasCitas.slice(0, 2).forEach((cita, idx) => {
+      console.log(`\n--- Cita ${idx + 1} (ID: ${cita.id}) ---`);
+      console.log(`  estado: "${cita.estado}"`);
+      console.log(`  paciente_nombre: "${cita.paciente_nombre}" (tipo: ${typeof cita.paciente_nombre})`);
+      console.log(`  documento: "${cita.documento}" (tipo: ${typeof cita.documento})`);
+      console.log(`  fecha_cita:`, cita.fecha_cita);
+      console.log(`  entidad_id: ${cita.entidad_id}`);
+    });
+  }
+
+  // CONTAR cuántas tienen estado 'atendida'
+  const citasAtendidasCount = todasLasCitas.filter(c => c.estado === 'atendida').length;
+  console.log(`\n✅ Citas con estado "atendida": ${citasAtendidasCount} de ${todasLasCitas.length}`);
+
+  // Aplicar filtros con logs detallados
+  citasFiltradas = todasLasCitas.filter(cita => {
+    // Verificar estado
+    if (cita.estado !== 'atendida') {
+      return false;
+    }
+    
+    // FILTRO DE FECHA
+    if (filtroFecha) {
+      let fechaCitaStr;
+      if (cita.fecha_cita instanceof Date) {
+        const year = cita.fecha_cita.getFullYear();
+        const month = String(cita.fecha_cita.getMonth() + 1).padStart(2, '0');
+        const day = String(cita.fecha_cita.getDate()).padStart(2, '0');
+        fechaCitaStr = `${year}-${month}-${day}`;
+      } else if (typeof cita.fecha_cita === 'string') {
+        fechaCitaStr = cita.fecha_cita.split('T')[0];
+      } else {
+        fechaCitaStr = new Date(cita.fecha_cita).toISOString().split('T')[0];
+      }
+      if (fechaCitaStr !== filtroFecha) return false;
+    }
+    
+    // FILTRO DE ENTIDAD
+    if (filtroEntidad) {
+      const citaEntidadId = parseInt(cita.entidad_id);
+      const filtroEntidadNum = parseInt(filtroEntidad);
+      if (citaEntidadId !== filtroEntidadNum) return false;
+    }
+    
+    // FILTRO DE BÚSQUEDA CON LOGS DETALLADOS
+    if (searchText && searchText.length > 0) {
+      // Obtener valores asegurando que sean strings
+      const nombreCompleto = cita.paciente_nombre ? String(cita.paciente_nombre) : '';
+      const documentoStr = cita.documento ? String(cita.documento) : '';
+      
+      const nombreLower = nombreCompleto.toLowerCase();
+      const documentoLower = documentoStr.toLowerCase();
+      
+      const nombreMatch = nombreLower.includes(searchText);
+      const docMatch = documentoLower.includes(searchText);
+      
+      // Log detallado de la búsqueda (solo cuando hay texto)
+      console.log(`\n🔎 Analizando cita ID ${cita.id}:`);
+      console.log(`   Nombre: "${nombreCompleto}" → contiene "${searchText}": ${nombreMatch}`);
+      console.log(`   Documento: "${documentoStr}" → contiene "${searchText}": ${docMatch}`);
+      console.log(`   Resultado: ${nombreMatch || docMatch ? '✅ PASA' : '❌ RECHAZADA'}`);
+      
+      if (!nombreMatch && !docMatch) return false;
+    }
+    
+    return true;
+  });
+
+  console.log(`\n📊 RESULTADO FINAL: ${citasFiltradas.length} citas filtradas`);
+  
+  if (searchText && searchText.length > 0) {
+    if (citasFiltradas.length === 0) {
+      console.log('⚠️ NO SE ENCONTRARON COINCIDENCIAS');
+      console.log('Posibles causas:');
+      console.log('  1. Los nombres/cédulas no coinciden exactamente');
+      console.log('  2. Hay espacios extras en los datos');
+      console.log('  3. Hay mayúsculas/minúsculas (aunque se convierte a minúsculas)');
+    } else {
+      console.log('✅ CITAS QUE COINCIDEN:');
+      citasFiltradas.forEach(cita => {
+        console.log(`   - ID:${cita.id} | ${cita.paciente_nombre} | ${cita.documento}`);
+      });
+    }
+  }
+  
+  console.log('🔍 ========== FIN BÚSQUEDA ==========\n');
+  
+  paginaActual = 1;
+  renderizarTabla();
+  renderizarPaginador();
+}
+  function renderizarTabla() {
+  const tbody = document.getElementById('tablaCitasBody');
+  const inicio = (paginaActual - 1) * registrosPorPagina;
+  const fin = inicio + registrosPorPagina;
+  const citasPagina = citasFiltradas.slice(inicio, fin);
+
+  if (citasPagina.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="8">No hay citas realizadas registradas</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = citasPagina.map(cita => {
+    const fechaFormateada = formatearFecha(cita.fecha_cita);
+    const horaFormateada = formatearHora(cita.hora_cita);
+    const tipoAtencion = obtenerTipoAtencion(cita.motivo);
+    
+    // Escapar datos para evitar problemas con comillas
+    const citaJSON = JSON.stringify(cita).replace(/'/g, "&#39;");
+    
+    return `
+      <tr>
+        <td>${fechaFormateada || ''}</td>
+        <td>${horaFormateada || ''}</td>
+        <td><strong>${cita.paciente_nombre || ''}</strong></td>
+        <td>${cita.documento || ''}</td>
+        <td>${cita.entidad_nombre || ''}</td>
+        <td>${tipoAtencion}</td>
+        <td><span class="badge badge-atendida">Realizada</span></td>
+        <td>
+
+
+
+
+        </td>
+      </tr>
+    `;
+  }).join('');
+}
+
+  function renderizarPaginador() {
+    const totalPaginas = Math.ceil(citasFiltradas.length / registrosPorPagina);
+    const paginadorDiv = document.getElementById('paginador');
+    
+    if (totalPaginas <= 1) {
+      paginadorDiv.innerHTML = '';
+      return;
+    }
+
+    let html = `<button onclick="cambiarPagina(1)" ${paginaActual === 1 ? 'disabled' : ''}>«</button>`;
+    html += `<button onclick="cambiarPagina(${paginaActual - 1})" ${paginaActual === 1 ? 'disabled' : ''}>‹</button>`;
+    
+    for (let i = 1; i <= totalPaginas; i++) {
+      if (i === 1 || i === totalPaginas || (i >= paginaActual - 2 && i <= paginaActual + 2)) {
+        html += `<button onclick="cambiarPagina(${i})" class="${paginaActual === i ? 'active' : ''}">${i}</button>`;
+      } else if (i === paginaActual - 3 || i === paginaActual + 3) {
+        html += `<button disabled>...</button>`;
+      }
+    }
+    
+    html += `<button onclick="cambiarPagina(${paginaActual + 1})" ${paginaActual === totalPaginas ? 'disabled' : ''}>›</button>`;
+    html += `<button onclick="cambiarPagina(${totalPaginas})" ${paginaActual === totalPaginas ? 'disabled' : ''}>»</button>`;
+    
+    paginadorDiv.innerHTML = html;
+  }
+
+  window.cambiarPagina = function(pagina) {
+    paginaActual = pagina;
+    renderizarTabla();
+    renderizarPaginador();
+  };
+
+  // Navegación entre vistas
+  document.getElementById('btnCitasSemana')?.addEventListener('click', () => {
+    window.api?.navegar('citassemana.html');
+  });
+
+  document.getElementById('btnCitasRealizadas')?.addEventListener('click', () => {
+    // Ya estamos en esta vista
+  });
+
+  document.getElementById('btnCitasPendientesNoSemana')?.addEventListener('click', () => {
+    window.api?.navegar('citas-pendientes.html');
+  });
+
+  // Event listeners para filtros
+ document.getElementById('btnLimpiarBusqueda')?.addEventListener('click', () => {
+  document.getElementById('searchInput').value = '';
+  document.getElementById('filtroFecha').value = '';  // ← Limpia fecha
+  document.getElementById('filtroEntidad').value = ''; // ← Limpia entidad
+  aplicarFiltros(); // ← Aplica los filtros limpios
+});
+  document.getElementById('searchInput')?.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') aplicarFiltros();
+  });
+
+  document.getElementById('filtroFecha')?.addEventListener('change', aplicarFiltros);
+document.getElementById('filtroEntidad')?.addEventListener('change', aplicarFiltros);
+document.getElementById('btnBuscar')?.addEventListener('click', aplicarFiltros);
+
+  // Botón volver
+  document.getElementById('btnVolverDashboard')?.addEventListener('click', () => {
+    window.api?.volverDashboard();
+  });
+
+  // Inicializar
+  async function init() {
+    await cargarEntidades();
+    await cargarCitas();
+  }
+
+  // Función para determinar el tipo de certificado
+function determinarTipoCertificado(motivo) {
+  if (!motivo) return 'audiometria';
+  if (motivo.includes('Logoaudiometria')) return 'logoaudiometria';
+  if (motivo.includes('Audiometría')) return 'audiometria';
+  if (motivo.includes('Audiometria')) return 'audiometria';
+  return 'audiometria';
+}
+
+// Función para generar PDF desde una cita realizada
+// Función para generar PDF desde una cita realizada
+async function generarPDFcita(cita) {
+  try {
+    console.log('========== INICIO generarPDFcita ==========');
+    console.log('Cita ID:', cita.id);
+    console.log('Paciente:', cita.paciente_nombre);
+    console.log('Motivo:', cita.motivo);
+    
+    const buttons = document.querySelectorAll('.btn-pdf');
+    let targetBtn = null;
+    for (let btn of buttons) {
+      if (btn.textContent.includes('PDF') && btn.closest('tr')?.innerHTML.includes(cita.id)) {
+        targetBtn = btn;
+        break;
+      }
+    }
+    
+    if (targetBtn) {
+      targetBtn.textContent = '⏳...';
+      targetBtn.disabled = true;
+    }
+    
+    const tipoCertificado = determinarTipoCertificado(cita.motivo);
+    console.log('Tipo certificado:', tipoCertificado);
+    
+    // Buscar examen por cita_id
+    let examenData = null;
+    console.log('1. Llamando a obtenerExamenPorCitaId con ID:', cita.id);
+    
+    if (window.api && window.api.obtenerExamenPorCitaId) {
+      const result = await window.api.obtenerExamenPorCitaId(cita.id);
+      console.log('2. Resultado de la búsqueda:', result);
+      
+      if (result.ok && result.examen) {
+        examenData = result.examen;
+        console.log('3. ✅ Examen encontrado!');
+        console.log('3a. examenData completo:', JSON.stringify(examenData, null, 2));
+        console.log('3b. tipo_examen:', examenData.tipo_examen);
+        console.log('3c. grafica_base64 presente?', !!examenData.grafica_base64);
+        console.log('3d. longitud grafica_base64:', examenData.grafica_base64?.length || 0);
+        console.log('3e. valores_od:', examenData.valores_od);
+        console.log('3f. valores_oi:', examenData.valores_oi);
+        console.log('3g. urv_od:', examenData.urv_od);
+        console.log('3h. upalabra_od:', examenData.upalabra_od);
+      } else {
+        console.log('3. ❌ No se encontró examen. result.ok:', result.ok, 'examen:', result.examen);
+      }
+    } else {
+      console.log('2. ❌ window.api.obtenerExamenPorCitaId NO está disponible');
+    }
+    
+    // Preparar datos para el PDF
+    let datosParaPDF = null;
+    
+    if (examenData) {
+      console.log('4. Procesando examenData - tipo:', examenData.tipo_examen);
+      
+      if (examenData.tipo_examen === 'logoaudiometria') {
+        console.log('4a. Procesando como LOGOAUDIOMETRIA');
+        
+        let valoresOD = {};
+        let valoresOI = {};
+        
+        // Verificar dónde están los valores
+        if (examenData.urv_od !== undefined) {
+          console.log('4b. Valores encontrados en campos separados (urv_od, etc.)');
+          valoresOD = {
+            urv: examenData.urv_od || '',
+            upalabra: examenData.upalabra_od || '',
+            udisc: examenData.udisc_od || '',
+            pmax: examenData.pmax_od || ''
+          };
+          valoresOI = {
+            urv: examenData.urv_oi || '',
+            upalabra: examenData.upalabra_oi || '',
+            udisc: examenData.udisc_oi || '',
+            pmax: examenData.pmax_oi || ''
+          };
+        } else if (examenData.valores_od) {
+          console.log('4c. Valores encontrados en JSON (valores_od)');
+          valoresOD = typeof examenData.valores_od === 'string' 
+            ? JSON.parse(examenData.valores_od) 
+            : examenData.valores_od;
+          valoresOI = typeof examenData.valores_oi === 'string' 
+            ? JSON.parse(examenData.valores_oi) 
+            : examenData.valores_oi;
+        } else {
+          console.log('4d. ⚠️ No se encontraron valores en ninguna estructura');
+        }
+        
+        console.log('4e. valoresOD final:', valoresOD);
+        console.log('4f. valoresOI final:', valoresOI);
+        
+        datosParaPDF = {
+          paciente: {
+            nombre: cita.paciente_nombre,
+            documento: cita.documento
+          },
+          fecha_cita: cita.fecha_cita,
+          valores_od: valoresOD,
+          valores_oi: valoresOI,
+          grafica_base64: examenData.grafica_base64 || '',
+          diagnostico: examenData.diagnostico || '',
+          diagnostico_od: examenData.diagnostico_od || '',
+          diagnostico_oi: examenData.diagnostico_oi || ''
+        };
+        
+      } else if (examenData.tipo_examen === 'audiometria') {
+        console.log('4a. Procesando como AUDIOMETRIA');
+        
+        let valoresOD = {};
+        let valoresOI = {};
+        
+        if (examenData.valores_od) {
+          valoresOD = typeof examenData.valores_od === 'string' 
+            ? JSON.parse(examenData.valores_od) 
+            : examenData.valores_od;
+          valoresOI = typeof examenData.valores_oi === 'string' 
+            ? JSON.parse(examenData.valores_oi) 
+            : examenData.valores_oi;
+        }
+        
+        console.log('4b. valoresOD (frecuencias):', valoresOD);
+        
+        datosParaPDF = {
+          paciente: {
+            nombre: cita.paciente_nombre,
+            documento: cita.documento
+          },
+          fecha_cita: cita.fecha_cita,
+          valores_od: valoresOD,
+          valores_oi: valoresOI,
+          grafica_base64: examenData.grafica_base64 || '',
+          diagnostico_od: examenData.diagnostico_od || '',
+          diagnostico_oi: examenData.diagnostico_oi || '',
+          observaciones: examenData.observaciones || ''
+        };
+      } else {
+        console.log('4a. ⚠️ Tipo de examen no reconocido:', examenData.tipo_examen);
+        datosParaPDF = {
+          paciente: {
+            nombre: cita.paciente_nombre,
+            documento: cita.documento
+          },
+          fecha_cita: cita.fecha_cita,
+          valores_od: {},
+          valores_oi: {},
+          grafica_base64: '',
+          diagnostico: '',
+          diagnostico_od: '',
+          diagnostico_oi: ''
+        };
+      }
+    } else {
+      console.log('4. ❌ examenData es NULL, usando datos mínimos');
+      datosParaPDF = {
+        paciente: {
+          nombre: cita.paciente_nombre,
+          documento: cita.documento
+        },
+        fecha_cita: cita.fecha_cita,
+        valores_od: {},
+        valores_oi: {},
+        grafica_base64: '',
+        diagnostico: '',
+        diagnostico_od: '',
+        diagnostico_oi: ''
+      };
+    }
+    
+    console.log('5. Datos finales para PDF:');
+    console.log('5a. paciente:', datosParaPDF.paciente);
+    console.log('5b. valores_od:', datosParaPDF.valores_od);
+    console.log('5c. valores_oi:', datosParaPDF.valores_oi);
+    console.log('5d. grafica_base64 existe?', !!datosParaPDF.grafica_base64);
+    console.log('5e. longitud grafica_base64:', datosParaPDF.grafica_base64?.length || 0);
+    console.log('5f. diagnostico_od:', datosParaPDF.diagnostico_od);
+    console.log('5g. diagnostico_oi:', datosParaPDF.diagnostico_oi);
+    
+    console.log('6. Llamando a window.api.generarYMostrarPDF...');
+    
+    // Generar y mostrar PDF
+    const result = await window.api.generarYMostrarPDF(
+      datosParaPDF, 
+      cita.entidad_nombre || 'No especificada', 
+      tipoCertificado
+    );
+    
+    console.log('7. Respuesta de generarYMostrarPDF:', result);
+    
+    if (!result.ok) {
+      console.log('8. Error en respuesta:', result.error);
+      mostrarMensaje('Error al generar PDF: ' + (result.error || 'Desconocido'), 'error');
+    } else {
+      console.log('8. ✅ PDF generado correctamente');
+    }
+    
+    if (targetBtn) {
+      targetBtn.textContent = '📄 PDF';
+      targetBtn.disabled = false;
+    }
+    
+    console.log('========== FIN generarPDFcita ==========');
+    
+  } catch (error) {
+    console.error('❌ ERROR en generarPDFcita:', error);
+    console.error('Stack trace:', error.stack);
+    mostrarMensaje('Error al generar el certificado PDF: ' + error.message, 'error');
+    
+    const buttons = document.querySelectorAll('.btn-pdf');
+    for (let btn of buttons) {
+      if (btn.textContent.includes('...')) {
+        btn.textContent = '📄 PDF';
+        btn.disabled = false;
+      }
+    }
+  }
+}
+
+// Función para generar QR desde una cita realizada
+async function generarQRcita(cita) {
+  try {
+    const buttons = document.querySelectorAll('.btn-qr');
+    let targetBtn = null;
+    for (let btn of buttons) {
+      if (btn.textContent.includes('QR') && btn.closest('tr')?.innerHTML.includes(cita.id)) {
+        targetBtn = btn;
+        break;
+      }
+    }
+    
+    if (targetBtn) {
+      targetBtn.textContent = '⏳...';
+      targetBtn.disabled = true;
+    }
+    
+    const tipoCertificado = determinarTipoCertificado(cita.motivo);
+
+    
+    
+    // Buscar examen por cita_id
+    let examenData = null;
+    if (window.api && window.api.obtenerExamenPorCitaId) {
+      const result = await window.api.obtenerExamenPorCitaId(cita.id);
+      if (result.ok && result.examen) {
+        examenData = result.examen;
+        console.log('✅ Examen encontrado para QR:', examenData);
+      }
+    }
+    
+    // Preparar datos para el QR (debe tener los mismos datos que el PDF)
+    let datosParaQR = null;
+    
+    if (examenData) {
+      if (examenData.tipo_examen === 'logoaudiometria') {
+        datosParaQR = {
+          paciente: {
+            nombre: cita.paciente_nombre,
+            documento: cita.documento
+          },
+          fecha_cita: cita.fecha_cita,
+          valores_od: {
+            urv: examenData.urv_od || '',
+            upalabra: examenData.upalabra_od || '',
+            udisc: examenData.udisc_od || '',
+            pmax: examenData.pmax_od || ''
+          },
+          valores_oi: {
+            urv: examenData.urv_oi || '',
+            upalabra: examenData.upalabra_oi || '',
+            udisc: examenData.udisc_oi || '',
+            pmax: examenData.pmax_oi || ''
+          },
+          grafica_base64: examenData.grafica_base64 || '',
+          diagnostico: examenData.diagnostico || '',
+          diagnostico_od: examenData.diagnostico_od || '',
+          diagnostico_oi: examenData.diagnostico_oi || ''
+        };
+      } else {
+        let valoresOD = {};
+        let valoresOI = {};
+        
+        try {
+          if (examenData.valores_od) {
+            valoresOD = typeof examenData.valores_od === 'string' 
+              ? JSON.parse(examenData.valores_od) 
+              : examenData.valores_od;
+          }
+          if (examenData.valores_oi) {
+            valoresOI = typeof examenData.valores_oi === 'string' 
+              ? JSON.parse(examenData.valores_oi) 
+              : examenData.valores_oi;
+          }
+        } catch(e) {}
+        
+        datosParaQR = {
+          paciente: {
+            nombre: cita.paciente_nombre,
+            documento: cita.documento
+          },
+          fecha_cita: cita.fecha_cita,
+          valores_od: valoresOD,
+          valores_oi: valoresOI,
+          grafica_base64: examenData.grafica_base64 || '',
+          diagnostico_od: examenData.diagnostico_od || '',
+          diagnostico_oi: examenData.diagnostico_oi || '',
+          observaciones: examenData.observaciones || ''
+        };
+      }
+    } else {
+      datosParaQR = {
+        paciente: {
+          nombre: cita.paciente_nombre,
+          documento: cita.documento
+        },
+        fecha_cita: cita.fecha_cita,
+        valores_od: {},
+        valores_oi: {},
+        grafica_base64: '',
+        diagnostico: '',
+        diagnostico_od: '',
+        diagnostico_oi: ''
+      };
+    }
+    
+    // Datos para mostrar en la ventana del QR
+    const datosCita = {
+      paciente: {
+        nombre: cita.paciente_nombre,
+        documento: cita.documento
+      },
+      fecha_cita: cita.fecha_cita,
+      entidad: cita.entidad_nombre
+    };
+    
+    console.log('Enviando a QR - grafica_base64 existe?', !!datosParaQR.grafica_base64);
+    
+    const result = await window.api.generarYMostrarQR(
+      datosCita,
+      datosParaQR,  // ← Pasar los datos completos del examen
+      cita.entidad_nombre || 'No especificada',
+      tipoCertificado
+    );
+    
+    if (!result.ok) {
+      mostrarMensaje('Error al generar QR: ' + (result.error || 'Desconocido'), 'error');
+    }
+    
+    if (targetBtn) {
+      targetBtn.textContent = '📱 QR';
+      targetBtn.disabled = false;
+    }
+    
+  } catch (error) {
+    console.error('Error generando QR:', error);
+    mostrarMensaje('Error al generar el código QR', 'error');
+    
+    const buttons = document.querySelectorAll('.btn-qr');
+    for (let btn of buttons) {
+      if (btn.textContent.includes('...')) {
+        btn.textContent = '📱 QR';
+        btn.disabled = false;
+      }
+    }
+  }
+  
+}
+
+
+
+  init();
+</script>
+</body>
+</html>

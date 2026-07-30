@@ -1,0 +1,5452 @@
+
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Audiometría Tonal Clínica</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+<style>
+/* ============================================
+   REORGANIZACIÓN CSS - SIN CAMBIAR NOMBRES NI JS
+   ============================================ */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background: #ffffff;
+    font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, sans-serif;
+    padding: 20px 28px;
+    color: #1e293b;
+    max-width: 1600px;
+    margin: 0 auto;
+}
+
+/* === BOTONES SUPERIORES === */
+.top-buttons-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: center;
+    margin-bottom: 18px;
+}
+
+/* ============================================
+   MENÚ DE OPCIONES DE FRECUENCIA
+   ============================================ */
+
+#menuOpcionesFrecuencia {
+    background: white;
+    border: 2px solid #1e3a8a;
+    border-radius: 8px;
+    padding: 10px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+    z-index: 10002;
+    min-width: 150px;
+}
+
+#menuOpcionesFrecuencia button {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 6px 10px;
+    margin: 3px 0;
+    border: none;
+    border-radius: 4px;
+    background: transparent;
+    cursor: pointer;
+    font-size: 12px;
+    transition: background 0.2s;
+}
+
+#menuOpcionesFrecuencia button:hover {
+    background: #f1f5f9;
+}
+
+.filtro-item {
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.filtro-item:hover {
+    transform: scale(1.05);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+
+/* Estilos para el filtro de vía ósea */
+#filtroViaOsea button {
+    transition: all 0.2s;
+}
+
+#filtroViaOsea button:hover {
+    transform: scale(1.05);
+    opacity: 0.9;
+}
+
+#filtroViaOsea .filtro-item {
+    display: inline-block;
+    background: #f8fafc;
+    padding: 2px 8px;
+    margin: 2px 4px;
+    border-radius: 4px;
+    font-size: 12px;
+    border: 1px solid #e2e8f0;
+}
+
+#filtroViaOsea .filtro-item.od {
+    border-color: #991b1b;
+    color: #991b1b;
+}
+
+#filtroViaOsea .filtro-item.oi {
+    border-color: #1d4ed8;
+    color: #1d4ed8;
+}
+
+.top-buttons-row .btn-back-floating {
+    background: #1e3a8a;
+    color: white;
+    border: none;
+    padding: 10px 24px;
+    border-radius: 40px;
+    font-weight: 600;
+    cursor: pointer;
+    font-size: 0.85rem;
+    transition: all 0.2s;
+    margin: 0;
+}
+
+.top-buttons-row .btn-back-floating:hover {
+    background: #0f2b4d;
+    transform: translateY(-1px);
+}
+
+.top-buttons-row button {
+    margin-top: 0;
+    margin-right: 0;
+}
+
+.top-buttons-row .btn-grabar {
+    background: #27ae60;
+    padding: 10px 20px;
+    border-radius: 6px;
+    font-weight: bold;
+    border: none;
+    color: white;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.top-buttons-row .btn-grabar:hover {
+    background: #219a52;
+}
+
+/* === LOGO === */
+.logo-empresa-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 18px;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+.logo-empresa-top img {
+    height: 70px;
+    object-fit: contain;
+    border-radius: 12px;
+}
+
+.logo-texto-temporal {
+    font-weight: 700;
+    font-size: 1.2rem;
+    color: #001e81;
+}
+
+.logo-texto-temporal span {
+    display: block;
+    font-size: 0.7rem;
+    color: #475569;
+}
+
+.logo-header {
+    text-align: center;
+    margin-bottom: 24px;
+}
+
+.logo-header h1 {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #001e81;
+    margin-bottom: 4px;
+}
+
+.logo-header p {
+    color: #475569;
+    font-weight: 500;
+    font-size: 0.95rem;
+}
+
+/* === PACIENTE === */
+.patient-card {
+    background: #ffffff;
+    border: 1px solid #bbd8ff;
+    border-radius: 16px;
+    padding: 18px 22px;
+    margin-bottom: 22px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.03);
+}
+
+.patient-title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #001e81;
+    margin-bottom: 14px;
+}
+
+.patient-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 14px;
+}
+
+.patient-grid span {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #64748b;
+    text-transform: uppercase;
+}
+
+.patient-grid p {
+    margin-top: 4px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #0f172a;
+}
+
+/* === OÍDOS (OD y OI) en 2 columnas === */
+.ears-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 22px;
+    margin-bottom: 22px;
+}
+
+.ear-section {
+    padding: 16px 18px;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.ear-section.od {
+    border-left: 4px solid #e74c3c;
+}
+
+.ear-section.oi {
+    border-left: 4px solid #3498db;
+}
+
+.ear-title.od {
+    color: #e74c3c;
+    font-weight: 600;
+    margin-bottom: 14px;
+}
+
+.ear-title.oi {
+    color: #3498db;
+    font-weight: 600;
+    margin-bottom: 14px;
+}
+
+.input-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 10px 12px;
+}
+
+.input-field {
+    display: flex;
+    flex-direction: column;
+}
+
+.input-field label {
+    font-size: 11px;
+    font-weight: bold;
+    margin-bottom: 3px;
+    color: #555;
+}
+
+.input-field input {
+    padding: 6px 6px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 13px;
+    text-align: center;
+    width: 100%;
+    min-width: 0;
+}
+
+.input-field input:focus {
+    outline: none;
+    border-color: #3498db;
+}
+
+/* === VÍA ÓSEA (OD y OI) en 2 columnas === */
+bone-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 22px;
+    margin-bottom: 22px;
+}
+
+/* === CHART + PANELES LATERALES === */
+.chart-and-symbols {
+    display: flex;
+    gap: 28px;
+    align-items: flex-start;
+    margin-bottom: 22px;
+    flex-wrap: wrap;
+}
+
+/* CHART - TAMAÑO FIJO, NO MODIFICAR */
+.chart-wrapper {
+    flex: 0 0 auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.chart-container {
+    position: relative;
+    width: 690px;
+    height: 355px;
+    background-color: transparent;
+    border: 1px solid #ffffff00;
+    border-radius: 14px;
+    padding: 20px;
+    flex: none;
+    transform-origin: center center;
+    margin: 0;
+      
+}
+
+/* Escalas automáticas */
+@media (max-width: 820px) {
+    .chart-container { transform: scale(0.85); }
+}
+@media (max-width: 720px) {
+    .chart-container { transform: scale(0.7); }
+}
+@media (max-width: 620px) {
+    .chart-container { transform: scale(0.55); }
+}
+@media (min-width: 1400px) {
+    .chart-container { transform: scale(1.1); }
+}
+@media (min-width: 1800px) {
+    .chart-container { transform: scale(1.25); }
+}
+
+#toneChart,
+#drawingCanvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100% !important;
+    height: 100% !important;
+}
+
+#drawingCanvas {
+    z-index: 20;
+    pointer-events: auto;
+}
+
+/* === PANELES DE SÍMBOLOS (4 paneles a la derecha del chart) === */
+.symbols-side {
+    flex: 1;
+    min-width: 280px;
+    max-width: 500px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.symbols-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.symbols-panel {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 12px 10px;
+    text-align: center;
+}
+
+.symbols-panel h4 {
+    font-size: 0.8rem;
+    margin-bottom: 8px;
+    font-weight: 600;
+}
+
+.symbols-panel button {
+    margin: 3px;
+    padding: 5px 10px;
+    font-size: 0.8rem;
+    min-width: 34px;
+    background: #f1f5f9;
+    border: 1px solid #cbd5e1;
+    border-radius: 4px;
+    cursor: pointer;
+    color: #1e293b;
+}
+
+.symbols-panel button.active {
+    background: #111827;
+    color: white;
+    border-color: #111827;
+}
+
+.symbol-btn[data-ear="od"] {
+    background-color: #e74c3c !important;
+    color: white !important;
+}
+.symbol-btn[data-ear="od"]:hover {
+    background-color: #c0392b !important;
+}
+.bone-btn[data-bone-ear="od"] {
+    background-color: #e74c3c !important;
+    color: white !important;
+}
+.bone-btn[data-bone-ear="od"]:hover {
+    background-color: #c0392b !important;
+}
+
+/* === PTA + ENMASCARAR (lado a lado) === */
+.pta-enmascarar-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    margin-bottom: 22px;
+    justify-content: center;
+}
+
+.pta-box {
+    background: #ffffff;
+    border: 1px solid #dbe2ea;
+    border-radius: 12px;
+    padding: 14px 18px;
+    width: 280px;
+    flex: 0 0 auto;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+}
+
+.pta-box h3 {
+    margin-bottom: 12px;
+    color: #001e81;
+    text-align: center;
+    font-size: 1rem;
+}
+
+.pta-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 6px;
+    font-size: 13px;
+}
+
+.pta-row strong {
+    color: #111827;
+}
+
+.enmascarar-box {
+    background: #ffffff;
+    border: 1px solid #dbe2ea;
+    border-radius: 12px;
+    padding: 14px 18px;
+    flex: 1;
+    min-width: 280px;
+    max-width: 480px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+}
+
+.enmascarar-box h3 {
+    margin-bottom: 12px;
+    color: #001e81;
+    text-align: center;
+    font-size: 1rem;
+}
+
+.freq-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 4px 6px;
+    margin: 3px 0;
+    background: #f8fafc;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 12px;
+}
+
+.freq-item:hover {
+    background: #e2e8f0;
+    transform: translateX(3px);
+}
+
+.freq-item .freq-label {
+    font-weight: 600;
+    color: #334155;
+}
+
+.freq-item .freq-symbol {
+    font-family: monospace;
+    font-size: 16px;
+    font-weight: bold;
+    min-width: 30px;
+    text-align: center;
+}
+
+.freq-item.od-item .freq-symbol {
+    color: #991b1b;
+}
+.freq-item.oi-item .freq-symbol {
+    color: #1d4ed8;
+}
+
+/* === DIAGNÓSTICOS, OTOSCOPIA, OBSERVACIONES === */
+.diagnostics-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+.diagnostico-section {
+    background: #ffffff;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.diagnostico-section h4 {
+    padding: 10px 16px;
+    margin: 0;
+    background: #f8fafc;
+    font-size: 0.85rem;
+    font-weight: 600;
+    border-bottom: 2px solid #e2e8f0;
+}
+
+.diagnostico-section .diagnostico-input {
+    width: 100%;
+    padding: 12px 16px;
+    border: none;
+    font-family: 'Inter', system-ui, monospace;
+    font-size: 0.85rem;
+    line-height: 1.5;
+    resize: vertical;
+    background: #ffffff;
+    transition: background 0.2s ease;
+}
+
+.diagnostico-section .diagnostico-input:focus {
+    outline: none;
+    background: #fef9e8;
+}
+
+.diagnostico-section:nth-of-type(1) h4 {
+    color: #e74c3c !important;
+    border-bottom-color: #e74c3c !important;
+}
+.diagnostico-section:nth-of-type(2) h4 {
+    color: #3498db !important;
+    border-bottom-color: #3498db !important;
+}
+.diagnostico-section:nth-of-type(3) h4 {
+    color: #f59e0b !important;
+    border-bottom-color: #f59e0b !important;
+}
+.diagnostico-section:nth-of-type(4) h4 {
+    color: #10b981 !important;
+    border-bottom-color: #10b981 !important;
+}
+
+.diagnostico-section:nth-of-type(1) h4::before { content: "🔴 "; }
+.diagnostico-section:nth-of-type(2) h4::before { content: "🔵 "; }
+
+/* === RESPONSIVE === */
+@media (max-width: 1024px) {
+    .chart-and-symbols {
+        flex-direction: column;
+        align-items: center;
+    }
+    .symbols-side {
+        max-width: 100%;
+        width: 100%;
+    }
+}
+
+@media (max-width: 768px) {
+    .ears-row,
+    .bone-row,
+    .diagnostics-row {
+        grid-template-columns: 1fr;
+    }
+    .input-grid {
+        grid-template-columns: repeat(5, 1fr);
+    }
+    .symbols-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+    .pta-enmascarar-row {
+        flex-direction: column;
+        align-items: center;
+    }
+    .pta-box,
+    .enmascarar-box {
+        width: 100%;
+        max-width: 100%;
+    }
+    body {
+        padding: 12px;
+    }
+}
+
+@media (max-width: 480px) {
+    .input-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+    .symbols-grid {
+        grid-template-columns: 1fr;
+    }
+    .top-buttons-row {
+        flex-direction: column;
+        align-items: stretch;
+    }
+}
+
+/* === OTROS ESTILOS EXISTENTES === */
+button {
+    background: #3498db;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background 0.2s;
+}
+
+button:hover {
+    background: #2980b9;
+}
+
+.symbol-selector {
+    display: block !important;
+    position: fixed;
+    background: white;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    padding: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    z-index: 10000;
+}
+
+.symbol-selector button {
+    margin: 4px;
+    padding: 6px 12px;
+    font-size: 14px;
+    min-width: 40px;
+    cursor: pointer;
+    background: #f1f5f9;
+    border: 1px solid #cbd5e1;
+    border-radius: 4px;
+}
+
+.symbol-selector button:hover {
+    background: #3b82f6;
+    color: white;
+}
+
+#loadingOverlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.7);
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+}
+
+#loadingOverlay > div {
+    background: white;
+    padding: 30px;
+    border-radius: 12px;
+    text-align: center;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.loading-spinner {
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid #1e3a8a;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 15px;
+}
+
+/* ============================================
+   NUEVOS ESTILOS PARA VÍA ÓSEA SÓLO SÍMBOLOS
+   ============================================ */
+
+/* Inputs de vía ósea símbolos - más pequeños y sutiles */
+#od-bone-symbol-inputs .input-field input,
+#oi-bone-symbol-inputs .input-field input {
+    background-color: #fafafa;
+    border-color: #d0d5dd;
+    font-size: 12px;
+    padding: 4px 4px;
+}
+
+#od-bone-symbol-inputs .input-field label,
+#oi-bone-symbol-inputs .input-field label {
+    font-size: 10px;
+    color: #888;
+}
+
+/* Estilos para el nuevo panel de enmascaramiento de vía ósea símbolos */
+.symbol-bone-mask-box {
+    background: #ffffff;
+    border: 1px solid #dbe2ea;
+    border-radius: 12px;
+    padding: 14px 18px;
+    flex: 1;
+    min-width: 280px;
+    max-width: 480px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+}
+
+.symbol-bone-mask-box h3 {
+    margin-bottom: 12px;
+    color: #001e81;
+    text-align: center;
+    font-size: 1rem;
+}
+
+.symbol-bone-mask-box .freq-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 3px 6px;
+    margin: 2px 0;
+    background: #f8fafc;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 11px;
+}
+
+.symbol-bone-mask-box .freq-item:hover {
+    background: #e2e8f0;
+    transform: translateX(3px);
+}
+
+.symbol-bone-mask-box .freq-item .freq-label {
+    font-weight: 600;
+    color: #334155;
+}
+
+.symbol-bone-mask-box .freq-item .freq-symbol {
+    font-family: monospace;
+    font-size: 18px !important;
+    font-weight: bold;
+    min-width: 30px;
+    text-align: center;
+}
+
+.symbol-bone-mask-box .freq-item.od-symbol-item .freq-symbol {
+    color: #8B0000;
+}
+
+.symbol-bone-mask-box .freq-item.oi-symbol-item .freq-symbol {
+    color: #1d4ed8;
+}
+
+/* Selector de símbolos específico para vía ósea símbolos */
+.symbol-selector-bone {
+    display: block !important;
+    position: fixed;
+    background: white;
+    border: 2px solid #1e3a8a;
+    border-radius: 8px;
+    padding: 6px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+    z-index: 10001;
+}
+
+.symbol-selector-bone button {
+    margin: 3px;
+    padding: 4px 10px;
+    font-size: 16px;
+    min-width: 30px;
+    cursor: pointer;
+    background: #f1f5f9;
+    border: 1px solid #cbd5e1;
+    border-radius: 4px;
+    font-weight: bold;
+}
+
+.symbol-selector-bone button:hover {
+    background: #3b82f6;
+    color: white;
+}
+
+.symbol-selector-bone .selector-title {
+    font-size: 10px;
+    text-align: center;
+    color: #64748b;
+    padding: 2px 0 4px 0;
+    font-weight: 600;
+    border-bottom: 1px solid #e2e8f0;
+    margin-bottom: 4px;
+}
+
+/* ============================================
+   VÍA ÓSEA + SÍMBOLOS - 4 COLUMNAS
+   ============================================ */
+
+/* Por defecto: 2 columnas (solo VÍA ÓSEA) */
+#boneRowContainer {
+    grid-template-columns: 1fr 1fr;
+}
+
+/* Cuando los símbolos están visibles: 4 columnas */
+#boneRowContainer.bone-symbols-visible {
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+}
+
+/* Ajustes responsive */
+@media (max-width: 992px) {
+    #boneRowContainer.bone-symbols-visible {
+        grid-template-columns: 1fr 1fr;
+    }
+    #boneRowContainer.bone-symbols-visible .ear-section {
+        grid-column: span 1 !important;
+    }
+}
+
+@media (max-width: 576px) {
+    #boneRowContainer.bone-symbols-visible {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Estilos compactos para cuando los símbolos están visibles */
+#boneRowContainer.bone-symbols-visible .ear-section {
+    padding: 10px 12px !important;
+}
+
+#boneRowContainer.bone-symbols-visible .input-grid {
+    gap: 4px 6px !important;
+}
+
+#boneRowContainer.bone-symbols-visible .input-field input {
+    padding: 3px 3px !important;
+    font-size: 11px !important;
+}
+
+#boneRowContainer.bone-symbols-visible .input-field label {
+    font-size: 9px !important;
+}
+
+#boneRowContainer.bone-symbols-visible .ear-title {
+    font-size: 11px !important;
+    margin-bottom: 4px !important;
+}
+
+
+</style>
+
+</head>
+<body>
+
+<!-- ============================================ -->
+<!-- BOTONES SUPERIORES -->
+<!-- ============================================ -->
+<div class="top-buttons-row">
+    <button class="btn-back-floating">← Volver al Dashboard</button>
+    <button onclick="clearAll()" style="background-color:#0a2649; color:white; padding:8px 14px;">Limpiar datos</button>
+<!--   <button id="elasticODBtn" style="background:#ff0101; color:white; padding:8px 14px;">VIA OSEA MANUAL OD</button> -->
+ <!--    <button id="elasticOIBtn" style="background:#1e40af; color:white; padding:8px 14px;">VIA OSEA MANUAL OI</button> -->
+    <button id="limpiarViaOseaBtn" style="background-color:#041931; color:white; padding:8px 14px;">Limpiar Vía Ósea</button>
+    <button id="toggleBoneSymbolsBtn" style="background-color:#09010f; color:white; padding:8px 14px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold;">Símbolos Vía Ósea</button>
+    <button id="grabarAudiometriaBtn" class="btn-grabar" style="background:#6fcf97; padding:8px 20px;">GRABAR CITA</button>
+</div>
+
+<!-- ============================================ -->
+<!-- LOGO -->
+<!-- ============================================ -->
+<div class="logo-empresa-top">
+    <img src="../img/saninlogo.jpg" alt="Logo Clínica" onerror="this.style.display='none'">
+    <div class="logo-texto-temporal">
+        <strong>AUDIOLOGÍA CLÍNICA</strong>
+        <span>Especialistas en Audición</span>
+    </div>
+</div>
+
+<div class="logo-header">
+    <h1>AUDIOMETRÍA TONAL</h1>
+</div>
+
+<!-- ============================================ -->
+<!-- DATOS DEL PACIENTE -->
+<!-- ============================================ -->
+<div class="patient-card" id="patientCard" style="display:none;">
+    <div class="patient-title"><strong>Datos del paciente</strong></div>
+    <div class="patient-grid">
+        <div><span>Paciente:</span><p id="pacienteNombre">--</p></div>
+        <div><span>Cédula:</span><p id="pacienteDocumento">--</p></div>
+        <div><span>Fecha cita:</span><p id="pacienteFecha">--</p></div>
+        <div><span>Hora:</span><p id="pacienteHora">--</p></div>
+        <div><span>Tipo atención:</span><p id="pacienteTipo">--</p></div>
+    </div>
+</div>
+
+<!-- ============================================ -->
+<!-- OÍDOS (OD y OI) en 2 columnas -->
+<!-- ============================================ -->
+<div class="ears-row">
+    <div class="ear-section od" style="border-left-color:#8B0000; background:#fff7f7;">
+        <div class="ear-title od" >🔴 OÍDO DERECHO (OD)</div>
+        <div class="input-grid" id="od-inputs"></div>
+    </div>
+    <div class="ear-section oi" style="border-left-color:#00418b; background:#f6f9fd;;">
+        <div class="ear-title oi">🔵 OÍDO IZQUIERDO (OI)</div>
+        <div class="input-grid" id="oi-inputs"></div>
+    </div>
+</div>
+
+<!-- ============================================ -->
+<!-- NUEVA VÍA ÓSEA IZQUIERDA Y DERECHA (SOLO SÍMBOLOS) -->
+<!-- ============================================ -->
+<!-- ============================================ -->
+<!-- VÍA ÓSEA + VÍA ÓSEA SÍMBOLOS (4 columnas) -->
+<!-- ============================================ -->
+<div class="ears-row" style="margin-bottom:22px;" id="boneRowContainer">
+    <!-- VÍA ÓSEA DERECHA (OD) -->
+    <div class="ear-section od" style="border-left-color:#991b1b; grid-column: span 1;">
+        <div class="ear-title od" style="color:#991b1b; font-size:13px;">🟤 VÍA ÓSEA OD</div>
+        <div class="input-grid" id="od-bone-inputs"></div>
+    </div>
+    
+    <!-- VÍA ÓSEA IZQUIERDA (OI) -->
+    <div class="ear-section oi" style="border-left-color:#1d4ed8; grid-column: span 1;">
+        <div class="ear-title oi" style="color:#1d4ed8; font-size:13px;">🔵 VÍA ÓSEA OI</div>
+        <div class="input-grid" id="oi-bone-inputs"></div>
+    </div>
+    
+    <!-- VÍA ÓSEA SÍMBOLOS DERECHA (OD) -->
+    <div id="od-bone-symbol-wrapper" class="ear-section od" style="border-left-color:#8B0000; background:#fff7f7; display:none; grid-column: span 1;">
+        <div class="ear-title od" style="color:#8B0000; font-size:11px;">🔴 VÍA ÓSEA SÍMBOLOS OD</div>
+        <div class="input-grid" id="od-bone-symbol-inputs"></div>
+        <div style="font-size:9px; color:#888; margin-top:4px; text-align:center;">Solo símbolos, sin líneas</div>
+    </div>
+    
+    <!-- VÍA ÓSEA SÍMBOLOS IZQUIERDA (OI) -->
+    <div id="oi-bone-symbol-wrapper" class="ear-section oi" style="border-left-color:#1d4ed8; background:#f6f9fd; display:none; grid-column: span 1;">
+        <div class="ear-title oi" style="color:#1d4ed8; font-size:11px;">🔵 VÍA ÓSEA SÍMBOLOS OI</div>
+        <div class="input-grid" id="oi-bone-symbol-inputs"></div>
+        <div style="font-size:9px; color:#888; margin-top:4px; text-align:center;">Solo símbolos, sin líneas</div>
+    </div>
+</div>
+<!-- ============================================ -->
+<!-- CHART (izquierda) + 4 PANELES SÍMBOLOS (derecha) -->
+<!-- ============================================ -->
+<div class="chart-and-symbols">
+    <!-- CHART -->
+    <div class="chart-wrapper">
+        <div class="chart-container">
+            <canvas id="toneChart"></canvas>
+            <canvas id="drawingCanvas"></canvas>
+        </div>
+    </div>
+
+    <!-- 4 PANELES DE SÍMBOLOS -->
+    <div class="symbols-side">
+<!-- NUEVO DIV PARA FILTRAR VÍA ÓSEA -->
+<!-- FILTRO VÍA ÓSEA - ESTILO CLÍNICO -->
+<div id="filtroViaOsea" style="background: #ffffff; border-radius: 8px; padding: 14px 18px; margin-bottom: 12px; border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+        <div style="display: flex; align-items: center; gap: 10px;">
+            <span style="font-weight: 600; font-size: 12px; color: #64748b; letter-spacing: 0.5px; text-transform: uppercase;">Enmascaramiento Via Osea Sin Respuesta</span>
+            <div style="display: flex; gap: 4px; background: #f1f5f9; padding: 3px; border-radius: 6px;">
+                <button id="btnFiltrarOD" style="background: #991b1b; color: white; border: none; padding: 4px 14px; border-radius: 4px; font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.15s;">OD</button>
+                <button id="btnFiltrarOI" style="background: #1d4ed8; color: white; border: none; padding: 4px 14px; border-radius: 4px; font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.15s;">OI</button>
+                <button id="btnFiltrarAmbos" style="background: #475569; color: white; border: none; padding: 4px 14px; border-radius: 4px; font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.15s;"></button>
+            </div>
+        </div>
+        <div id="filtroValores" style="font-size: 12px; color: #475569; display: flex; gap: 20px; flex-wrap: wrap;">
+            <span style="display: flex; align-items: center; gap: 6px;">
+                <span style="display: inline-block; width: 10px; height: 10px; background: #991b1b; border-radius: 2px;"></span>
+                <strong style="color: #1e293b; font-weight: 600;">OD</strong>
+                <span id="filtroODValores" style="color: #64748b; font-weight: 500;">--</span>
+            </span>
+            <span style="display: flex; align-items: center; gap: 6px;">
+                <span style="display: inline-block; width: 10px; height: 10px; background: #1d4ed8; border-radius: 2px;"></span>
+                <strong style="color: #1e293b; font-weight: 600;">OI</strong>
+                <span id="filtroOIValores" style="color: #64748b; font-weight: 500;">--</span>
+            </span>
+        </div>
+    </div>
+    
+    <div id="filtroResultados" style="margin-top: 10px; padding-top: 10px; border-top: 1px solid #e9edf2; font-size: 12px; color: #1e293b; display: flex; gap: 16px; flex-wrap: wrap;">
+        <div id="filtroODResultado" style="background: #fafafa; padding: 4px 12px; border-radius: 4px; border-left: 3px solid #991b1b; min-width: 100px; display: flex; align-items: center; gap: 6px;">
+            <span style="font-weight: 600; color: #991b1b; font-size: 11px;">OD</span>
+            <span id="filtroODLista" style="color: #64748b;">--</span>
+        </div>
+        <div id="filtroOIResultado" style="background: #fafafa; padding: 4px 12px; border-radius: 4px; border-left: 3px solid #1d4ed8; min-width: 100px; display: flex; align-items: center; gap: 6px;">
+            <span style="font-weight: 600; color: #1d4ed8; font-size: 11px;">OI</span>
+            <span id="filtroOILista" style="color: #64748b;">--</span>
+        </div>
+    </div>
+</div>
+    </div>
+</div>
+
+<!-- ============================================ -->
+<!-- PTA + ENMASCARAR (lado a lado) -->
+<!-- ============================================ -->
+<div class="pta-enmascarar-row">
+    <!-- PTA -->
+    <div class="pta-box" id="ptaBox">
+        <h3>PTA</h3>
+        <div class="pta-row"><span>🔴 OD Vía Aérea:</span><strong id="pta_od_air">--</strong></div>
+        <div class="pta-row"><span>🔵 OI Vía Aérea:</span><strong id="pta_oi_air">--</strong></div>
+        <div class="pta-row"><span>🔴 OD Vía Ósea:</span><strong id="pta_od_bone">--</strong></div>
+        <div class="pta-row"><span>🔵 OI Vía Ósea:</span><strong id="pta_oi_bone">--</strong></div>
+    </div>
+
+    <!-- ENMASCARAR -->
+    <div class="enmascarar-box" id="enmascararBox">
+        <h3>Enmascarar Vía Ósea</h3>
+        <div style="display:flex; gap:15px;">
+            <div style="flex:1;">
+                <div style="font-size:12px; font-weight:bold; color:#991b1b; margin-bottom:6px;">🔴 OD Vía Ósea</div>
+                <div id="listaOD" style="font-size:12px; max-height:150px; overflow-y:auto;"></div>
+            </div>
+            <div style="flex:1;">
+                <div style="font-size:12px; font-weight:bold; color:#1d4ed8; margin-bottom:6px;">🔵 OI Vía Ósea</div>
+                <div id="listaOI" style="font-size:12px; max-height:150px; overflow-y:auto;"></div>
+            </div>
+        </div>
+    </div>
+
+    
+  <div class="enmascarar-box" id="enmascararBox">
+        <div style="font-size:12px; font-weight:bold; color:#001e81; margin:0 0 6px 0;">Enmascarar Vía Aérea</div>
+        <div style="display:flex; gap:15px;">
+            <div style="flex:1;">
+                <div style="font-size:12px; font-weight:bold; color:#e74c3c; margin-bottom:6px;">🔴 OD Vía Aérea</div>
+                <div id="listaODAir" style="font-size:12px; max-height:120px; overflow-y:auto;"></div>
+            </div>
+            <div style="flex:1;">
+                <div style="font-size:12px; font-weight:bold; color:#3498db; margin-bottom:6px;">🔵 OI Vía Aérea</div>
+                <div id="listaOIAir" style="font-size:12px; max-height:120px; overflow-y:auto;"></div>
+            </div>
+        </div>
+    </div>
+
+<!-- NUEVO: Enmascarar Vía Ósea Símbolos -->
+<!-- NUEVO: Enmascarar Vía Ósea Símbolos -->
+<div class="symbol-bone-mask-box" id="enmascararBoneSymbolsBox">
+    <h3>Enmascarar Vía Ósea (Símbolos)</h3>
+    <div style="display:flex; gap:15px;">
+        <div style="flex:1;">
+            <div style="font-size:12px; font-weight:bold; color:#8B0000; margin-bottom:6px;">🔴 OD Símbolos</div>
+            <div id="listaODBoneSymbols" style="font-size:12px; max-height:150px; overflow-y:auto;"></div>
+        </div>
+        <div style="flex:1;">
+            <div style="font-size:12px; font-weight:bold; color:#1d4ed8; margin-bottom:6px;">🔵 OI Símbolos</div>
+            <div id="listaOIBoneSymbols" style="font-size:12px; max-height:150px; overflow-y:auto;"></div>
+        </div>
+    </div>
+    <div style="font-size:10px; color:#94a3b8; text-align:center; margin-top:8px; border-top:1px solid #e2e8f0; padding-top:6px;">
+        
+    </div>
+</div>
+    
+</div>
+
+<!-- ============================================ -->
+<!-- DIAGNÓSTICOS, OTOSCOPIA, OBSERVACIONES -->
+<!-- ============================================ -->
+<div class="diagnostics-row">
+    <div class="diagnostico-section">
+        <h4 style="color:#e74c3c;">🔴 Diagnóstico Oído Derecho (OD)</h4>
+        <textarea id="diagnostico_od" class="diagnostico-input" rows="3" placeholder="Diagnóstico específico para oído derecho..."></textarea>
+    </div>
+    <div class="diagnostico-section">
+        <h4 style="color:#3498db;">🔵 Diagnóstico Oído Izquierdo (OI)</h4>
+        <textarea id="diagnostico_oi" class="diagnostico-input" rows="3" placeholder="Diagnóstico específico para oído izquierdo..."></textarea>
+    </div>
+    <div class="diagnostico-section">
+        <h4>OTOSCOPIA</h4>
+        <textarea id="otoscopia_audiometria" class="diagnostico-input" rows="3" placeholder="Describa los hallazgos de la exploración otoscópica:"></textarea>
+    </div>
+    <div class="diagnostico-section">
+        <h4>Observaciones Generales</h4>
+        <textarea id="observaciones_audiometria" class="diagnostico-input" rows="3" placeholder="Observaciones adicionales..."></textarea>
+    </div>
+</div>
+
+<!-- ============================================ -->
+<!-- LOADING OVERLAY -->
+<!-- ============================================ -->
+<div id="loadingOverlay">
+    <div>
+        <div class="loading-spinner"></div>
+        <p>Guardando y generando PDF...</p>
+    </div>
+</div>
+
+<script>
+    
+// ============================================
+// FUNCIONES DE GUARDADO PARA AUDIOMETRÍA
+// ============================================
+
+async function capturarGraficaAudiometria() {
+
+    return new Promise((resolve, reject) => {
+
+        const container =
+            document.querySelector('.chart-container');
+
+        if (!container) {
+
+            reject(
+                new Error('No se encontró el contenedor')
+            );
+
+            return;
+        }
+
+        html2canvas(container, {
+
+            scale: 3,
+
+            backgroundColor: '#ffffff',
+
+            logging: false,
+
+            useCORS: true
+
+        }).then(resolve).catch(reject);
+
+    });
+}
+
+function obtenerValoresAudiometria() {
+const freqs = ['125','250', '500', '750', '1000', '1500', '2000', '3000', '4000', '6000', '8000', ''];
+    const od = {};
+    const oi = {};
+    
+    freqs.forEach(f => {
+        const odInput = document.getElementById(`od_${f}`);
+        const oiInput = document.getElementById(`oi_${f}`);
+        od[f] = odInput?.value || '';
+        oi[f] = oiInput?.value || '';
+    });
+    
+      const odBoneSymbols = {};
+    const oiBoneSymbols = {};
+    freqs.forEach(f => {
+        if (f === '') return;
+        const odInput = document.getElementById(`od-bone-symbol_${f}`);
+        const oiInput = document.getElementById(`oi-bone-symbol_${f}`);
+        odBoneSymbols[f] = odInput?.value || '';
+        oiBoneSymbols[f] = oiInput?.value || '';
+    });
+    
+    return { od, oi, freqs, odBoneSymbols, oiBoneSymbols };
+}
+
+
+// ============================================
+// FUNCIÓN PARA DIBUJAR FLECHA (NUEVA)
+// ============================================
+function drawArrow(ctx, x1, y1, x2, y2, arrowSize = 7) {
+    ctx.beginPath();
+    ctx.moveTo(x1, y1);
+    ctx.lineTo(x2, y2);
+    ctx.stroke();
+
+    const angle = Math.atan2(y2 - y1, x2 - x1);
+    ctx.beginPath();
+    ctx.moveTo(x2, y2);
+    ctx.lineTo(x2 - arrowSize * Math.cos(angle - Math.PI / 6), y2 - arrowSize * Math.sin(angle - Math.PI / 6));
+    ctx.lineTo(x2 - arrowSize * Math.cos(angle + Math.PI / 6), y2 - arrowSize * Math.sin(angle + Math.PI / 6));
+    ctx.closePath();
+    ctx.fill();
+}
+// ============================================
+// FUNCIONES PARA ENMASCARAR VÍA AÉREA
+// ============================================
+
+function guardarSimboloPersonalizadoAir(ear, freq, symbol) {
+    if (ear === 'od') {
+        personalAirSymbolsOD[freq] = symbol;
+    } else {
+        personalAirSymbolsOI[freq] = symbol;
+    }
+}
+
+function obtenerSimboloPersonalizadoAir(ear, freq, defaultSymbol) {
+    if (ear === 'od') {
+        return personalAirSymbolsOD[freq] || defaultSymbol;
+    } else {
+        return personalAirSymbolsOI[freq] || defaultSymbol;
+    }
+}
+
+function actualizarPanelEnmascararAir() {
+    const listaOD = document.getElementById('listaODAir');
+    const listaOI = document.getElementById('listaOIAir');
+    
+    // Si no existen los elementos, crearlos
+    let containerOD = listaOD;
+    let containerOI = listaOI;
+    
+    if (!containerOD || !containerOI) {
+        // Si no existen, crearlos en el DOM
+        const enmascararBox = document.getElementById('enmascararBox');
+        if (!enmascararBox) return;
+        
+        // Buscar o crear el contenedor para vía aérea
+        let airContainer = document.getElementById('enmascararAirContainer');
+        if (!airContainer) {
+            airContainer = document.createElement('div');
+            airContainer.id = 'enmascararAirContainer';
+            airContainer.style.marginTop = '15px';
+            airContainer.style.borderTop = '1px solid #e2e8f0';
+            airContainer.style.paddingTop = '12px';
+            
+            const title = document.createElement('div');
+            title.style.fontSize = '12px';
+            title.style.fontWeight = 'bold';
+            title.style.textAlign = 'center';
+            title.style.marginBottom = '10px';
+            title.style.color = '#001e81';
+            title.textContent = 'Enmascarar Vía Aérea';
+            airContainer.appendChild(title);
+            
+            const row = document.createElement('div');
+            row.style.display = 'flex';
+            row.style.gap = '15px';
+            
+            const colOD = document.createElement('div');
+            colOD.style.flex = '1';
+            const labelOD = document.createElement('div');
+            labelOD.style.fontSize = '12px';
+            labelOD.style.fontWeight = 'bold';
+            labelOD.style.color = '#e74c3c';
+            labelOD.style.marginBottom = '6px';
+            labelOD.textContent = '🔴 OD Vía Aérea';
+            colOD.appendChild(labelOD);
+            const listOD = document.createElement('div');
+            listOD.id = 'listaODAir';
+            listOD.style.fontSize = '12px';
+            listOD.style.maxHeight = '120px';
+            listOD.style.overflowY = 'auto';
+            colOD.appendChild(listOD);
+            
+            const colOI = document.createElement('div');
+            colOI.style.flex = '1';
+            const labelOI = document.createElement('div');
+            labelOI.style.fontSize = '12px';
+            labelOI.style.fontWeight = 'bold';
+            labelOI.style.color = '#3498db';
+            labelOI.style.marginBottom = '6px';
+            labelOI.textContent = '🔵 OI Vía Aérea';
+            colOI.appendChild(labelOI);
+            const listOI = document.createElement('div');
+            listOI.id = 'listaOIAir';
+            listOI.style.fontSize = '12px';
+            listOI.style.maxHeight = '120px';
+            listOI.style.overflowY = 'auto';
+            colOI.appendChild(listOI);
+            
+            row.appendChild(colOD);
+            row.appendChild(colOI);
+            airContainer.appendChild(row);
+            enmascararBox.appendChild(airContainer);
+        }
+        
+        containerOD = document.getElementById('listaODAir');
+        containerOI = document.getElementById('listaOIAir');
+        if (!containerOD || !containerOI) return;
+    }
+    
+    containerOD.innerHTML = '';
+    containerOI.innerHTML = '';
+    
+    // ✅ TAMAÑOS PEQUEÑOS Y CONSISTENTES para los símbolos
+    const tamanos = {
+        'od': {
+            'O': '14px',      // Reducido de 20px a 14px
+            '△': '12px',      // Aumentado de 7px a 12px (para que se vea bien)
+            '<': '14px',      // Reducido de 16px a 14px
+            '[': '14px',      // Reducido de 16px a 14px
+            '┐': '14px',      // Reducido de 16px a 14px
+            'default': '14px' // Reducido de 20px a 14px
+        },
+        'oi': {
+            'X': '14px',      // Reducido de 18px a 14px
+            '□': '14px',      // Reducido de 16px a 14px
+            '>': '14px',      // Reducido de 16px a 14px
+            ']': '14px',      // Reducido de 16px a 14px
+            '┌': '14px',      // Reducido de 16px a 14px
+            'default': '14px' // Reducido de 18px a 14px
+        }
+    };
+    
+    // Recorrer frecuencias para OD vía aérea
+    freqs.forEach(freq => {
+        const input = document.getElementById(`od_${freq}`);
+        if (input && input.value !== '') {
+            const valor = input.value;
+            const simboloActual = obtenerSimboloPersonalizadoAir('od', freq, getSymbolText('od'));
+            
+            const item = document.createElement('div');
+            item.className = 'freq-item od-item';
+            
+            // Determinar el tamaño para este símbolo específico
+            const tamanoOD = tamanos.od[simboloActual] || tamanos.od.default;
+            
+            item.innerHTML = `
+                <span class="freq-label">${freq} Hz</span>
+                <span class="freq-symbol" 
+                      data-freq="${freq}" 
+                      data-ear="od" 
+                      data-tipo="air"
+                      style="font-size: ${tamanoOD} !important; font-weight: bold; min-width: 30px; display: inline-block; text-align: center;">
+                    ${simboloActual} ${valor} dB
+                </span>
+            `;
+            item.addEventListener('click', (e) => {
+                e.stopPropagation();
+                mostrarSelectorSimboloAir(item.querySelector('.freq-symbol'), 'od', freq);
+            });
+            containerOD.appendChild(item);
+        }
+    });
+    
+    // Recorrer frecuencias para OI vía aérea
+    freqs.forEach(freq => {
+        const input = document.getElementById(`oi_${freq}`);
+        if (input && input.value !== '') {
+            const valor = input.value;
+            const simboloActual = obtenerSimboloPersonalizadoAir('oi', freq, getSymbolText('oi'));
+            
+            const item = document.createElement('div');
+            item.className = 'freq-item oi-item';
+            
+            // Determinar el tamaño para este símbolo específico
+            const tamanoOI = tamanos.oi[simboloActual] || tamanos.oi.default;
+            
+            item.innerHTML = `
+                <span class="freq-label">${freq} Hz</span>
+                <span class="freq-symbol" 
+                      data-freq="${freq}" 
+                      data-ear="oi" 
+                      data-tipo="air"
+                      style="font-size: ${tamanoOI} !important; font-weight: bold; min-width: 30px; display: inline-block; text-align: center;">
+                    ${simboloActual} ${valor} dB
+                </span>
+            `;
+            item.addEventListener('click', (e) => {
+                e.stopPropagation();
+                mostrarSelectorSimboloAir(item.querySelector('.freq-symbol'), 'oi', freq);
+            });
+            containerOI.appendChild(item);
+        }
+    });
+    
+    if (containerOD.children.length === 0) {
+        containerOD.innerHTML = '<div style="color: #94a3b8; text-align: center; padding: 10px; font-size:11px;">Sin datos</div>';
+    }
+    if (containerOI.children.length === 0) {
+        containerOI.innerHTML = '<div style="color: #94a3b8; text-align: center; padding: 10px; font-size:11px;">Sin datos</div>';
+    }
+}
+function mostrarSelectorSimboloAir(elemento, ear, freq) {
+    // Eliminar selector existente
+    const selectorExistente = document.querySelector('.symbol-selector');
+    if (selectorExistente) selectorExistente.remove();
+    
+    // Crear selector de símbolos
+    const selector = document.createElement('div');
+    selector.className = 'symbol-selector';
+    selector.style.display = 'block';
+    
+    // Símbolos disponibles para vía aérea
+    const simbolosOD = ['O', 'O↘', '△', '<', '[', '┐'];
+    const simbolosOI = ['X', '↙X', '□', '>', ']', '┌']
+    const simbolos = ear === 'od' ? simbolosOD : simbolosOI;
+    
+    simbolos.forEach(sim => {
+        const btn = document.createElement('button');
+        btn.textContent = sim;
+        btn.onclick = (e) => {
+            e.stopPropagation();
+            
+            // GUARDAR el símbolo personalizado para esta frecuencia específica
+            guardarSimboloPersonalizadoAir(ear, freq, sim);
+            
+            // Actualizar el símbolo en el elemento clickeado
+            const valor = elemento.textContent.split(' ')[1] || '';
+            elemento.textContent = `${sim} ${valor}`;
+            
+            // Actualizar el dataset para reflejar el cambio
+            elemento.dataset.symbol = sim;
+            
+            // Redibujar la gráfica
+            if (typeof updateChart === 'function') updateChart();
+            
+            selector.remove();
+        };
+        selector.appendChild(btn);
+    });
+    
+    // Posicionar el selector cerca del elemento
+    const rect = elemento.getBoundingClientRect();
+    selector.style.position = 'fixed';
+    selector.style.left = `${rect.left}px`;
+    selector.style.top = `${rect.bottom + 5}px`;
+    
+    document.body.appendChild(selector);
+    
+    // Cerrar al hacer clic fuera
+    function cerrarSelector(e) {
+        if (!selector.contains(e.target)) {
+            selector.remove();
+            document.removeEventListener('click', cerrarSelector);
+        }
+    }
+    
+    setTimeout(() => {
+        document.addEventListener('click', cerrarSelector);
+    }, 10);
+}
+
+function mostrarLoadingAudiometria(mostrar) {
+    const overlay = document.getElementById('loadingOverlay');
+    if (overlay) {
+        overlay.style.display = mostrar ? 'flex' : 'none';
+    }
+}
+
+
+
+
+function mostrarNotificacionAudiometria(mensaje, esError = false) {
+    // Eliminar notificación anterior si existe
+    const notifAnterior = document.querySelector('.notificacion-flotante');
+    if (notifAnterior) notifAnterior.remove();
+    
+    const notif = document.createElement('div');
+    notif.className = 'notificacion-flotante';
+    notif.textContent = mensaje;
+    notif.style.position = 'fixed';
+    notif.style.bottom = '20px';
+    notif.style.right = '20px';
+    notif.style.padding = '12px 20px';
+    notif.style.borderRadius = '8px';
+    notif.style.backgroundColor = esError ? '#e74c3c' : '#27ae60';
+    notif.style.color = 'white';
+    notif.style.fontWeight = 'bold';
+    notif.style.zIndex = '10001';
+    notif.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15)';
+    
+    document.body.appendChild(notif);
+    
+    setTimeout(() => {
+        notif.style.opacity = '0';
+        setTimeout(() => {
+            if (notif.parentNode) notif.parentNode.removeChild(notif);
+        }, 300);
+    }, 3000);
+}
+
+let personalSymbolsOD = {};  // Guarda símbolos personalizados para OD
+let personalSymbolsOI = {};  // Guarda símbolos personalizados para OI
+
+let personalAirSymbolsOD = {};  // Guarda símbolos personalizados para vía aérea OD
+let personalAirSymbolsOI = {};  // Guarda símbolos personalizados para vía aérea OI
+
+// ============================================
+// NUEVAS VARIABLES PARA VÍA ÓSEA SÓLO SÍMBOLOS
+// ============================================
+
+// Almacena los símbolos personalizados para cada frecuencia
+let personalBoneSymbolsOD = {};  // Guarda símbolos personalizados para OD
+let personalBoneSymbolsOI = {};  // Guarda símbolos personalizados para OI
+
+// Almacena los puntos para dibujar en el canvas
+let boneSymbolPointsOD = [];  // Puntos de OD para dibujo
+let boneSymbolPointsOI = [];  // Puntos de OI para dibujo
+
+// Símbolos activos por defecto
+let activeBoneSymbolOD = '<';
+let activeBoneSymbolOI = '>';
+
+// Flag para mostrar/ocultar los símbolos de vía ósea
+let showBoneSymbols = true;
+
+
+
+// ============================================
+// CONTROL DE IMÁGENES POR FRECUENCIA (desde filtro)
+// ============================================
+
+// Almacena qué frecuencias deben mostrar imagen en lugar del símbolo < o >
+let usarImagenOD = {};
+let usarImagenOI = {};
+
+
+
+// Almacena las coordenadas originales para restaurar
+let coordenadasOriginalesOD = {};
+let coordenadasOriginalesOI = {};
+
+function guardarSimboloPersonalizado(ear, freq, symbol) {
+    if (ear === 'od') {
+        personalSymbolsOD[freq] = symbol;
+    } else {
+        personalSymbolsOI[freq] = symbol;
+    }
+}
+
+function obtenerSimboloPersonalizado(ear, freq, defaultSymbol) {
+    if (ear === 'od') {
+        return personalSymbolsOD[freq] || defaultSymbol;
+    } else {
+        return personalSymbolsOI[freq] || defaultSymbol;
+    }
+}
+
+function sincronizarCanvasDesdeInputs() {
+    if (!chart) return;
+    
+    // Limpiar símbolos de input previos
+    drawnBoneSymbols = drawnBoneSymbols.filter(item => item.tipo !== 'input');
+    
+    // 🔥 OBTENER FACTORES DE ESCALA
+    const chartCanvas = chart.canvas;
+    const drawCanvas = drawingCanvas;
+    
+    if (!drawCanvas._scaleX || !drawCanvas._chartCanvas) {
+        const chartRect = chartCanvas.getBoundingClientRect();
+        const drawRect = drawCanvas.getBoundingClientRect();
+        drawCanvas._scaleX = drawRect.width / chartRect.width;
+        drawCanvas._scaleY = drawRect.height / chartRect.height;
+        drawCanvas._chartCanvas = chartCanvas;
+    }
+    
+    const scaleX = drawCanvas._scaleX;
+    const scaleY = drawCanvas._scaleY;
+    
+    // Recopilar puntos OD
+    const odPoints = [];
+    freqs.forEach((freq, index) => {
+        const inputOD = document.getElementById(`od-bone_${freq}`);
+        if (inputOD && inputOD.value !== '') {
+            const dbValue = parseFloat(inputOD.value);
+            if (!isNaN(dbValue)) {
+                const chartX = chart.scales.x.getPixelForValue(xPositions[index]);
+                const chartY = chart.scales.y.getPixelForValue(dbValue);
+                const x = chartX * scaleX;
+                const y = chartY * scaleY;
+                odPoints.push({ x, y, freq, db: dbValue, index });
+            }
+        }
+    });
+    
+    odPoints.sort((a, b) => a.index - b.index);
+    
+    odPoints.forEach((point, idx) => {
+            const tieneImagen = usarImagenOD[point.freq];
+            let savedSymbol = obtenerSimboloPersonalizado('od', point.freq, '<');
+
+    if (tieneImagen) {
+        // No agregar a drawnBoneSymbols, la imagen se dibujará en dibujarImagenesDesdeFiltro
+         savedSymbol = '';
+    }
+
+        let angle = 0;
+        if (idx > 0) {
+            const prev = odPoints[idx - 1];
+            angle = Math.atan2(point.y - prev.y, point.x - prev.x);
+        }
+        drawnBoneSymbols.push({
+            x: point.x, 
+            y: point.y, 
+            angle: angle,
+            tool: 'od',
+            symbol: savedSymbol,
+            tipo: 'input',
+            freq: point.freq,
+            db: point.db
+        });
+    });
+    
+    // Recopilar puntos OI
+    const oiPoints = [];
+    freqs.forEach((freq, index) => {
+        const inputOI = document.getElementById(`oi-bone_${freq}`);
+        if (inputOI && inputOI.value !== '') {
+            const dbValue = parseFloat(inputOI.value);
+            if (!isNaN(dbValue)) {
+                const chartX = chart.scales.x.getPixelForValue(xPositions[index]);
+                const chartY = chart.scales.y.getPixelForValue(dbValue);
+                const x = chartX * scaleX;
+                const y = chartY * scaleY;
+                oiPoints.push({ x, y, freq, db: dbValue, index });
+            }
+        }
+    });
+    
+    oiPoints.sort((a, b) => a.index - b.index);
+    
+    oiPoints.forEach((point, idx) => {
+            const tieneImagen = usarImagenOI[point.freq];
+    let savedSymbol = obtenerSimboloPersonalizado('oi', point.freq, '>');
+
+
+  if (tieneImagen) {
+        // No agregar a drawnBoneSymbols, la imagen se dibujará en dibujarImagenesDesdeFiltro
+         savedSymbol = '';
+    }
+
+        let angle = 0;
+        if (idx > 0) {
+            const prev = oiPoints[idx - 1];
+            angle = Math.atan2(point.y - prev.y, point.x - prev.x);
+        }
+        drawnBoneSymbols.push({
+            x: point.x, 
+            y: point.y, 
+            angle: angle,
+            tool: 'oi',
+            symbol: savedSymbol,
+            tipo: 'input',
+            freq: point.freq,
+            db: point.db
+        });
+    });
+    
+    if (typeof redrawAll === 'function') {
+        redrawAll();
+    }
+
+
+}
+// Nueva función para dibujar símbolos direccionales con rotación
+function drawDirectionalSymbol(point, color, ear) {
+    drawCtx.save();
+    drawCtx.fillStyle = color;
+    drawCtx.font = "bold 20px Arial";
+    drawCtx.textAlign = "center";
+    drawCtx.textBaseline = "middle";
+    
+    // Determinar el ángulo de rotación según el símbolo y dirección
+    let rotation = 0;
+    let symbolToDraw = point.symbol;
+    
+    if (point.symbol === '<' || point.symbol === '>') {
+        // Para flechas horizontales, rotar según el ángulo del punto
+        rotation = point.angle || 0;
+    } else if (point.symbol === 'V') {
+        rotation = Math.PI; // 180 grados
+        symbolToDraw = 'V';
+    } else if (point.symbol === 'Λ') {
+        rotation = 0;
+        symbolToDraw = 'Λ';
+    }
+    
+    drawCtx.translate(point.x, point.y);
+    drawCtx.rotate(rotation);
+    drawCtx.fillText(symbolToDraw, 0, 0);
+    drawCtx.restore();
+}
+
+// Nueva función para dibujar líneas conectores direccionales (sin el guión fijo)
+function drawDirectionalLine(prev, curr, color) {
+    drawCtx.save();
+    drawCtx.strokeStyle = color;
+    drawCtx.lineWidth = 2;
+    
+    // Dibujar línea conectora
+    drawCtx.beginPath();
+    drawCtx.moveTo(prev.x, prev.y);
+    drawCtx.lineTo(curr.x, curr.y);
+    drawCtx.stroke();
+    
+    drawCtx.restore();
+}
+
+// Esta es la función principal que se ejecuta al hacer clic
+async function onGrabarAudiometriaClick() {
+    console.log('=== BOTÓN CLICKEADO ===');
+    
+    try {
+        mostrarLoadingAudiometria(true);
+        
+        // 1. Obtener valores del formulario
+        const valores = obtenerValoresAudiometria();
+        console.log('Valores obtenidos:', valores);
+        
+        // 2. Verificar que haya al menos un valor
+        const tieneValores = Object.values(valores.od).some(v => v !== '') || Object.values(valores.oi).some(v => v !== '');
+        if (!tieneValores) {
+            throw new Error('No hay datos para guardar. Complete al menos un valor');
+        }
+        
+        // 3. Obtener datos del paciente y cita
+        const pacienteData = localStorage.getItem('pacienteActual');
+        const citaData = localStorage.getItem('citaActual');
+        
+        if (!pacienteData) {
+            throw new Error('No hay paciente seleccionado');
+        }
+        
+        const paciente = JSON.parse(pacienteData);
+        const cita = citaData ? JSON.parse(citaData) : null;
+        
+        let pacienteId = paciente.id || paciente.id_paciente || paciente.paciente_id;
+        let citaId = cita?.id || cita?.id_cita || cita?.cita_id;
+        
+        if (!pacienteId) {
+            throw new Error('ID de paciente no válido');
+        }
+        
+        if (!citaId) {
+            throw new Error('No hay cita seleccionada');
+        }
+        
+        // 4. Obtener diagnósticos
+        const diagnostico_od = document.getElementById('diagnostico_od')?.value || '';
+        const diagnostico_oi = document.getElementById('diagnostico_oi')?.value || '';
+        const observaciones = document.getElementById('observaciones_audiometria')?.value || '';
+        const otoscopia = document.getElementById('otoscopia_audiometria')?.value || '';  // ← AGREGAR ESTA LÍNEA
+        
+        console.log('Diagnósticos:', { diagnostico_od, diagnostico_oi, observaciones });
+        
+        // 5. Capturar gráfica
+        let imagenBase64 = '';
+        try {
+            const canvasImg = await capturarGraficaAudiometria();
+            imagenBase64 = canvasImg.toDataURL('image/png');
+            console.log('Gráfica capturada');
+        } catch (err) {
+            console.warn('Error capturando gráfica:', err);
+        }
+        
+        // 6. Preparar datos para guardar
+        const data = {
+            paciente_id: parseInt(pacienteId),
+            cita_id: parseInt(citaId),
+            entidad_id: cita?.entidad_id || null,
+            diagnostico_od: diagnostico_od,
+            diagnostico_oi: diagnostico_oi,
+            observaciones: observaciones,
+            otoscopia: otoscopia,  // ← AGREGAR ESTA LÍNEA
+            valores_od: valores.od,
+            valores_oi: valores.oi,
+            grafica_base64: imagenBase64,
+            pta_via_aerea_od: ultimosPTA.od_air,
+            pta_via_osea_od: ultimosPTA.od_bone,
+            pta_via_aerea_oi: ultimosPTA.oi_air,
+            pta_via_osea_oi: ultimosPTA.oi_bone
+        };
+        
+        console.log('Enviando a guardar:', data);
+        
+        // 7. Verificar que window.api existe
+        if (!window.api) {
+            throw new Error('API no disponible. Reinicie la aplicación.');
+        }
+        
+        // 8. GUARDAR EN BASE DE DATOS
+        if (!window.api.guardarAudiometria) {
+            throw new Error('Función guardarAudiometria no disponible');
+        }
+        
+        const result = await window.api.guardarAudiometria(data);
+        
+        if (!result || !result.ok) {
+            throw new Error(result?.error || 'Error al guardar');
+        }
+        
+        console.log('✅ Guardado exitoso en BD, ID:', result.id);
+        mostrarNotificacionAudiometria('✅ Audiometría guardada exitosamente');
+        
+        // 9. GENERAR PDF - Usar el manejador específico para audiometría
+        try {
+            const entidadNombre = cita?.entidad_nombre || 'PARTICULAR';
+            const datosPDF = {
+                paciente: {
+                    nombre: paciente.nombre || '',
+                    documento: paciente.documento || ''
+                },
+                cita: {
+                    fecha_cita: cita?.fecha_cita || new Date().toISOString().split('T')[0]
+                },
+                valores_od: valores.od,
+                valores_oi: valores.oi,
+                freqs: valores.freqs,
+                diagnostico_od: diagnostico_od,
+                diagnostico_oi: diagnostico_oi,
+                observaciones: observaciones,
+                    otoscopia: otoscopia,
+                grafica_base64: imagenBase64,
+                   pta: {
+        od_air: ultimosPTA.od_air,
+        oi_air: ultimosPTA.oi_air,
+        od_bone: ultimosPTA.od_bone,
+        oi_bone: ultimosPTA.oi_bone
+    }
+            };
+            
+            // 🔥 IMPORTANTE: Usar el manejador EXCLUSIVO para audiometría
+            // Si tienes window.api.generarPDFAudiometria (recomendado)
+            if (window.api.generarPDFAudiometria) {
+                const pdfResult = await window.api.generarPDFAudiometria(datosPDF, entidadNombre);
+                if (pdfResult && pdfResult.ok) {
+                    mostrarNotificacionAudiometria(`✅ PDF generado: ${pdfResult.path}`);
+                } else {
+                    throw new Error(pdfResult?.error || 'Error al generar PDF');
+                }
+            } 
+            // Fallback: usar el manejador genérico con tipo 'audiometria'
+            else if (window.api.generarPDF) {
+                const pdfResult = await window.api.generarPDF(datosPDF, entidadNombre, 'audiometria');
+                if (pdfResult && pdfResult.ok) {
+                    mostrarNotificacionAudiometria(`✅ PDF generado: ${pdfResult.path}`);
+                } else {
+                    throw new Error(pdfResult?.error || 'Error al generar PDF');
+                }
+            }
+            else {
+                throw new Error('No hay función disponible para generar PDF');
+            }
+            
+        } catch (err) {
+            console.warn('Error generando PDF:', err);
+            mostrarNotificacionAudiometria('⚠️ Datos guardados pero error al generar PDF', true);
+        }
+        
+    } catch (error) {
+        console.error('❌ ERROR:', error);
+        mostrarNotificacionAudiometria(`❌ Error: ${error.message}`, true);
+    } finally {
+        mostrarLoadingAudiometria(false);
+    }
+}
+
+// Conectar el botón cuando el DOM esté listo
+document.addEventListener('DOMContentLoaded', function() {
+    const grabarBtn = document.getElementById('grabarAudiometriaBtn');
+    if (grabarBtn) {
+        console.log('Botón encontrado, conectando evento...');
+        grabarBtn.addEventListener('click', onGrabarAudiometriaClick);
+    } else {
+        console.error('Botón no encontrado!');
+    }
+});
+
+// Conectar el botón de limpiar vía ósea
+document.addEventListener('DOMContentLoaded', function() {
+    const limpiarBtn = document.getElementById('limpiarViaOseaBtn');
+    if (limpiarBtn) {
+        limpiarBtn.addEventListener('click', function() {
+            limpiarViaOsea();
+        });
+        console.log('✅ Botón limpiar vía ósea conectado');
+    } else {
+        console.warn('⚠️ Botón limpiar vía ósea no encontrado');
+    }
+});
+</script>
+
+
+<script>
+const freqs = ['125','250', '500', '750', '1000', '1500', '2000', '3000', '4000', '6000', '8000'];
+window.freqs = freqs;  // ← PARA QUE SinRespuestaOsea pueda usarlo
+const inputFreqs = ['250', '500', '750', '1000', '1500', '2000', '3000', '4000', '6000', '8000'];
+
+const defaultOD = [10, 15, 15, 15, 18, 65, 60, 55, 50];
+const defaultOI = [35, 42, 38, 39, 42, 50, 72, 68, 68];
+
+function createInputs(containerId, prefix, tipo = 'air') {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+
+    inputFreqs.forEach((f, i) => {
+        const div = document.createElement('div');
+        div.className = 'input-field';
+
+        div.innerHTML = `
+            <label>${f} Hz</label>
+            <input 
+                type="text"
+                id="${prefix}_${f}"
+                data-index="${i}"
+                data-prefix="${prefix}"
+                data-tipo="${tipo}"
+                value=""
+            >
+        `;
+
+        container.appendChild(div);
+    });
+
+    const inputs = container.querySelectorAll("input");
+
+    inputs.forEach((input) => {
+        input.addEventListener("focus", () => {
+            input.select();
+        });
+
+        input.addEventListener("input", () => {
+            updateChart();
+            actualizarPTA();
+            sincronizarCanvasDesdeInputs();
+            if (typeof redrawAll === 'function') redrawAll();
+        });
+
+        input.addEventListener("keydown", (e) => {
+            const index = parseInt(input.dataset.index);
+            const prefix = input.dataset.prefix;
+
+            const next = document.querySelector(
+                `input[data-prefix="${prefix}"][data-index="${index + 1}"]`
+            );
+
+            const prev = document.querySelector(
+                `input[data-prefix="${prefix}"][data-index="${index - 1}"]`
+            );
+
+            if (e.key === "ArrowRight" || e.key === "ArrowDown") {
+                if (next) {
+                    next.focus();
+                    e.preventDefault();
+                }
+            }
+
+            if (e.key === "ArrowLeft" || e.key === "ArrowUp") {
+                if (prev) {
+                    prev.focus();
+                    e.preventDefault();
+                }
+            }
+        });
+    });
+}
+
+// ============================================
+// FUNCIÓN PARA CREAR INPUTS DE VÍA ÓSEA SÓLO SÍMBOLOS
+// ============================================
+
+function createBoneSymbolInputs(containerId, prefix) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+
+    // Usar las mismas frecuencias que los otros inputs
+    const frecuencias = ['250', '500', '750', '1000', '1500', '2000', '3000', '4000', '6000', '8000'];
+
+    frecuencias.forEach((freq, i) => {
+        const div = document.createElement('div');
+        div.className = 'input-field';
+
+        div.innerHTML = `
+            <label>${freq} Hz</label>
+            <input 
+                type="text"
+                id="${prefix}-bone-symbol_${freq}"
+                data-index="${i}"
+                data-prefix="${prefix}"
+                data-tipo="bone-symbol"
+                placeholder="dB"
+                style="width:100%;"
+            >
+        `;
+
+        container.appendChild(div);
+    });
+
+    // Agregar event listeners a los inputs
+    const inputs = container.querySelectorAll("input");
+    inputs.forEach((input) => {
+        input.addEventListener("focus", () => {
+            input.select();
+        });
+
+        input.addEventListener("input", function() {
+            // Obtener el prefijo (od o oi)
+            const prefix = this.dataset.prefix;
+            const freq = this.id.replace(`${prefix}-bone-symbol_`, '');
+            
+            // Actualizar el punto en el canvas
+            updateBoneSymbolPoint(prefix, freq);
+            
+            // Actualizar el panel de enmascaramiento
+            actualizarPanelEnmascararBoneSymbols();
+        });
+
+input.addEventListener("keydown", (e) => {
+    // Obtener TODOS los inputs DENTRO del contenedor actual
+    const allInputsInContainer = container.querySelectorAll('input');
+    
+    // Encontrar la posición actual dentro del contenedor
+    let currentIndex = -1;
+    allInputsInContainer.forEach((el, idx) => {
+        if (el === input) currentIndex = idx;
+    });
+
+    if (currentIndex === -1) return;
+
+    const next = allInputsInContainer[currentIndex + 1];
+    const prev = allInputsInContainer[currentIndex - 1];
+
+    if (e.key === "ArrowRight" || e.key === "ArrowDown") {
+        if (next) {
+            next.focus();
+            e.preventDefault();
+        }
+    }
+
+    if (e.key === "ArrowLeft" || e.key === "ArrowUp") {
+        if (prev) {
+            prev.focus();
+            e.preventDefault();
+        }
+    }
+});
+    });
+}
+
+// ============================================
+// FUNCIÓN PARA ACTUALIZAR UN PUNTO DE VÍA ÓSEA SÓLO SÍMBOLOS
+// ============================================
+
+function updateBoneSymbolPoint(prefix, freq) {
+    if (!chart) return;
+
+    const inputId = `${prefix}-bone-symbol_${freq}`;
+    const input = document.getElementById(inputId);
+    if (!input) return;
+
+    const valor = input.value.trim();
+    
+    // Si el valor está vacío, eliminar el punto
+    if (valor === '') {
+        if (prefix === 'od') {
+            boneSymbolPointsOD = boneSymbolPointsOD.filter(p => p.freq !== freq);
+        } else {
+            boneSymbolPointsOI = boneSymbolPointsOI.filter(p => p.freq !== freq);
+        }
+        redrawBoneSymbolsOnly();
+        return;
+    }
+
+    // Verificar si es "NR" (Sin Respuesta)
+    const esNR = valor.toUpperCase() === 'NR';
+    const dbValue = esNR ? 110 : parseFloat(valor);
+
+    if (esNR || !isNaN(dbValue)) {
+        // Encontrar el índice de la frecuencia
+        const freqIndex = freqs.indexOf(freq);
+        if (freqIndex === -1) return;
+
+        // Obtener coordenadas en el canvas
+        const chartCanvas = chart.canvas;
+        const drawCanvas = drawingCanvas;
+        
+        if (!drawCanvas._scaleX || !drawCanvas._chartCanvas) {
+            const chartRect = chartCanvas.getBoundingClientRect();
+            const drawRect = drawCanvas.getBoundingClientRect();
+            drawCanvas._scaleX = drawRect.width / chartRect.width;
+            drawCanvas._scaleY = drawRect.height / chartRect.height;
+            drawCanvas._chartCanvas = chartCanvas;
+        }
+
+        const scaleX = drawCanvas._scaleX;
+        const scaleY = drawCanvas._scaleY;
+
+        const chartX = chart.scales.x.getPixelForValue(xPositions[freqIndex]);
+        const chartY = chart.scales.y.getPixelForValue(dbValue);
+        
+        const x = chartX * scaleX;
+        const y = chartY * scaleY;
+
+        // Determinar el símbolo a usar
+        let symbol = prefix === 'od' ? activeBoneSymbolOD : activeBoneSymbolOI;
+        // Verificar si hay un símbolo personalizado para esta frecuencia
+        if (prefix === 'od' && personalBoneSymbolsOD[freq]) {
+            symbol = personalBoneSymbolsOD[freq];
+        } else if (prefix === 'oi' && personalBoneSymbolsOI[freq]) {
+            symbol = personalBoneSymbolsOI[freq];
+        }
+
+        // Crear el punto
+        const point = {
+            x: x,
+            y: y,
+            freq: freq,
+            db: dbValue,
+            esNR: esNR,
+            symbol: symbol,
+            prefix: prefix
+        };
+
+        // Guardar o actualizar el punto
+        const list = prefix === 'od' ? boneSymbolPointsOD : boneSymbolPointsOI;
+        const existingIndex = list.findIndex(p => p.freq === freq);
+        
+        if (existingIndex !== -1) {
+            list[existingIndex] = point;
+        } else {
+            list.push(point);
+        }
+
+        // Ordenar por frecuencia
+        if (prefix === 'od') {
+            boneSymbolPointsOD.sort((a, b) => freqs.indexOf(a.freq) - freqs.indexOf(b.freq));
+        } else {
+            boneSymbolPointsOI.sort((a, b) => freqs.indexOf(a.freq) - freqs.indexOf(b.freq));
+        }
+
+        // Redibujar solo los símbolos
+        redrawBoneSymbolsOnly();
+    }
+}
+
+// ============================================
+// FUNCIÓN PARA REDIBUJAR SÓLO SÍMBOLOS DE VÍA ÓSEA (SIN LÍNEAS)
+// ============================================
+
+function redrawBoneSymbolsOnly() {
+    if (!drawCtx || !drawingCanvas) return;
+
+    // Limpiar solo la parte de símbolos de vía ósea
+    // NOTA: No limpiar todo el canvas para no borrar otros dibujos
+    // En su lugar, redibujamos encima
+    
+    // Guardar el estado actual del canvas
+    // Como no podemos limpiar solo una parte, usamos un enfoque:
+    // Redibujamos TODO manteniendo los otros elementos
+
+    // Pero para no interferir con otros dibujos, usamos un método más seguro:
+    // Guardamos los símbolos existentes y los redibujamos
+    
+    // Primero, obtener todos los símbolos actuales (incluyendo los que ya estaban)
+    const allSymbols = [...drawnBoneSymbols];
+    
+    // Filtrar los que son de tipo 'bone-symbol' para eliminarlos
+    const otherSymbols = allSymbols.filter(item => item.tipo !== 'bone-symbol');
+    
+    // Crear la nueva lista con los puntos actuales
+    const newSymbols = [];
+    
+    // Agregar puntos OD
+    boneSymbolPointsOD.forEach(point => {
+        newSymbols.push({
+            x: point.x,
+            y: point.y,
+            symbol: point.symbol,
+            tool: 'od',
+            tipo: 'bone-symbol',
+            freq: point.freq,
+            db: point.db,
+            esNR: point.esNR || false,
+            angle: 0 // Sin rotación para estos símbolos
+        });
+    });
+    
+    // Agregar puntos OI
+    boneSymbolPointsOI.forEach(point => {
+        newSymbols.push({
+            x: point.x,
+            y: point.y,
+            symbol: point.symbol,
+            tool: 'oi',
+            tipo: 'bone-symbol',
+            freq: point.freq,
+            db: point.db,
+            esNR: point.esNR || false,
+            angle: 0 // Sin rotación para estos símbolos
+         
+        });
+    });
+    
+    // Combinar con otros símbolos existentes
+    drawnBoneSymbols = [...otherSymbols, ...newSymbols];
+    
+    // Redibujar todo el canvas
+    redrawAll();
+}
+
+
+// ============================================
+// FUNCIONES PARA EL PANEL DE ENMASCARAMIENTO DE VÍA ÓSEA SÓLO SÍMBOLOS
+// ============================================
+
+function actualizarPanelEnmascararBoneSymbols() {
+    const listaOD = document.getElementById('listaODBoneSymbols');
+    const listaOI = document.getElementById('listaOIBoneSymbols');
+    
+    if (!listaOD || !listaOI) return;
+    
+    listaOD.innerHTML = '';
+    listaOI.innerHTML = '';
+    
+    const frecuencias = ['250', '500', '750', '1000', '1500', '2000', '3000', '4000', '6000', '8000'];
+    
+    // Recorrer frecuencias para OD
+    frecuencias.forEach(freq => {
+        const input = document.getElementById(`od-bone-symbol_${freq}`);
+        if (input && input.value !== '') {
+            const valor = input.value;
+            const simboloActual = personalBoneSymbolsOD[freq] || activeBoneSymbolOD;
+            
+            const item = document.createElement('div');
+            item.className = 'freq-item od-symbol-item';
+            item.innerHTML = `
+                <span class="freq-label">${freq} Hz</span>
+                <span class="freq-symbol" data-freq="${freq}" data-ear="od" data-tipo="bone-symbol">
+                    ${simboloActual} ${valor} dB
+                </span>
+            `;
+            item.addEventListener('click', (e) => {
+                e.stopPropagation();
+                mostrarSelectorBoneSymbol(item.querySelector('.freq-symbol'), 'od', freq);
+            });
+            listaOD.appendChild(item);
+        }
+    });
+    
+    // Recorrer frecuencias para OI
+    frecuencias.forEach(freq => {
+        const input = document.getElementById(`oi-bone-symbol_${freq}`);
+        if (input && input.value !== '') {
+            const valor = input.value;
+            const simboloActual = personalBoneSymbolsOI[freq] || activeBoneSymbolOI;
+            
+            const item = document.createElement('div');
+            item.className = 'freq-item oi-symbol-item';
+            item.innerHTML = `
+                <span class="freq-label">${freq} Hz</span>
+                <span class="freq-symbol" data-freq="${freq}" data-ear="oi" data-tipo="bone-symbol">
+                    ${simboloActual} ${valor} dB
+                </span>
+            `;
+            item.addEventListener('click', (e) => {
+                e.stopPropagation();
+                mostrarSelectorBoneSymbol(item.querySelector('.freq-symbol'), 'oi', freq);
+            });
+            listaOI.appendChild(item);
+        }
+    });
+    
+    if (listaOD.children.length === 0) {
+        listaOD.innerHTML = '<div style="color: #94a3b8; text-align: center; padding: 10px; font-size:11px;">Sin datos</div>';
+    }
+    if (listaOI.children.length === 0) {
+        listaOI.innerHTML = '<div style="color: #94a3b8; text-align: center; padding: 10px; font-size:11px;">Sin datos</div>';
+    }
+}
+
+function mostrarSelectorBoneSymbol(elemento, ear, freq) {
+    // Eliminar selector existente
+    const selectorExistente = document.querySelector('.symbol-selector-bone');
+    if (selectorExistente) selectorExistente.remove();
+    
+    // Crear selector de símbolos
+    const selector = document.createElement('div');
+    selector.className = 'symbol-selector-bone';
+    selector.style.display = 'block';
+    
+    // Título
+    const title = document.createElement('div');
+    title.className = 'selector-title';
+    title.textContent = `Cambiar símbolo para ${freq} Hz`;
+    selector.appendChild(title);
+    
+    // Símbolos disponibles
+      const simbolosOD = ['O', 'O↘', '△', '<', '[', '┐'];
+    const simbolosOI = ['X', '↙X', '□', '>', ']', '┌'];
+    const simbolos = ear === 'od' ? simbolosOD : simbolosOI;
+    
+    simbolos.forEach(sim => {
+        const btn = document.createElement('button');
+        btn.textContent = sim;
+        btn.style.fontSize = '20px';
+        btn.onclick = (e) => {
+            e.stopPropagation();
+            
+            // Guardar el símbolo personalizado
+            if (ear === 'od') {
+                personalBoneSymbolsOD[freq] = sim;
+                activeBoneSymbolOD = sim;
+            } else {
+                personalBoneSymbolsOI[freq] = sim;
+                activeBoneSymbolOI = sim;
+            }
+            
+            // Actualizar el punto en el canvas
+            updateBoneSymbolPoint(ear, freq);
+            
+            // Actualizar el panel
+            actualizarPanelEnmascararBoneSymbols();
+            
+            selector.remove();
+        };
+        selector.appendChild(btn);
+    });
+    
+    // Botón para resetear al símbolo por defecto
+    const resetBtn = document.createElement('button');
+    resetBtn.textContent = '↺';
+    resetBtn.style.backgroundColor = '#fef3c7';
+    resetBtn.style.color = '#92400e';
+    resetBtn.title = 'Resetear al símbolo por defecto';
+    resetBtn.onclick = (e) => {
+        e.stopPropagation();
+        if (ear === 'od') {
+            delete personalBoneSymbolsOD[freq];
+            activeBoneSymbolOD = '<';
+        } else {
+            delete personalBoneSymbolsOI[freq];
+            activeBoneSymbolOI = '>';
+        }
+        updateBoneSymbolPoint(ear, freq);
+        actualizarPanelEnmascararBoneSymbols();
+        selector.remove();
+    };
+    selector.appendChild(resetBtn);
+    
+    // Posicionar el selector
+    const rect = elemento.getBoundingClientRect();
+    selector.style.position = 'fixed';
+    selector.style.left = `${Math.min(rect.left, window.innerWidth - 250)}px`;
+    selector.style.top = `${Math.min(rect.bottom + 5, window.innerHeight - 200)}px`;
+    
+    document.body.appendChild(selector);
+    
+    // Cerrar al hacer clic fuera
+    function cerrarSelector(e) {
+        if (!selector.contains(e.target)) {
+            selector.remove();
+            document.removeEventListener('click', cerrarSelector);
+        }
+    }
+    
+    setTimeout(() => {
+        document.addEventListener('click', cerrarSelector);
+    }, 10);
+}
+
+// Modificar la función obtenerDatosPacienteAudiometria
+function obtenerDatosPacienteAudiometria() {
+    try {
+        const pacienteData = localStorage.getItem('pacienteActual');
+        if (!pacienteData) return null;
+        let paciente = JSON.parse(pacienteData);
+        
+        if (!paciente.id && paciente.id_paciente) paciente.id = paciente.id_paciente;
+        if (!paciente.id && paciente.paciente_id) paciente.id = paciente.paciente_id;
+        
+        const citaData = localStorage.getItem('citaActual');
+        const cita = citaData ? JSON.parse(citaData) : null;
+        
+        // Obtener entidad_id de la cita o de un campo adicional
+        let entidad_id = null;
+        let entidad_nombre = 'PARTICULAR';
+        
+        if (cita) {
+            entidad_id = cita.entidad_id || null;
+            entidad_nombre = cita.entidad_nombre || 'PARTICULAR';
+        }
+        
+        return { paciente, cita, entidad_id, entidad_nombre };
+    } catch (e) {
+        console.error('Error:', e);
+        return null;
+    }
+}
+
+// Modificar guardarAudiometriaEnBaseDeDatos
+async function guardarAudiometriaEnBaseDeDatos(pacienteId, citaId, entidadId, diagnostico_od, diagnostico_oi, observaciones, otoscopia, valoresOD, valoresOI, imagenBase64) {
+    const data = {
+        paciente_id: pacienteId,
+        cita_id: citaId,
+        entidad_id: entidadId,
+        diagnostico_od: diagnostico_od,
+        diagnostico_oi: diagnostico_oi,
+        observaciones: observaciones,
+        otoscopia: otoscopia,  // ← AGREGAR ESTA LÍNEA
+        valores_od: valoresOD,
+        valores_oi: valoresOI,
+        grafica_base64: imagenBase64,
+        pta_via_aerea_od: ptaData.od_air,
+        pta_via_osea_od: ptaData.od_bone,
+        pta_via_aerea_oi: ptaData.oi_air,
+        pta_via_osea_oi: ptaData.oi_bone
+
+    };
+    
+    if (!window.api || !window.api.guardarAudiometria) {
+        throw new Error('window.api.guardarAudiometria no está disponible');
+    }
+    
+    const result = await window.api.guardarAudiometria(data);
+    if (!result.ok) {
+        throw new Error(result.error || 'Error al guardar');
+    }
+    return result.id;
+}
+
+// Agregar funciones para obtener diagnósticos
+function obtenerDiagnosticoOd() {
+    // Si agregaste inputs para diagnóstico en el HTML
+    return document.getElementById('diagnostico_od')?.value || '';
+}
+
+function obtenerDiagnosticoOi() {
+    return document.getElementById('diagnostico_oi')?.value || '';
+}
+
+function obtenerObservaciones() {
+    return document.getElementById('observaciones_audiometria')?.value || '';
+}
+
+
+
+function clearAll() {
+    document.querySelectorAll("input").forEach(input => {
+        input.value = "";
+    });
+
+    updateChart();
+}
+createInputs('od-inputs', 'od');
+createInputs('oi-inputs', 'oi');
+
+
+createInputs('od-bone-inputs', 'od-bone', 'bone');
+createInputs('oi-bone-inputs', 'oi-bone', 'bone');
+document.querySelectorAll(".symbol-btn").forEach(btn => {
+
+    btn.addEventListener("click", function () {
+
+        const ear = this.dataset.ear;
+        const symbol = this.dataset.symbol;
+
+        activeSymbols[ear] = symbol;
+
+        // quitar active del mismo oído
+        document
+            .querySelectorAll(`.symbol-btn[data-ear="${ear}"]`)
+            .forEach(b => b.classList.remove("active"));
+
+        this.classList.add("active");
+
+        updateChart();
+    });
+
+});
+
+document.querySelectorAll(".bone-btn").forEach(btn => {
+
+    btn.addEventListener("click", function () {
+
+        const ear = this.dataset.boneEar;
+        const symbol = this.dataset.boneSymbol;
+
+        activeBoneSymbols[ear] = symbol;
+
+        document
+            .querySelectorAll(`.bone-btn[data-bone-ear="${ear}"]`)
+            .forEach(b => b.classList.remove("active"));
+
+        this.classList.add("active");
+
+        updateChart();
+    });
+
+});
+
+document.querySelectorAll(".bone-btn").forEach(btn => {
+
+    btn.addEventListener("click", function () {
+
+        const ear = this.dataset.boneEar;
+        const symbol = this.dataset.boneSymbol;
+
+        activeBoneSymbols[ear] = symbol;
+
+        // ACTUALIZAR TRAZOS ELÁSTICOS YA EXISTENTES
+        const elasticList =
+            ear === "od"
+                ? elasticPointsOD
+                : elasticPointsOI;
+
+        elasticList.forEach(point => {
+            point.symbol = symbol;
+        });
+
+        // ACTUALIZAR TRAZOS DRAW YA EXISTENTES
+        drawnBoneSymbols.forEach(item => {
+            if (item.tool === ear) {
+                item.symbol = symbol;
+            }
+        });
+
+        document
+            .querySelectorAll(`.bone-btn[data-bone-ear="${ear}"]`)
+            .forEach(b => b.classList.remove("active"));
+
+        this.classList.add("active");
+
+        redrawAll();
+    });
+
+});
+
+let chart;
+let currentOD = [];
+let currentOI = [];
+
+let bonePointsOD = {};
+let bonePointsOI = {};
+let drawnBoneSymbols = [];
+
+let activeBoneSymbols = {
+    od: "<",
+    oi: ">"
+};
+
+
+
+let activeSymbols = {
+    od: "air",
+    oi: "air"
+};
+
+
+
+let drawingCanvas;
+let drawCtx;
+
+let isDrawing = false;
+
+let currentTool = null;
+
+// ========================
+// MODO ELÁSTICO
+// ========================
+
+let elasticMode = false;
+let elasticEar = null;
+
+let elasticPointsOD = [];
+let elasticPointsOI = [];
+
+let elasticPreview = null;
+let ignoreNextClick = false;
+
+let lastX = 0;
+let lastY = 0;
+
+const MIN_DISTANCE = 34;
+const audiologySymbolsPlugin = {
+    id: 'audiologySymbolsPlugin',
+
+    afterDatasetsDraw(chart) {
+
+        const { ctx } = chart;
+
+        chart.data.datasets.forEach((dataset, datasetIndex) => {
+
+            const meta = chart.getDatasetMeta(datasetIndex);
+
+            /* =========================
+   SÍMBOLOS PERSONALIZADOS
+========================= */
+
+// En el plugin audiologySymbolsPlugin, dentro de afterDatasetsDraw, 
+// reemplaza la sección de "SÍMBOLOS PERSONALIZADOS" con esto:
+
+
+/*
+if (dataset.customSymbol) {
+    meta.data.forEach((point, index) => {
+        if (dataset.data[index]?.y === null) return;
+        const dataPoint = dataset.data[index];
+        if (dataPoint?.esInterpolado && dataPoint?.ocultarPunto) {
+            return;
+        }
+        
+        // Obtener símbolo personalizado para esta frecuencia específica
+        let symbol = dataset.customSymbol;
+        const freq = freqs[index];
+        const ear = dataset.label === 'OD Vía Aérea' ? 'od' : 
+                    dataset.label === 'OI Vía Aérea' ? 'oi' : null;
+        
+        if (ear === 'od' && personalAirSymbolsOD[freq]) {
+            symbol = personalAirSymbolsOD[freq];
+        } else if (ear === 'oi' && personalAirSymbolsOI[freq]) {
+            symbol = personalAirSymbolsOI[freq];
+        }
+
+        // 🔥 Si es NR (por "-"), forzar el símbolo de Sin Respuesta
+        if (dataPoint && dataPoint.esNR) {
+            if (ear === 'od') {
+                symbol = '↘O';
+            } else if (ear === 'oi') {
+                symbol = '↙X';
+            }
+        }
+        
+        ctx.save();
+
+        // ============================================
+        // 🔥 PRIMERO: VERIFICAR SI ES NR (MOVER AQUÍ)
+        // ============================================
+        
+        // OD: O↘
+        if (symbol === '↘O' || symbol === 'O↘' || symbol === 'NR_OD') {
+            ctx.font = 'bold 14px Arial';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillStyle = dataset.borderColor;
+            ctx.fillText('O', point.x, point.y);
+
+            const radio = 6;
+            const inicioX = point.x + radio;
+            const inicioY = point.y;
+            const longitud = 12;
+            const finX = inicioX + longitud;
+            const finY = inicioY + (longitud * 0.6);
+
+            ctx.strokeStyle = dataset.borderColor;
+            ctx.fillStyle = dataset.borderColor;
+            ctx.lineWidth = 2;
+            drawArrow(ctx, inicioX, inicioY, finX, finY, 6);
+            ctx.restore();
+            return; // ← SALIR DE LA ITERACIÓN
+        }
+        
+        // OI: X↙
+        if (symbol === '↙X' || symbol === 'X↙' || symbol === 'NR_OI') {
+            const tamañoX = 2; // ← AJUSTA AQUÍ EL TAMAÑO
+            ctx.strokeStyle = dataset.borderColor;
+            ctx.fillStyle = dataset.borderColor;
+            ctx.lineWidth = -4;
+
+            ctx.beginPath();
+            ctx.moveTo(point.x - tamañoX, point.y - tamañoX);
+            ctx.lineTo(point.x + tamañoX, point.y + tamañoX);
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.moveTo(point.x - tamañoX, point.y + tamañoX);
+            ctx.lineTo(point.x + tamañoX, point.y - tamañoX);
+            ctx.stroke();
+
+            const inicioX = point.x + tamañoX - 2;
+            const inicioY = point.y + tamañoX - 2;
+            const longitud = 1; // ← AJUSTA LA LONGITUD DE LA FLECHA
+            const finX = inicioX + longitud;
+            const finY = inicioY + longitud;
+
+            drawArrow(ctx, inicioX, inicioY, finX, finY, 6);
+            ctx.restore();
+            return; // ← SALIR DE LA ITERACIÓN
+        }
+
+        // ============================================
+        // ✅ EL RESTO DEL CÓDIGO SOLO PARA SÍMBOLOS NO NR
+        // ============================================
+
+        if (symbol === '•') {
+            const radius = 4;
+            ctx.beginPath();
+            ctx.arc(point.x, point.y, radius, 0, 2 * Math.PI);
+            ctx.fillStyle = dataset.borderColor;
+            ctx.fill();
+            ctx.restore();
+            return;
+        }
+        
+        // DIFERENTE TAMAÑO SEGÚN EL OÍDO
+        const esEnmascaramiento = (ear === 'od' && personalAirSymbolsOD[freq]) || 
+                                  (ear === 'oi' && personalAirSymbolsOI[freq]);
+        
+        if (dataset.label === 'OD Vía Aérea') {
+            ctx.font = esEnmascaramiento ? 'bold 20px Arial' : 'bold 30px Arial';
+        } else if (dataset.label === 'OI Vía Aérea') {
+            ctx.font = esEnmascaramiento ? 'bold 20px Arial' : 'bold 16px Arial';
+        } else {
+            ctx.font = 'bold 16px Arial';
+        }
+        
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillStyle = dataset.borderColor;
+        ctx.fillText(symbol, point.x, point.y);
+        ctx.restore();
+    });
+}
+*/
+
+
+
+if (dataset.customSymbol) {
+    meta.data.forEach((point, index) => {
+        if (dataset.data[index]?.y === null) return;
+        const dataPoint = dataset.data[index];
+        if (dataPoint?.esInterpolado && dataPoint?.ocultarPunto) {
+            return;
+        }
+        
+        // Obtener símbolo personalizado para esta frecuencia específica
+        let symbol = dataset.customSymbol;
+        const freq = freqs[index];
+        const ear = dataset.label === 'OD Vía Aérea' ? 'od' : 
+                    dataset.label === 'OI Vía Aérea' ? 'oi' : null;
+        
+        if (ear === 'od' && personalAirSymbolsOD[freq]) {
+            symbol = personalAirSymbolsOD[freq];
+        } else if (ear === 'oi' && personalAirSymbolsOI[freq]) {
+            symbol = personalAirSymbolsOI[freq];
+        }
+
+
+        // 🔥 NUEVO: Si es NR (por "-"), forzar el símbolo de Sin Respuesta
+if (dataPoint && dataPoint.esNR) {
+    if (ear === 'od') {
+        symbol = '↘O';  // OD: O con flecha
+    } else if (ear === 'oi') {
+        symbol = '↙X';  // OI: X con flecha
+    }
+}
+        
+        ctx.save();
+
+if (symbol === '↘O' || symbol === 'O↘' || symbol === 'NR_OD') {
+    // Dibujar O (tamaño pequeño)
+    ctx.font = 'bold 10px Arial';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillStyle = dataset.borderColor;
+    ctx.fillText('O', point.x, point.y);
+
+    // 🔥 Flecha PEGADA al círculo - desde el BORDE DERECHO
+    const radio = 6;  // Radio REAL de la O con font-size 14px
+    const inicioX = point.x + radio;      // Borde derecho exacto
+    const inicioY = point.y;              // Misma altura que el centro
+    const longitud = 12;                  // Flecha más corta
+    const finX = inicioX + longitud;
+    const finY = inicioY + (longitud * 0.6); // Inclinación suave hacia abajo
+
+    ctx.strokeStyle = dataset.borderColor;
+    ctx.fillStyle = dataset.borderColor;
+    ctx.lineWidth = 2;
+    drawArrow(ctx, inicioX, inicioY, finX, finY, 6);
+    ctx.restore();
+    return;
+}
+                    // ============================================
+                    // ✅ SÍMBOLO NR PARA OI (↙X) - X + flecha PEGADA
+                    // ============================================
+                    if (symbol === '↙X' || symbol === 'X↙' || symbol === 'NR_OI') {
+                        const tamañoX = 2;
+                        ctx.strokeStyle = dataset.borderColor;
+                        ctx.fillStyle = dataset.borderColor;
+                        ctx.lineWidth = 2;
+
+                        // Dibujar X (tamaño pequeño)
+                        ctx.beginPath();
+                        ctx.moveTo(point.x - tamañoX, point.y - tamañoX);
+                        ctx.lineTo(point.x + tamañoX, point.y + tamañoX);
+                        ctx.stroke();
+
+                        ctx.beginPath();
+                        ctx.moveTo(point.x - tamañoX, point.y + tamañoX);
+                        ctx.lineTo(point.x + tamañoX, point.y - tamañoX);
+                        ctx.stroke();
+
+                        // Flecha desde la esquina inferior derecha
+                        const inicioX = point.x + tamañoX - 2;
+                        const inicioY = point.y + tamañoX - 2;
+                        const longitud = 1;
+                        const finX = inicioX + longitud;
+                        const finY = inicioY + longitud;
+
+                        drawArrow(ctx, inicioX, inicioY, finX, finY, 6);
+                        ctx.restore();
+                        return;
+                    }
+
+              if (symbol === '•') {
+                        const radius = 4;  // Tamaño del círculo
+                        ctx.beginPath();
+                        ctx.arc(point.x, point.y, radius, 0, 2 * Math.PI);
+                        ctx.fillStyle = dataset.borderColor;
+                        ctx.fill();
+                        ctx.restore();
+                        return;  // Salir después de dibujar el círculo
+                    }
+        
+        // DIFERENTE TAMAÑO SEGÚN EL OÍDO
+                    const esEnmascaramiento = (ear === 'od' && personalAirSymbolsOD[freq]) || 
+                                              (ear === 'oi' && personalAirSymbolsOI[freq]);
+                    
+                    if (dataset.label === 'OD Vía Aérea') {
+                        if (esEnmascaramiento) {
+                            ctx.font = 'bold 20px Arial';  // Tamaño pequeño para enmascaramiento OD
+                        } else {
+                            ctx.font = 'bold 30px Arial';  // Tamaño normal para OD
+                        }
+                    } else if (dataset.label === 'OI Vía Aérea') {
+                        if (esEnmascaramiento) {
+                            ctx.font = 'bold 20px Arial';   // Tamaño pequeño para enmascaramiento OI
+                        } else {
+                            ctx.font = 'bold 16px Arial';  // Tamaño normal para OI
+                        }
+                    } else {
+                        ctx.font = 'bold 16px Arial';
+                    }
+        
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillStyle = dataset.borderColor;
+        ctx.fillText(symbol, point.x, point.y);
+        ctx.restore();
+    });
+}
+
+
+
+            /* =========================
+               VÍA ÓSEA
+            ========================== */
+
+            if (
+                dataset.label === 'OD Vía Ósea' ||
+                dataset.label === 'OI Vía Ósea'
+            ) {
+
+                meta.data.forEach((point, index) => {
+
+                    if (dataset.data[index] === null) return;
+
+                    const x = point.x;
+                    const y = point.y;
+
+                    ctx.save();
+
+                    ctx.font = 'bold 18px Arial';
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillStyle = dataset.borderColor;
+
+   // OD <-
+if (dataset.label === 'OD Vía Ósea') {
+
+    ctx.strokeStyle = dataset.borderColor;
+    ctx.lineWidth = 2;
+
+    // línea horizontal
+    ctx.beginPath();
+    ctx.moveTo(x - 18, y - 8);
+    ctx.lineTo(x - 4, y - 8);
+    ctx.stroke();
+
+    // símbolo <
+  ctx.fillText(activeBoneSymbols.od, x + 4, y - 8);
+}
+
+// OI ->
+if (dataset.label === 'OI Vía Ósea') {
+
+    ctx.strokeStyle = dataset.borderColor;
+    ctx.lineWidth = 2;
+
+    // línea horizontal
+    ctx.beginPath();
+    ctx.moveTo(x + 4, y - 8);
+    ctx.lineTo(x + 18, y - 8);
+    ctx.stroke();
+
+    // símbolo >
+  ctx.fillText(activeBoneSymbols.oi, x - 4, y - 8);
+}
+
+                    ctx.restore();
+                });
+
+                
+            }
+
+        });
+    }
+};
+
+const audiologyGridPlugin = {
+    id: 'audiologyGridPlugin',
+
+    beforeDraw(chart) {
+
+        const { ctx, chartArea, scales } = chart;
+
+        const x = scales.x;
+        const y = scales.y;
+
+        ctx.save();
+
+        ctx.strokeStyle = '#000';
+        ctx.lineWidth = 1;
+
+        // líneas verticales REALES
+const verticalLines = xPositions.filter(v => v !== xPositions[xPositions.length - 1]);
+verticalLines.forEach(v => {
+
+    const xPos = x.getPixelForValue(v);
+
+    ctx.beginPath();
+    ctx.moveTo(xPos, chartArea.top);
+    ctx.lineTo(xPos, chartArea.bottom);
+    ctx.stroke();
+});
+
+        
+        // líneas horizontales
+        for (let db = -10; db <= 120; db += 10) {
+
+            const yPos = y.getPixelForValue(db);
+
+            ctx.beginPath();
+            ctx.moveTo(chartArea.left, yPos);
+            ctx.lineTo(chartArea.right, yPos);
+            ctx.stroke();
+        }
+
+        ctx.restore();
+    }
+};
+
+const audiologyLabelsPlugin = {
+    id: 'audiologyLabelsPlugin',
+
+    afterDraw(chart) {
+
+        const { ctx, chartArea } = chart;
+
+        ctx.save();
+
+        ctx.fillStyle = '#000';
+        ctx.font = 'bold 13px Arial';
+
+        // dB HL arriba izquierda
+        ctx.textAlign = 'left';
+
+        ctx.fillText(
+            'dB HL',
+            chartArea.left - 30,
+            chartArea.top - 8
+        );
+
+        // Hz PEGADO al 8000
+        ctx.textAlign = 'left';
+
+        ctx.fillText(
+            'Hz',
+            chartArea.right - 8,
+            chartArea.top - 8
+        );
+
+        ctx.restore();
+    }
+};
+let showODBone = false;
+let showOIBone = false;
+
+
+
+function getBoneValues(prefix) {
+    if (prefix === "od") {
+       return [15, 15, 15, 15, 15, 15, null, null, null];
+    }
+
+    if (prefix === "oi") {
+        return [35, 35, 38, 38, 40, 45, 50, null, null];
+    }
+}
+function toggleODBone() {
+
+    currentTool = "od";
+}
+
+function toggleOIBone() {
+
+    currentTool = "oi";
+}
+
+const SCALE_X = 0.80; // 90% del tamaño original
+
+const xPositions = [
+    0,
+    10,
+    20,
+    25,
+    30,
+    35,
+    40,
+    45,
+    51.5,
+    56.5,
+    63,
+    72.9,
+    140
+].map(v => v * SCALE_X);
+window.xPositions = xPositions;
+
+function getValues(prefix, tipo = 'air') {
+    return freqs.map((f, index) => {
+        const inputId = tipo === 'air' ? `${prefix}_${f}` : `${prefix}_${f}`;
+        const input = document.getElementById(inputId);
+
+        const rawValue = input
+            ? input.value.trim().toUpperCase()
+            : "";
+
+              // 🔥 NUEVO: Manejar 110 como valor normal
+        if (rawValue === "110") {
+            return {
+                x: xPositions[index],
+                y: 110,
+                noResponse: false
+            };
+        }
+
+        // 🔥 NUEVO: Manejar NR como sin respuesta
+        if (rawValue === "NR") {
+            return {
+                x: xPositions[index],
+                y: 110,  // ← POSICIONAR EN 110 dB
+                noResponse: true
+            };
+        }
+
+        // 🔥 NUEVO: Manejar "-" como sin respuesta (NR)
+if (rawValue === "-") {
+    return {
+        x: xPositions[index],
+        y: 110,  // ← POSICIONAR EN 110 dB
+        noResponse: true,
+        esNR: true  // 🔥 MARCADOR PARA SABER QUE ES NR POR GUION
+    };
+}
+
+        // 🔥 INTERPOLACIÓN PARA 750Hz Y 1500Hz (SIN PUNTO)
+        if ((f === '750' || f === '1500') && rawValue === "") {
+            const freqAnterior = f === '750' ? '500' : '1000';
+            const freqPosterior = f === '750' ? '1000' : '2000';
+            
+            const inputAnterior = document.getElementById(`${prefix}_${freqAnterior}`);
+            const inputPosterior = document.getElementById(`${prefix}_${freqPosterior}`);
+            
+            const valAnterior = inputAnterior ? parseFloat(inputAnterior.value) : null;
+            const valPosterior = inputPosterior ? parseFloat(inputPosterior.value) : null;
+
+            if (valAnterior !== null && !isNaN(valAnterior) && valPosterior !== null && !isNaN(valPosterior)) {
+                const interpolado = (valAnterior + valPosterior) / 2;
+                return {
+                    x: xPositions[index],
+                    y: interpolado,
+                    noResponse: false,
+                    esInterpolado: true,
+                    ocultarPunto: true  // 🔥 NUEVO: oculta el punto
+                };
+            }
+        }
+
+        if (rawValue === "") {
+            return {
+                x: xPositions[index],
+                y: null,
+                noResponse: false
+            };
+        }
+
+        if (rawValue === "NR") {
+            return {
+                x: xPositions[index],
+                y: 105,
+                noResponse: true
+            };
+        }
+
+        return {
+            x: xPositions[index],
+            y: parseFloat(rawValue),
+            noResponse: false
+        };
+    });
+}
+
+function calcularPTAAir(prefix) {
+
+    const frecuenciasPTA = ['500', '1000', '2000', '3000'];
+
+    let suma = 0;
+    let cantidad = 0;
+
+    frecuenciasPTA.forEach(freq => {
+
+        const input = document.getElementById(`${prefix}_${freq}`);
+
+        if (!input) return;
+
+        const valor = parseFloat(input.value);
+
+        if (!isNaN(valor)) {
+            suma += valor;
+            cantidad++;
+        }
+    });
+
+    if (cantidad !== 4) return '--';
+
+    return (suma / 4).toFixed(1);
+}
+
+function calcularPTABone(prefix) {
+    const frecuenciasPTA = ['500', '1000', '2000', '3000'];
+    let suma = 0;
+    let cantidad = 0;
+    
+    frecuenciasPTA.forEach(freq => {
+        // Primero intentar leer del input
+        const inputId = prefix === 'od' ? `od-bone_${freq}` : `oi-bone_${freq}`;
+        const input = document.getElementById(inputId);
+        let valor = parseFloat(input?.value);
+        
+        // Si no hay valor en input, intentar del dibujo manual (bonePoints)
+        if (isNaN(valor)) {
+            valor = prefix === 'od' ? bonePointsOD[freq] : bonePointsOI[freq];
+        }
+        
+        if (!isNaN(valor) && valor !== undefined) {
+            suma += valor;
+            cantidad++;
+        }
+    });
+    
+    return cantidad === 4 ? (suma / 4).toFixed(1) : '--';
+}
+
+let ultimosPTA = {
+    od_air: null,
+    od_bone: null,
+    oi_air: null,
+    oi_bone: null
+};
+
+function actualizarPTA() {
+
+    // VÍA AÉREA
+    const odAir = calcularPTAAir('od');
+    const oiAir = calcularPTAAir('oi');
+
+    // VÍA ÓSEA
+    const odBone = calcularPTABone('od');
+    const oiBone = calcularPTABone('oi');
+
+    document.getElementById('pta_od_air').textContent = odAir;
+    document.getElementById('pta_oi_air').textContent = oiAir;
+
+    document.getElementById('pta_od_bone').textContent = odBone;
+    document.getElementById('pta_oi_bone').textContent = oiBone;
+
+
+        // ✅ GUARDAR en variable global para usar al guardar
+    ultimosPTA = {
+        od_air: odAir !== '--' ? parseFloat(odAir) : null,
+        od_bone: odBone !== '--' ? parseFloat(odBone) : null,
+        oi_air: oiAir !== '--' ? parseFloat(oiAir) : null,
+        oi_bone: oiBone !== '--' ? parseFloat(oiBone) : null
+    };
+    
+    console.log('📊 PTA actualizados:', ultimosPTA);
+}
+
+
+function getSymbolText(ear) {
+
+    //const symbol = activeSymbols[ear];
+    const globalSymbol = activeSymbols[ear];
+
+    const mapOD = {
+        air: "•",
+        nr: "↘•",
+        airMask: "△",
+        bone: "<",
+        boneMask: "[",
+        frontMask: "┐"
+    };
+
+    const mapOI = {
+        air: "x",
+        nr: "↙X",
+        airMask: "□",
+        bone: ">",
+        boneMask: "]",
+        frontMask: "┌"
+    };
+
+    const defaultSymbol = ear === "od" ? mapOD[globalSymbol] : mapOI[globalSymbol];
+    
+    // Si hay un símbolo personalizado para una frecuencia específica, se usará en el plugin
+    // El plugin de Chart.js usará los símbolos personalizados por punto
+    return defaultSymbol;
+}
+
+/* REEMPLAZA COMPLETA la función updateChart() por esta */
+
+function updateChart() {
+    const od = getValues('od');
+    const oi = getValues('oi');
+    const odBone = getValues('od-bone', 'bone');
+    const oiBone = getValues('oi-bone', 'bone');
+
+    currentOD = od;
+    currentOI = oi;
+
+    // ✅ SI EL CHART YA EXISTE, SOLO ACTUALIZAR DATOS
+    if (chart) {
+        // Actualizar datasets existentes
+        const datasets = chart.data.datasets;
+        
+        // Buscar y actualizar cada dataset por su label
+        datasets.forEach(ds => {
+            if (ds.label === 'OD Vía Aérea') {
+                ds.data = od;
+            } else if (ds.label === 'OI Vía Aérea') {
+                ds.data = oi;
+            } else if (ds.label === 'OD Vía Ósea' && showODBone) {
+                ds.data = odBone;
+            } else if (ds.label === 'OI Vía Ósea' && showOIBone) {
+                ds.data = oiBone;
+            }
+        });
+
+        // ✅ ACTUALIZAR, NO DESTRUIR
+        chart.update('none'); // 'none' = sin animación para evitar parpadeo
+        
+        // Redibujar canvas superpuesto
+        setTimeout(() => {
+            resizeDrawingCanvas();
+            if (drawCtx) {
+                drawCtx.clearRect(0, 0, drawingCanvas.width, drawingCanvas.height);
+            }
+            if (typeof redrawAll === 'function') {
+                redrawAll();
+            }
+            if (typeof sincronizarCanvasDesdeInputs === 'function') {
+                sincronizarCanvasDesdeInputs();
+            }
+
+        }, 50);
+        
+        return; // ✅ SALIR, NO RECREAR EL CHART
+    }
+
+    // ==========================================
+    // SOLO SE EJECUTA LA PRIMERA VEZ (CREACIÓN INICIAL)
+    // ==========================================
+    
+    const ctx = document.getElementById('toneChart');
+
+    chart = new Chart(ctx, {
+        type: 'line',
+        plugins: [
+            audiologyGridPlugin,
+            audiologySymbolsPlugin,
+            audiologyLabelsPlugin
+        ],
+        data: {
+            labels: freqs,
+            datasets: [
+                {
+                    label: 'OD Vía Aérea',
+                    data: od,
+                    borderColor: '#e74c3c',
+                    backgroundColor: '#e74c3c',
+                    tension: 0.35,
+                    borderWidth: 1.5,
+                    pointRadius: 0,
+                    customSymbol: getSymbolText("od"),
+                },
+                {
+                    label: 'OI Vía Aérea',
+                    data: oi,
+                    borderColor: '#004EB0',
+                    backgroundColor: '#004EB0',
+                    tension: 0.35,
+                    borderWidth: 1.5,
+                    pointRadius: 0,
+                    customSymbol: getSymbolText("oi"),
+                },
+                ...(showODBone ? [{
+                    label: 'OD Vía Ósea',
+                    data: odBone,
+                    borderColor: '#991b1b',
+                    backgroundColor: '#991b1b',
+                    borderWidth: 2,
+                    borderDash: [6, 4],
+                    tension: 0,
+                    pointRadius: 0,
+                }] : []),
+                ...(showOIBone ? [{
+                    label: 'OI Vía Ósea',
+                    data: oiBone,
+                    borderColor: '#1d4ed8',
+                    backgroundColor: '#1d4ed8',
+                    borderWidth: 2,
+                    borderDash: [6, 4],
+                    tension: 0,
+                    pointRadius: 0,
+                }] : [])
+            ]
+        },
+        options: {
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+                x: {
+                    type: 'linear',
+                    position: 'top',
+                    min: 0,
+                    max: xPositions[xPositions.length - 2],
+                    afterBuildTicks: (axis) => {
+                        axis.ticks = xPositions.map(v => ({ value: v }));
+                    },
+                    grid: { display: false },
+                    border: { color: '#000', width: 1 },
+                    ticks: {
+                        padding: 14,
+                        font: { size: 9 },
+                        callback: function(value, index) {
+                            return freqs[index] || '';
+                        }
+                    }
+                },
+                y: {
+                    reverse: true,
+                    min: -10,
+                    max: 120,
+                    ticks: {
+                        stepSize: 10,
+                        color: '#000',
+                        font: { size: 10 },
+                        callback: function(value) {
+                            if (value === 120) return '';
+                            return value;
+                        }
+                    },
+                    grid: { display: false },
+                    border: { color: '#000', width: 1 }
+                }
+            }
+        }
+    });
+
+    // Inicializar canvas de dibujo
+    setTimeout(() => {
+        resizeDrawingCanvas();
+        if (drawCtx) {
+            drawCtx.clearRect(0, 0, drawingCanvas.width, drawingCanvas.height);
+        }
+        if (typeof redrawAll === 'function') {
+            redrawAll();
+        }
+        if (typeof sincronizarCanvasDesdeInputs === 'function') {
+            sincronizarCanvasDesdeInputs();
+        }
+    }, 100);
+}
+
+
+function cargarDatosPaciente() {
+    const data = localStorage.getItem("pacienteActual");
+
+    if (!data) return;
+
+    const paciente = JSON.parse(data);
+
+    document.getElementById("patientCard").style.display = "block";
+
+    document.getElementById("pacienteNombre").textContent =
+        paciente.nombre || "--";
+
+    document.getElementById("pacienteDocumento").textContent =
+        paciente.documento || "--";
+
+    document.getElementById("pacienteFecha").textContent =
+        paciente.fecha
+            ? new Date(paciente.fecha).toLocaleDateString("es-ES")
+            : "--";
+
+    document.getElementById("pacienteHora").textContent =
+        paciente.hora || "--";
+
+    document.getElementById("pacienteTipo").textContent =
+        paciente.tipo || "--";
+}
+
+cargarDatosPaciente();
+
+updateChart();
+
+initDrawingCanvas();
+
+
+/*
+document
+.getElementById("elasticODBtn")
+.addEventListener("click", () => {
+
+    elasticMode = true;
+    elasticEar = "od";
+
+});
+
+document
+.getElementById("elasticOIBtn")
+.addEventListener("click", () => {
+
+    elasticMode = true;
+    elasticEar = "oi";
+
+});
+*/
+
+window.addEventListener("resize", resizeDrawingCanvas);
+
+function initDrawingCanvas() {
+
+    drawingCanvas = document.getElementById("drawingCanvas");
+
+    drawCtx = drawingCanvas.getContext("2d");
+
+    resizeDrawingCanvas();
+
+    drawingCanvas.addEventListener("mousedown", startDrawing);
+
+    drawingCanvas.addEventListener("mousemove", draw);
+
+    drawingCanvas.addEventListener("mouseup", stopDrawing);
+
+    drawingCanvas.addEventListener("mouseleave", stopDrawing);
+
+    drawingCanvas.addEventListener(
+    "click",
+    elasticClick
+);
+
+drawingCanvas.addEventListener(
+    "mousemove",
+    elasticMove
+);
+
+drawingCanvas.addEventListener(
+    "dblclick",
+    finishElastic
+);
+}
+
+// ============================================
+// FUNCIÓN CORREGIDA - resizeDrawingCanvas
+// ============================================
+function resizeDrawingCanvas() {
+    const chartCanvas = chart ? chart.canvas : null;
+    const container = drawingCanvas.parentElement;
+    
+    if (chartCanvas) {
+        // ✅ OBTENER EL TAMAÑO REAL DEL CANVAS DE CHART.JS
+        // NO usar getBoundingClientRect() porque devuelve el tamaño visual (escalado)
+        const chartRect = chartCanvas.getBoundingClientRect();
+        const containerRect = container.getBoundingClientRect();
+        
+        // Calcular la relación de escala real entre el contenedor y el canvas de Chart.js
+        const scaleX = containerRect.width / chartRect.width;
+        const scaleY = containerRect.height / chartRect.height;
+        
+        // 🔥 IMPORTANTE: Asignar el MISMO tamaño en píxeles que Chart.js
+        drawingCanvas.width = chartCanvas.width;
+        drawingCanvas.height = chartCanvas.height;
+        
+        // El estilo CSS debe coincidir con el tamaño del contenedor
+        drawingCanvas.style.width = containerRect.width + 'px';
+        drawingCanvas.style.height = containerRect.height + 'px';
+        
+        // Guardar los factores de escala para usarlos en otras funciones
+        drawingCanvas._scaleX = scaleX;
+        drawingCanvas._scaleY = scaleY;
+        drawingCanvas._chartCanvas = chartCanvas;
+        
+        console.log('📐 Canvas redimensionado:', {
+            chart: `${chartCanvas.width}x${chartCanvas.height}`,
+            draw: `${drawingCanvas.width}x${drawingCanvas.height}`,
+            container: `${containerRect.width.toFixed(0)}x${containerRect.height.toFixed(0)}`,
+            scale: `${scaleX.toFixed(2)}x${scaleY.toFixed(2)}`
+        });
+    } else {
+        // Fallback
+        const rect = container.getBoundingClientRect();
+        drawingCanvas.width = rect.width || 690;
+        drawingCanvas.height = rect.height || 355;
+        drawingCanvas.style.width = rect.width + 'px';
+        drawingCanvas.style.height = rect.height + 'px';
+        drawingCanvas._scaleX = 1;
+        drawingCanvas._scaleY = 1;
+    }
+}
+
+// ============================================
+// FUNCIÓN CORREGIDA - addElasticPoint
+// ============================================
+function addElasticPoint(mouseX, mouseY) {
+    if (!chart) return;
+    
+    // 🔥 OBTENER FACTORES DE ESCALA REALES
+    const chartCanvas = chart.canvas;
+    const drawCanvas = drawingCanvas;
+    
+    // Si no tenemos los factores de escala guardados, calcularlos
+    if (!drawCanvas._scaleX || !drawCanvas._chartCanvas) {
+        const chartRect = chartCanvas.getBoundingClientRect();
+        const drawRect = drawCanvas.getBoundingClientRect();
+        drawCanvas._scaleX = drawRect.width / chartRect.width;
+        drawCanvas._scaleY = drawRect.height / chartRect.height;
+        drawCanvas._chartCanvas = chartCanvas;
+    }
+    
+    const scaleX = drawCanvas._scaleX;
+    const scaleY = drawCanvas._scaleY;
+    
+    // 🔥 CONVERTIR coordenadas del mouse al sistema de Chart.js
+    const chartX = mouseX / scaleX;
+    const chartY = mouseY / scaleY;
+    
+    // Encontrar la frecuencia más cercana usando las coordenadas de Chart.js
+    let closestFreq = null;
+    let closestDistance = Infinity;
+    let closestIndex = -1;
+
+    xPositions.forEach((xp, index) => {
+        const pixelX = chart.scales.x.getPixelForValue(xp);
+        const dist = Math.abs(pixelX - chartX);
+        if (dist < closestDistance) {
+            closestDistance = dist;
+            closestFreq = freqs[index];
+            closestIndex = index;
+        }
+    });
+
+    if (closestFreq === null) return;
+
+    // Obtener el valor de dB exacto donde se hizo clic
+    const dbValue = Math.round(chart.scales.y.getValueForPixel(chartY));
+    
+    // Obtener la posición X exacta para la frecuencia encontrada (en sistema Chart.js)
+    const snappedChartX = chart.scales.x.getPixelForValue(xPositions[closestIndex]);
+    const snappedChartY = chart.scales.y.getPixelForValue(dbValue);
+    
+    // 🔥 CONVERTIR DE VUELTA al sistema del canvas de dibujo
+    const snappedX = snappedChartX * scaleX;
+    const snappedY = snappedChartY * scaleY;
+
+    // Calcular ángulo basado en el punto anterior
+    let angle = 0;
+    const list = elasticEar === "od" ? elasticPointsOD : elasticPointsOI;
+    
+    if (list.length > 0) {
+        const prev = list[list.length - 1];
+        angle = Math.atan2(snappedY - prev.y, snappedX - prev.x);
+    }
+
+    const point = {
+        x: snappedX,
+        y: snappedY,
+        freq: closestFreq,
+        db: dbValue,
+        angle: angle,
+        symbol: elasticEar === "od" ? activeBoneSymbols.od : activeBoneSymbols.oi
+    };
+
+    // Guardar en los arrays de puntos elásticos
+    if (elasticEar === "od") {
+        elasticPointsOD.push(point);
+        bonePointsOD[closestFreq] = dbValue;
+        const input = document.getElementById(`od-bone_${closestFreq}`);
+        if (input) input.value = dbValue;
+    } else {
+        elasticPointsOI.push(point);
+        bonePointsOI[closestFreq] = dbValue;
+        const input = document.getElementById(`oi-bone_${closestFreq}`);
+        if (input) input.value = dbValue;
+    }
+
+    actualizarPTA();
+    updateChart();
+    redrawElastic();
+}
+// ============================================
+// FUNCIÓN CORREGIDA - draw (para dibujo manual)
+// ============================================
+function draw(e) {
+    if (!isDrawing || !chart) return;
+
+    const rect = drawingCanvas.getBoundingClientRect();
+    
+    // 🔥 OBTENER FACTORES DE ESCALA
+    const chartCanvas = chart.canvas;
+    const drawCanvas = drawingCanvas;
+    
+    if (!drawCanvas._scaleX || !drawCanvas._chartCanvas) {
+        const chartRect = chartCanvas.getBoundingClientRect();
+        const drawRect = drawCanvas.getBoundingClientRect();
+        drawCanvas._scaleX = drawRect.width / chartRect.width;
+        drawCanvas._scaleY = drawRect.height / chartRect.height;
+        drawCanvas._chartCanvas = chartCanvas;
+    }
+    
+    const scaleX = drawCanvas._scaleX;
+    const scaleY = drawCanvas._scaleY;
+
+    // Coordenadas del mouse en el canvas de dibujo
+    let x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    
+    // 🔥 CONVERTIR al sistema de Chart.js
+    const chartX = x / scaleX;
+    const chartY = y / scaleY;
+
+    // Encontrar frecuencia más cercana
+    let closestFreq = null;
+    let closestDistance = Infinity;
+    let closestIndex = -1;
+
+    xPositions.forEach((xp, index) => {
+        const pixelX = chart.scales.x.getPixelForValue(xp);
+        const dist = Math.abs(pixelX - chartX);
+        if (dist < closestDistance) {
+            closestDistance = dist;
+            closestFreq = freqs[index];
+            closestIndex = index;
+        }
+    });
+
+    if (closestFreq === null) return;
+
+    // Obtener posición X exacta para la frecuencia
+    const snappedChartX = chart.scales.x.getPixelForValue(xPositions[closestIndex]);
+    const dbValue = Math.round(chart.scales.y.getValueForPixel(chartY));
+    const snappedChartY = chart.scales.y.getPixelForValue(dbValue);
+    
+    // 🔥 CONVERTIR DE VUELTA al sistema del canvas de dibujo
+    const snappedX = snappedChartX * scaleX;
+    const snappedY = snappedChartY * scaleY;
+
+    // Calcular distancia desde el último punto
+    const dx = snappedX - lastX;
+    const dy = snappedY - lastY;
+    const distance = Math.sqrt(dx * dx + dy * dy);
+
+    if (distance < MIN_DISTANCE) return;
+
+    lastX = snappedX;
+    lastY = snappedY;
+
+    // Guardar el valor en dB
+    if (currentTool === "od") {
+        bonePointsOD[closestFreq] = dbValue;
+    } else if (currentTool === "oi") {
+        bonePointsOI[closestFreq] = dbValue;
+    }
+
+    actualizarPTA();
+
+    // Guardar el símbolo dibujado
+    const angle = Math.atan2(dy, dx);
+    drawnBoneSymbols.push({
+        x: snappedX,
+        y: snappedY,
+        angle: angle,
+        tool: currentTool,
+        symbol: currentTool === "od" ? activeBoneSymbols.od : activeBoneSymbols.oi,
+        freq: closestFreq,
+        db: dbValue
+    });
+
+    // Dibujar el símbolo en el canvas
+    drawCtx.save();
+    drawCtx.translate(snappedX, snappedY);
+    drawCtx.rotate(angle);
+    drawCtx.lineWidth = 2;
+    drawCtx.textAlign = "center";
+    drawCtx.textBaseline = "middle";
+
+    if (currentTool === "od") {
+        drawCtx.strokeStyle = "#991b1b";
+        drawCtx.fillStyle = "#991b1b";
+        drawCtx.font = "bold 18px Arial";
+        drawCtx.beginPath();
+        drawCtx.moveTo(-18, 0);
+        drawCtx.lineTo(-4, 0);
+        drawCtx.stroke();
+        drawCtx.fillText(activeBoneSymbols.od, 8, 0);
+    } else if (currentTool === "oi") {
+        drawCtx.strokeStyle = "#1d4ed8";
+        drawCtx.fillStyle = "#1d4ed8";
+        drawCtx.font = "bold 18px Arial";
+        drawCtx.beginPath();
+        drawCtx.moveTo(4, 0);
+        drawCtx.lineTo(18, 0);
+        drawCtx.stroke();
+        drawCtx.fillText(activeBoneSymbols.oi, -8, 0);
+    }
+
+    drawCtx.restore();
+}
+
+// ============================================
+// FUNCIÓN CORREGIDA - initDrawingCanvas
+// ============================================
+function initDrawingCanvas() {
+    drawingCanvas = document.getElementById("drawingCanvas");
+    drawCtx = drawingCanvas.getContext("2d");
+    
+    // Inicializar después de que chart esté listo
+    setTimeout(() => {
+        resizeDrawingCanvas();
+        // Limpiar el canvas después de redimensionar
+        drawCtx.clearRect(0, 0, drawingCanvas.width, drawingCanvas.height);
+        // Redibujar símbolos existentes
+        if (drawnBoneSymbols.length > 0) {
+            redrawAll();
+        }
+    }, 200);
+
+    drawingCanvas.addEventListener("mousedown", startDrawing);
+    drawingCanvas.addEventListener("mousemove", draw);
+    drawingCanvas.addEventListener("mouseup", stopDrawing);
+    drawingCanvas.addEventListener("mouseleave", stopDrawing);
+    drawingCanvas.addEventListener("click", elasticClick);
+    drawingCanvas.addEventListener("mousemove", elasticMove);
+    drawingCanvas.addEventListener("dblclick", finishElastic);
+}
+function startDrawing(e) {
+
+    if (!currentTool) return;
+
+    isDrawing = true;
+
+    const rect = drawingCanvas.getBoundingClientRect();
+
+    lastX = e.clientX - rect.left;
+    lastY = e.clientY - rect.top;
+
+    draw(e);
+}
+function stopDrawing() {
+
+    isDrawing = false;
+
+    drawCtx.beginPath();
+}
+
+function elasticClick(e) {
+
+    if (!elasticMode) return;
+
+    if (ignoreNextClick) {
+        ignoreNextClick = false;
+        return;
+    }
+
+    const rect =
+        drawingCanvas.getBoundingClientRect();
+
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+
+    addElasticPoint(x, y);
+}
+
+function finishElastic() {
+
+    if (!elasticMode) return;
+
+    elasticMode = false;
+
+    elasticPreview = null;
+
+    ignoreNextClick = true;
+
+   redrawAll();
+}
+
+function elasticMove(e) {
+
+    if (!elasticMode) return;
+
+    const rect =
+        drawingCanvas.getBoundingClientRect();
+
+    elasticPreview = {
+
+        x: e.clientX - rect.left,
+        y: e.clientY - rect.top
+
+    };
+
+    redrawElastic();
+}
+
+
+
+/*
+function addElasticPoint(x, y) {
+    let closestFreq = null;
+    let closestDistance = Infinity;
+
+    // Encontrar frecuencia más cercana
+    xPositions.forEach((xp, index) => {
+        const pixelX = chart.scales.x.getPixelForValue(xp);
+        const dist = Math.abs(pixelX - x);
+        if (dist < closestDistance) {
+            closestDistance = dist;
+            closestFreq = freqs[index];
+        }
+    });
+
+    // Obtener el valor de dB exacto donde se hizo clic
+    const dbValue = Math.round(chart.scales.y.getValueForPixel(y));
+    
+    // Obtener la posición Y exacta para ese dB value
+    const snappedY = chart.scales.y.getPixelForValue(dbValue);
+    
+    const freqIndex = freqs.indexOf(closestFreq);
+    const snappedX = chart.scales.x.getPixelForValue(xPositions[freqIndex]);
+
+    // Calcular ángulo basado en el punto anterior
+    let angle = 0;
+    const list = elasticEar === "od" ? elasticPointsOD : elasticPointsOI;
+    
+    if (list.length > 0) {
+        const prev = list[list.length - 1];
+        angle = Math.atan2(snappedY - prev.y, snappedX - prev.x);
+    }
+
+    const point = {
+        x: snappedX,
+        y: snappedY,  // Usar la Y corregida al dB exacto
+        freq: closestFreq,
+        db: dbValue,
+        angle: angle,
+        symbol: elasticEar === "od" ? activeBoneSymbols.od : activeBoneSymbols.oi
+    };
+
+    if (elasticEar === "od") {
+        elasticPointsOD.push(point);
+        bonePointsOD[closestFreq] = dbValue;
+    }
+
+    if (elasticEar === "oi") {
+        elasticPointsOI.push(point);
+        bonePointsOI[closestFreq] = dbValue;
+    }
+
+    actualizarPTA();
+    redrawElastic();
+}
+
+*/
+
+function redrawElastic() {
+
+    redrawAll();
+
+    if (
+        elasticMode &&
+        elasticPreview
+    ) {
+
+        drawCtx.save();
+
+        drawCtx.strokeStyle =
+            elasticEar === "od"
+            ? "#991b1b"
+            : "#1d4ed8";
+
+        drawCtx.lineWidth = 3;
+
+     
+
+        const list =
+            elasticEar === "od"
+            ? elasticPointsOD
+            : elasticPointsOI;
+
+        if (list.length) {
+
+            const last =
+                list[list.length - 1];
+
+                if (list.length > 0) {
+
+if (list.length > 0 && elasticPreview) {
+
+    drawElasticLine(
+        [...list, elasticPreview],
+        elasticEar === "od"
+            ? "#991b1b"
+            : "#1d4ed8"
+    );
+}
+}
+
+      
+
+        }
+
+        drawCtx.restore();
+    }
+}
+
+function drawElasticLine(list, color) {
+    if (list.length < 2) return;
+
+    drawCtx.save();
+    drawCtx.fillStyle = color;
+    drawCtx.font = "bold 20px Arial";
+    drawCtx.textAlign = "center";
+    drawCtx.textBaseline = "middle";
+
+    for (let i = 1; i < list.length; i++) {
+        const prev = list[i - 1];
+        const curr = list[i];
+
+        const midX = (prev.x + curr.x) / 2;
+        const midY = (prev.y + curr.y) / 2;
+
+        // Calcular ángulo entre puntos (dirección del movimiento)
+        const angle = Math.atan2(curr.y - prev.y, curr.x - prev.x);
+
+        drawCtx.save();
+        drawCtx.translate(midX, midY);
+        drawCtx.rotate(angle);
+        drawCtx.fillText("-", 0, 0);
+        drawCtx.restore();
+    }
+
+    drawCtx.restore();
+}
+
+function drawElasticSymbols(list, color) {
+    list.forEach((point, index) => {
+        drawCtx.save();
+        drawCtx.fillStyle = color;
+        drawCtx.font = "bold 22px Arial";
+        drawCtx.textAlign = "center";
+        drawCtx.textBaseline = "middle";
+        
+        // Calcular ángulo basado en el punto anterior y siguiente (si existen)
+        let angle = point.angle || 0;
+        
+        if (list.length === 1) {
+            angle = 0;
+        } else if (index === 0 && list.length > 1) {
+            const next = list[index + 1];
+            angle = Math.atan2(next.y - point.y, next.x - point.x);
+        } else if (index === list.length - 1 && list.length > 1) {
+            const prev = list[index - 1];
+            angle = Math.atan2(point.y - prev.y, point.x - prev.x);
+        } else if (list.length > 2) {
+            const prev = list[index - 1];
+            const next = list[index + 1];
+            const anglePrev = Math.atan2(point.y - prev.y, point.x - prev.x);
+            const angleNext = Math.atan2(next.y - point.y, next.x - point.x);
+            angle = (anglePrev + angleNext) / 2;
+        }
+        
+        drawCtx.translate(point.x, point.y);
+        drawCtx.rotate(angle);
+        drawCtx.fillText(point.symbol, 0, 0);
+        drawCtx.restore();
+    });
+}
+
+
+function redrawBoneSymbols() {
+    drawCtx.clearRect(
+        0,
+        0,
+        drawingCanvas.width,
+        drawingCanvas.height
+    );
+
+    // Separar símbolos por tipo
+    const inputSymbols = drawnBoneSymbols.filter(item => item.tipo === 'input');
+    const manualSymbols = drawnBoneSymbols.filter(item => item.tipo !== 'input');
+
+    // DIBUJAR GUIONES CONECTORES ENTRE SÍMBOLOS DE INPUT
+    for (let i = 1; i < inputSymbols.length; i++) {
+        const prev = inputSymbols[i - 1];
+        const curr = inputSymbols[i];
+        
+        // Calcular punto medio para el guión
+        const midX = (prev.x + curr.x) / 2;
+        const midY = (prev.y + curr.y) / 2;
+        
+        // Calcular ángulo de la línea (misma rotación que los < >)
+        const angle = Math.atan2(curr.y - prev.y, curr.x - prev.x);
+        
+        drawCtx.save();
+        drawCtx.translate(midX, midY);
+        drawCtx.rotate(angle);
+        drawCtx.fillStyle = prev.tool === 'od' ? "#991b1b" : "#1d4ed8";
+        drawCtx.font = "bold 20px Arial";
+        drawCtx.textAlign = "center";
+        drawCtx.textBaseline = "middle";
+        drawCtx.fillText("-", 0, 0);
+        drawCtx.restore();
+    }
+
+    // Dibujar símbolos de input (SIN ROTACIÓN)
+    inputSymbols.forEach(item => {
+        drawCtx.save();
+        drawCtx.translate(item.x, item.y);
+        
+        // NO rotar los símbolos < y >
+        drawCtx.lineWidth = 2;
+        drawCtx.font = "bold 20px Arial";
+        drawCtx.textAlign = "center";
+        drawCtx.textBaseline = "middle";
+
+        if (item.tool === "od") {
+            drawCtx.fillStyle = "#991b1b";
+            drawCtx.fillText(item.symbol, 0, 0);
+        }
+        if (item.tool === "oi") {
+            drawCtx.fillStyle = "#1d4ed8";
+            drawCtx.fillText(item.symbol, 0, 0);
+        }
+        drawCtx.restore();
+    });
+
+    // Dibujar símbolos manuales (mantienen su lógica original)
+    manualSymbols.forEach(item => {
+        drawCtx.save();
+        drawCtx.translate(item.x, item.y);
+        drawCtx.rotate(item.angle);
+        drawCtx.lineWidth = 2;
+        drawCtx.font = "bold 18px Arial";
+        drawCtx.textAlign = "center";
+        drawCtx.textBaseline = "middle";
+
+        if (item.tool === "od") {
+            drawCtx.strokeStyle = "#991b1b";
+            drawCtx.fillStyle = "#991b1b";
+            drawCtx.beginPath();
+            drawCtx.moveTo(-18, 0);
+            drawCtx.lineTo(-4, 0);
+            drawCtx.stroke();
+            drawCtx.fillText(item.symbol, 8, 0);
+        }
+
+        if (item.tool === "oi") {
+            drawCtx.strokeStyle = "#1d4ed8";
+            drawCtx.fillStyle = "#1d4ed8";
+            drawCtx.beginPath();
+            drawCtx.moveTo(4, 0);
+            drawCtx.lineTo(18, 0);
+            drawCtx.stroke();
+            drawCtx.fillText(item.symbol, -8, 0);
+        }
+        drawCtx.restore();
+    });
+}
+// Función para limpiar los dibujos de vía ósea
+function limpiarViaOsea() {
+    // Limpiar los puntos de vía ósea
+    bonePointsOD = {};
+    bonePointsOI = {};
+
+    elasticPointsOD = [];
+    elasticPointsOI = [];
+
+    elasticPreview = null;
+    elasticMode = false;
+    elasticEar = null;
+    
+    // Limpiar el array de símbolos dibujados
+    drawnBoneSymbols = [];
+    
+    // LIMPIAR LOS INPUTS DE VÍA ÓSEA
+    const odInputs = document.querySelectorAll('#od-bone-inputs input');
+    const oiInputs = document.querySelectorAll('#oi-bone-inputs input');
+    
+    odInputs.forEach(input => {
+        input.value = '';
+    });
+    
+    oiInputs.forEach(input => {
+        input.value = '';
+    });
+    
+    // Limpiar el canvas de dibujo
+    if (drawCtx && drawingCanvas) {
+        drawCtx.clearRect(0, 0, drawingCanvas.width, drawingCanvas.height);
+        // Forzar redimensionamiento para asegurar limpieza completa
+        resizeDrawingCanvas();
+        drawCtx.clearRect(0, 0, drawingCanvas.width, drawingCanvas.height);
+    }
+    
+    // Actualizar los valores PTA
+    actualizarPTA();
+    
+    // Recargar la gráfica
+    if (typeof updateChart === 'function') {
+        updateChart();
+    }
+    
+    // Redibujar todo
+    if (typeof redrawAll === 'function') {
+        redrawAll();
+    }
+    
+    // Mostrar notificación
+    mostrarNotificacionAudiometria('🧹 Vía ósea completamente limpiada', false);
+    
+    console.log('✅ Vía ósea limpiada completamente');
+}
+
+// ============================================
+// FUNCIÓN MODIFICADA - redrawAll (AGREGAR DIBUJO DE SÍMBOLOS)
+// ============================================
+
+function redrawAll() {
+    if (!drawCtx || !drawingCanvas) return;
+    
+
+
+        drawCtx.clearRect(
+        0,
+        0,
+        drawingCanvas.width,
+        drawingCanvas.height
+    );
+    const inputSymbols = drawnBoneSymbols.filter(item => item.tipo === 'input');
+    const manualSymbols = drawnBoneSymbols.filter(item => item.tipo !== 'input' && item.tipo !== 'bone-symbol');
+    const boneSymbols = drawnBoneSymbols.filter(item => item.tipo === 'bone-symbol');
+
+    // === DIBUJAR GUIONES CONECTORES ENTRE SÍMBOLOS DE INPUT (EXISTENTE) ===
+    /*
+    for (let i = 1; i < inputSymbols.length; i++) {
+        const prev = inputSymbols[i - 1];
+        const curr = inputSymbols[i];
+        
+        const midX = (prev.x + curr.x) / 2;
+        const midY = (prev.y + curr.y) / 2;
+        const angle = Math.atan2(curr.y - prev.y, curr.x - prev.x);
+        
+        drawCtx.save();
+        drawCtx.translate(midX, midY);
+        drawCtx.rotate(angle);
+        drawCtx.fillStyle = prev.tool === 'od' ? "#991b1b" : "#1d4ed8";
+        drawCtx.font = "bold 20px Arial";
+        drawCtx.textAlign = "center";
+        drawCtx.textBaseline = "middle";
+        drawCtx.fillText("-", 0, 0);
+        drawCtx.restore();
+    }
+
+    */
+
+
+    //esto es el cambio de lo anterior, cambiar si falla
+    // === DIBUJAR GUIONES CONECTORES ENTRE PUNTOS DEL MISMO OÍDO ===
+// Agrupar puntos por oído
+const odPuntos = inputSymbols.filter(item => item.tool === 'od');
+const oiPuntos = inputSymbols.filter(item => item.tool === 'oi');
+
+function dibujarGuionesParaOido(puntos, color) {
+    if (puntos.length < 2) return;
+    puntos.sort((a, b) => {
+        const idxA = freqs.indexOf(a.freq);
+        const idxB = freqs.indexOf(b.freq);
+        return idxA - idxB;
+    });
+    
+    for (let i = 1; i < puntos.length; i++) {
+        const prev = puntos[i - 1];
+        const curr = puntos[i];
+        
+        const idxPrev = freqs.indexOf(prev.freq);
+        const idxCurr = freqs.indexOf(curr.freq);
+        if (idxCurr - idxPrev > 1) continue;
+        
+        const midX = (prev.x + curr.x) / 2;
+        const midY = (prev.y + curr.y) / 2;
+        const angle = Math.atan2(curr.y - prev.y, curr.x - prev.x);
+        
+        drawCtx.save();
+        drawCtx.translate(midX, midY);
+        drawCtx.rotate(angle);
+        drawCtx.fillStyle = color;
+        drawCtx.font = "bold 20px Arial";
+        drawCtx.textAlign = "center";
+        drawCtx.textBaseline = "middle";
+        drawCtx.fillText("-", 0, 0);
+        drawCtx.restore();
+    }
+}
+
+dibujarGuionesParaOido(odPuntos, "#991b1b");
+dibujarGuionesParaOido(oiPuntos, "#1d4ed8");
+
+    // === DIBUJAR SÍMBOLOS DE INPUT (EXISTENTE) ===
+    inputSymbols.forEach(item => {
+        drawCtx.save();
+        drawCtx.translate(item.x, item.y);
+        drawCtx.lineWidth = 2;
+        drawCtx.font = "bold 20px Arial";
+        drawCtx.textAlign = "center";
+        drawCtx.textBaseline = "middle";
+
+        if (item.tool === "od") {
+            drawCtx.fillStyle = "#991b1b";
+            drawCtx.fillText(item.symbol, 0, 0);
+        }
+        if (item.tool === "oi") {
+            drawCtx.fillStyle = "#1d4ed8";
+            drawCtx.fillText(item.symbol, 0, 0);
+        }
+        drawCtx.restore();
+    });
+
+    // === DIBUJAR SÍMBOLOS MANUALES (EXISTENTE) ===
+    manualSymbols.forEach(item => {
+        drawCtx.save();
+        drawCtx.translate(item.x, item.y);
+        drawCtx.rotate(item.angle);
+        drawCtx.lineWidth = 2;
+        drawCtx.font = "bold 18px Arial";
+        drawCtx.textAlign = "center";
+        drawCtx.textBaseline = "middle";
+
+        if (item.tool === "od") {
+            drawCtx.strokeStyle = "#991b1b";
+            drawCtx.fillStyle = "#991b1b";
+            drawCtx.beginPath();
+            drawCtx.moveTo(-18, 0);
+            drawCtx.lineTo(-4, 0);
+            drawCtx.stroke();
+            drawCtx.fillText(item.symbol, 8, 0);
+        }
+
+        if (item.tool === "oi") {
+            drawCtx.strokeStyle = "#1d4ed8";
+            drawCtx.fillStyle = "#1d4ed8";
+            drawCtx.beginPath();
+            drawCtx.moveTo(4, 0);
+            drawCtx.lineTo(18, 0);
+            drawCtx.stroke();
+            drawCtx.fillText(item.symbol, -8, 0);
+        }
+        drawCtx.restore();
+    });
+
+    // === NUEVO: DIBUJAR SÍMBOLOS DE VÍA ÓSEA SOLO SÍMBOLOS (SIN LÍNEAS) ===
+    // 🔥 IMPORTANTE: NO dibujar líneas entre estos símbolos
+// === NUEVO: DIBUJAR SÍMBOLOS DE VÍA ÓSEA SOLO SÍMBOLOS (SIN LÍNEAS) ===
+boneSymbols.forEach(item => {
+    drawCtx.save();
+    
+    // ============================================
+    // 🔥 SÍMBOLO NR PARA OD (O↘) - O + flecha PEGADA
+    // ============================================
+    if (item.symbol === 'O↘' || item.symbol === '↘O' || item.symbol === 'NR_OD') {
+        // Dibujar O (tamaño pequeño)
+        drawCtx.font = 'bold 14px Arial';
+        drawCtx.textAlign = 'center';
+        drawCtx.textBaseline = 'middle';
+        drawCtx.fillStyle = "#8B0000"; // Rojo oscuro para OD
+        drawCtx.fillText('O', item.x, item.y);
+
+        // Flecha PEGADA al círculo - desde el BORDE DERECHO
+        const radio = 6;
+        const inicioX = item.x + radio;
+        const inicioY = item.y;
+        const longitud = 12;
+        const finX = inicioX + longitud;
+        const finY = inicioY + (longitud * 0.6);
+
+        drawCtx.strokeStyle = "#8B0000";
+        drawCtx.fillStyle = "#8B0000";
+        drawCtx.lineWidth = 2;
+        
+        // Dibujar línea de la flecha
+        drawCtx.beginPath();
+        drawCtx.moveTo(inicioX, inicioY);
+        drawCtx.lineTo(finX, finY);
+        drawCtx.stroke();
+        
+        // Triángulo de la flecha
+        const angle = Math.atan2(finY - inicioY, finX - inicioX);
+        const arrowSize = 6;
+        drawCtx.beginPath();
+        drawCtx.moveTo(finX, finY);
+        drawCtx.lineTo(finX - arrowSize * Math.cos(angle - Math.PI / 6), finY - arrowSize * Math.sin(angle - Math.PI / 6));
+        drawCtx.lineTo(finX - arrowSize * Math.cos(angle + Math.PI / 6), finY - arrowSize * Math.sin(angle + Math.PI / 6));
+        drawCtx.closePath();
+        drawCtx.fill();
+        
+        drawCtx.restore();
+        return;
+    }
+    
+    // ============================================
+    // ✅ SÍMBOLO NR PARA OI (↙X) - X + flecha PEGADA
+    // ============================================
+    if (item.symbol === '↙X' || item.symbol === 'X↙' || item.symbol === 'NR_OI') {
+        const tamañoX = 7;
+        drawCtx.strokeStyle = "#1d4ed8"; // Azul para OI
+        drawCtx.fillStyle = "#1d4ed8";
+        drawCtx.lineWidth = 2;
+
+        // Dibujar X (tamaño pequeño)
+        drawCtx.beginPath();
+        drawCtx.moveTo(item.x - tamañoX, item.y - tamañoX);
+        drawCtx.lineTo(item.x + tamañoX, item.y + tamañoX);
+        drawCtx.stroke();
+
+        drawCtx.beginPath();
+        drawCtx.moveTo(item.x - tamañoX, item.y + tamañoX);
+        drawCtx.lineTo(item.x + tamañoX, item.y - tamañoX);
+        drawCtx.stroke();
+
+        // Flecha desde la esquina inferior derecha
+        const inicioX = item.x + tamañoX - 2;
+        const inicioY = item.y + tamañoX - 2;
+        const longitud = 14;
+        const finX = inicioX + longitud;
+        const finY = inicioY + longitud;
+
+        // Dibujar línea de la flecha
+        drawCtx.beginPath();
+        drawCtx.moveTo(inicioX, inicioY);
+        drawCtx.lineTo(finX, finY);
+        drawCtx.stroke();
+        
+        // Triángulo de la flecha
+        const angle = Math.atan2(finY - inicioY, finX - inicioX);
+        const arrowSize = 6;
+        drawCtx.beginPath();
+        drawCtx.moveTo(finX, finY);
+        drawCtx.lineTo(finX - arrowSize * Math.cos(angle - Math.PI / 6), finY - arrowSize * Math.sin(angle - Math.PI / 6));
+        drawCtx.lineTo(finX - arrowSize * Math.cos(angle + Math.PI / 6), finY - arrowSize * Math.sin(angle + Math.PI / 6));
+        drawCtx.closePath();
+        drawCtx.fill();
+        
+        drawCtx.restore();
+        return;
+    }
+    
+    // ============================================
+    // SI ES NR (Sin Respuesta) - dibujar con flecha hacia abajo
+    // ============================================
+    if (item.esNR) {
+        drawCtx.fillStyle = item.tool === "od" ? "#8B0000" : "#1d4ed8";
+        drawCtx.strokeStyle = item.tool === "od" ? "#8B0000" : "#1d4ed8";
+        drawCtx.lineWidth = 2;
+        
+        drawCtx.font = "bold 18px Arial";
+        drawCtx.textAlign = "center";
+        drawCtx.textBaseline = "middle";
+        drawCtx.fillText(item.symbol, item.x, item.y - 6);
+        
+        // Flecha hacia abajo
+        const inicioX = item.x;
+        const inicioY = item.y + 6;
+        const longitud = 14;
+        const finX = inicioX;
+        const finY = inicioY + longitud;
+        
+        drawCtx.beginPath();
+        drawCtx.moveTo(inicioX, inicioY);
+        drawCtx.lineTo(finX, finY);
+        drawCtx.stroke();
+        
+        const arrowSize = 6;
+        const angle = Math.PI / 2;
+        drawCtx.beginPath();
+        drawCtx.moveTo(finX, finY);
+        drawCtx.lineTo(finX - arrowSize * Math.cos(angle - Math.PI / 6), finY - arrowSize * Math.sin(angle - Math.PI / 6));
+        drawCtx.lineTo(finX - arrowSize * Math.cos(angle + Math.PI / 6), finY - arrowSize * Math.sin(angle + Math.PI / 6));
+        drawCtx.closePath();
+        drawCtx.fill();
+        
+        drawCtx.restore();
+        return;
+    }
+    
+    // ============================================
+    // SI NO ES NR - dibujar normal
+    // ============================================
+    drawCtx.translate(item.x, item.y);
+    drawCtx.font = "bold 28px Arial";
+    drawCtx.textAlign = "center";
+    drawCtx.textBaseline = "middle";
+
+    if (item.tool === "od") {
+        drawCtx.fillStyle = "#8B0000";
+    } else {
+        drawCtx.fillStyle = "#1d4ed8";
+    }
+
+    drawCtx.fillText(item.symbol, 0, 0);
+    drawCtx.restore();
+});
+
+    // === DIBUJAR LÍNEAS ELÁSTICAS (EXISTENTE) ===
+    drawElasticLine(elasticPointsOD, "#991b1b");
+    drawElasticLine(elasticPointsOI, "#1d4ed8");
+    drawElasticSymbols(elasticPointsOD, "#991b1b");
+    drawElasticSymbols(elasticPointsOI, "#1d4ed8");
+
+    // === NUEVO: DIBUJAR SÍMBOLOS NR PARA VÍA AÉREA (desde inputs con "-") ===
+// Recorrer los puntos de vía aérea que tienen esNR = true
+const allInputs = document.querySelectorAll('#od-inputs input, #oi-inputs input');
+allInputs.forEach(input => {
+    if (input.value.trim() === '-') {
+        const id = input.id;
+        const ear = id.startsWith('od') ? 'od' : 'oi';
+        const freq = id.split('_')[1];
+        const index = freqs.indexOf(freq);
+        if (index === -1) return;
+        
+        // Obtener coordenadas
+        const chartCanvas = chart.canvas;
+        const drawCanvas = drawingCanvas;
+        const scaleX = drawCanvas._scaleX || 1;
+        const scaleY = drawCanvas._scaleY || 1;
+        
+        const chartX = chart.scales.x.getPixelForValue(xPositions[index]);
+        const chartY = chart.scales.y.getPixelForValue(110);
+        const x = chartX * scaleX;
+        const y = chartY * scaleY;
+        
+        const color = ear === 'od' ? '#e74c3c' : '#004EB0';
+        
+        drawCtx.save();
+        drawCtx.fillStyle = color;
+        drawCtx.strokeStyle = color;
+        drawCtx.lineWidth = 2;
+        
+        if (ear === 'od') {
+            // Dibujar O
+            drawCtx.font = 'bold 14px Arial';
+            drawCtx.textAlign = 'center';
+            drawCtx.textBaseline = 'middle';
+            drawCtx.fillText('O', x, y);
+            
+            // Flecha PEGADA al círculo - desde el BORDE DERECHO
+            const radio = 6;
+            const inicioX = x + radio;
+            const inicioY = y;
+            const longitud = 12;
+            const finX = inicioX + longitud;
+            const finY = inicioY + (longitud * 0.6);
+            
+            drawCtx.beginPath();
+            drawCtx.moveTo(inicioX, inicioY);
+            drawCtx.lineTo(finX, finY);
+            drawCtx.stroke();
+            
+            const angle = Math.atan2(finY - inicioY, finX - inicioX);
+            const arrowSize = 6;
+            drawCtx.beginPath();
+            drawCtx.moveTo(finX, finY);
+            drawCtx.lineTo(finX - arrowSize * Math.cos(angle - Math.PI / 6), finY - arrowSize * Math.sin(angle - Math.PI / 6));
+            drawCtx.lineTo(finX - arrowSize * Math.cos(angle + Math.PI / 6), finY - arrowSize * Math.sin(angle + Math.PI / 6));
+            drawCtx.closePath();
+            drawCtx.fill();
+        } else {
+            // Dibujar X
+            const tamañoX = 7;
+            drawCtx.beginPath();
+            drawCtx.moveTo(x - tamañoX, y - tamañoX);
+            drawCtx.lineTo(x + tamañoX, y + tamañoX);
+            drawCtx.stroke();
+            
+            drawCtx.beginPath();
+            drawCtx.moveTo(x - tamañoX, y + tamañoX);
+            drawCtx.lineTo(x + tamañoX, y - tamañoX);
+            drawCtx.stroke();
+            
+            // Flecha desde la esquina inferior derecha
+            const inicioX = x + tamañoX - 2;
+            const inicioY = y + tamañoX - 2;
+            const longitud = 14;
+            const finX = inicioX + longitud;
+            const finY = inicioY + longitud;
+            
+            drawCtx.beginPath();
+            drawCtx.moveTo(inicioX, inicioY);
+            drawCtx.lineTo(finX, finY);
+            drawCtx.stroke();
+            
+            const angle = Math.atan2(finY - inicioY, finX - inicioX);
+            const arrowSize = 6;
+            drawCtx.beginPath();
+            drawCtx.moveTo(finX, finY);
+            drawCtx.lineTo(finX - arrowSize * Math.cos(angle - Math.PI / 6), finY - arrowSize * Math.sin(angle - Math.PI / 6));
+            drawCtx.lineTo(finX - arrowSize * Math.cos(angle + Math.PI / 6), finY - arrowSize * Math.sin(angle + Math.PI / 6));
+            drawCtx.closePath();
+            drawCtx.fill();
+        }
+        drawCtx.restore();
+    }
+});
+
+
+// Al final de la función redrawAll, después de todo el código:
+if (typeof dibujarImagenesDesdeFiltro === 'function') {
+    dibujarImagenesDesdeFiltro();
+}
+
+}
+
+
+
+
+// Función alternativa que también limpia las visualizaciones de la gráfica
+function limpiarViaOseaCompleta() {
+    // Limpiar datos
+    bonePointsOD = {};
+    bonePointsOI = {};
+    drawnBoneSymbols = [];
+    
+    // Limpiar canvas
+    if (drawCtx && drawingCanvas) {
+        drawCtx.clearRect(0, 0, drawingCanvas.width, drawingCanvas.height);
+        // Forzar redimensionamiento para asegurar limpieza completa
+        resizeDrawingCanvas();
+        drawCtx.clearRect(0, 0, drawingCanvas.width, drawingCanvas.height);
+    }
+    
+    // Actualizar PTA
+    actualizarPTA();
+    
+    // Recargar la gráfica
+    if (typeof updateChart === 'function') {
+        updateChart();
+    }
+    
+    mostrarNotificacionAudiometria('🧹 Todos los dibujos de vía ósea han sido eliminados', false);
+}
+
+// ============================================
+// PANEL DE ENMASCARAR VÍA ÓSEA
+// ============================================
+
+function actualizarPanelEnmascarar() {
+    const listaOD = document.getElementById('listaOD');
+    const listaOI = document.getElementById('listaOI');
+    
+    if (!listaOD || !listaOI) return;
+    
+    listaOD.innerHTML = '';
+    listaOI.innerHTML = '';
+    
+    // Recorrer frecuencias para OD
+    freqs.forEach(freq => {
+        const input = document.getElementById(`od-bone_${freq}`);
+        if (input && input.value !== '') {
+            const valor = input.value;
+            // Usar símbolo personalizado si existe
+            const simboloActual = obtenerSimboloPersonalizado('od', freq, activeBoneSymbols.od);
+            
+            const item = document.createElement('div');
+            item.className = 'freq-item od-item';
+            item.innerHTML = `
+                <span class="freq-label">${freq} Hz</span>
+                <span class="freq-symbol" data-freq="${freq}" data-ear="od">${simboloActual} ${valor} dB</span>
+            `;
+            item.addEventListener('click', (e) => {
+                e.stopPropagation();
+                mostrarSelectorSimbolo(item.querySelector('.freq-symbol'), 'od', freq);
+            });
+            listaOD.appendChild(item);
+        }
+    });
+    
+    // Recorrer frecuencias para OI
+    freqs.forEach(freq => {
+        const input = document.getElementById(`oi-bone_${freq}`);
+        if (input && input.value !== '') {
+            const valor = input.value;
+            // Usar símbolo personalizado si existe
+            const simboloActual = obtenerSimboloPersonalizado('oi', freq, activeBoneSymbols.oi);
+            
+            const item = document.createElement('div');
+            item.className = 'freq-item oi-item';
+            item.innerHTML = `
+                <span class="freq-label">${freq} Hz</span>
+                <span class="freq-symbol" data-freq="${freq}" data-ear="oi">${simboloActual} ${valor} dB</span>
+            `;
+            item.addEventListener('click', (e) => {
+                e.stopPropagation();
+                mostrarSelectorSimbolo(item.querySelector('.freq-symbol'), 'oi', freq);
+            });
+            listaOI.appendChild(item);
+        }
+    });
+    
+    if (listaOD.children.length === 0) {
+        listaOD.innerHTML = '<div style="color: #94a3b8; text-align: center; padding: 10px;"></div>';
+    }
+    if (listaOI.children.length === 0) {
+        listaOI.innerHTML = '<div style="color: #94a3b8; text-align: center; padding: 10px;"></div>';
+    }
+}
+
+function mostrarSelectorSimbolo(elemento, ear, freq) {
+    // Eliminar selector existente
+    const selectorExistente = document.querySelector('.symbol-selector');
+    if (selectorExistente) selectorExistente.remove();
+    
+    // Crear selector de símbolos
+    const selector = document.createElement('div');
+    selector.className = 'symbol-selector';
+    selector.style.display = 'block';
+    
+    // Símbolos disponibles según el oído
+    const simbolosOD = ['<', '[', '┐', '△', '↘'];
+    const simbolosOI = ['>', ']', '┌', '□', '↙'];
+    const simbolos = ear === 'od' ? simbolosOD : simbolosOI;
+    
+    simbolos.forEach(sim => {
+        const btn = document.createElement('button');
+        btn.textContent = sim;
+        btn.onclick = (e) => {
+            e.stopPropagation();
+            
+            // GUARDAR el símbolo personalizado para esta frecuencia específica
+            guardarSimboloPersonalizado(ear, freq, sim);
+            
+            // Cambiar el símbolo activo global (opcional, para nuevos puntos)
+            if (ear === 'od') {
+                activeBoneSymbols.od = sim;
+                document.querySelectorAll(`.bone-btn[data-bone-ear="od"]`).forEach(btn => {
+                    if (btn.dataset.boneSymbol === sim) {
+                        btn.classList.add('active');
+                    } else {
+                        btn.classList.remove('active');
+                    }
+                });
+            } else {
+                activeBoneSymbols.oi = sim;
+                document.querySelectorAll(`.bone-btn[data-bone-ear="oi"]`).forEach(btn => {
+                    if (btn.dataset.boneSymbol === sim) {
+                        btn.classList.add('active');
+                    } else {
+                        btn.classList.remove('active');
+                    }
+                });
+            }
+            
+            // Actualizar el símbolo en el elemento clickeado
+            const valor = elemento.textContent.split(' ')[1] || '';
+            elemento.textContent = `${sim} ${valor}`;
+            
+            // Actualizar los puntos existentes en drawnBoneSymbols
+            drawnBoneSymbols.forEach(item => {
+                if (item.tool === ear && item.freq === freq) {
+                    item.symbol = sim;
+                }
+            });
+            
+            // Actualizar puntos elásticos
+            if (ear === 'od') {
+                elasticPointsOD.forEach(point => {
+                    if (point.freq === freq) point.symbol = sim;
+                });
+            } else {
+                elasticPointsOI.forEach(point => {
+                    if (point.freq === freq) point.symbol = sim;
+                });
+            }
+            
+            // Redibujar todo
+            if (typeof redrawAll === 'function') redrawAll();
+            if (typeof updateChart === 'function') updateChart();
+            
+            selector.remove();
+        };
+        selector.appendChild(btn);
+    });
+    
+    // Posicionar el selector cerca del elemento
+    const rect = elemento.getBoundingClientRect();
+    selector.style.position = 'fixed';
+    selector.style.left = `${rect.left}px`;
+    selector.style.top = `${rect.bottom + 5}px`;
+    
+    document.body.appendChild(selector);
+    
+    // Cerrar al hacer clic fuera
+    function cerrarSelector(e) {
+        if (!selector.contains(e.target)) {
+            selector.remove();
+            document.removeEventListener('click', cerrarSelector);
+        }
+    }
+    
+    setTimeout(() => {
+        document.addEventListener('click', cerrarSelector);
+    }, 10);
+}
+
+// Modificar las funciones existentes para actualizar el panel
+function actualizarPTAConPanel() {
+    actualizarPTA();
+    actualizarPanelEnmascarar();
+     actualizarPanelEnmascararAir(); 
+}
+
+// Sobrescribir actualizarPTA para que también actualice el panel
+const originalActualizarPTA = actualizarPTA;
+actualizarPTA = function() {
+    originalActualizarPTA();
+    actualizarPanelEnmascarar();
+};
+
+// También actualizar cuando se usen los inputs de vía ósea
+document.addEventListener('DOMContentLoaded', function() {
+    // Observar cambios en inputs de vía ósea
+    const observer = new MutationObserver(function() {
+        actualizarPanelEnmascarar();
+    });
+    
+    const odBoneContainer = document.getElementById('od-bone-inputs');
+    const oiBoneContainer = document.getElementById('oi-bone-inputs');
+    
+    if (odBoneContainer) observer.observe(odBoneContainer, { childList: true, subtree: true, attributes: true });
+    if (oiBoneContainer) observer.observe(oiBoneContainer, { childList: true, subtree: true, attributes: true });
+    
+    // Inicializar panel
+    actualizarPanelEnmascarar();
+
+    // Al final del DOMContentLoaded, después de las otras inicializaciones:
+setTimeout(() => {
+    actualizarPanelEnmascararAir();
+    // También actualizar cuando cambien los inputs
+    document.querySelectorAll('#od-inputs input, #oi-inputs input').forEach(input => {
+        input.addEventListener('input', function() {
+            setTimeout(actualizarPanelEnmascararAir, 100);
+        });
+    });
+}, 500);
+
+createBoneSymbolInputs('od-bone-symbol-inputs', 'od');
+createBoneSymbolInputs('oi-bone-symbol-inputs', 'oi');
+
+// Inicializar el panel de enmascaramiento
+setTimeout(() => {
+    actualizarPanelEnmascararBoneSymbols();
+}, 300);
+
+// También actualizar cuando cambien los inputs de vía ósea símbolos
+document.querySelectorAll('#od-bone-symbol-inputs input, #oi-bone-symbol-inputs input').forEach(input => {
+    input.addEventListener('input', function() {
+        setTimeout(actualizarPanelEnmascararBoneSymbols, 100);
+    });
+});
+
+});
+
+// ============================================
+// TOGGLE PARA MOSTRAR/OCULTAR VÍA ÓSEA SÍMBOLOS
+// ============================================
+
+// ============================================
+// TOGGLE PARA MOSTRAR/OCULTAR VÍA ÓSEA SÍMBOLOS
+// ============================================
+
+let boneSymbolsVisible = false;
+
+document.addEventListener('DOMContentLoaded', function() {
+    const toggleBtn = document.getElementById('toggleBoneSymbolsBtn');
+    const boneRowContainer = document.getElementById('boneRowContainer');
+    const odSymbolWrapper = document.getElementById('od-bone-symbol-wrapper');
+    const oiSymbolWrapper = document.getElementById('oi-bone-symbol-wrapper');
+    const enmascararBoneBox = document.getElementById('enmascararBoneSymbolsBox');
+    
+    if (!toggleBtn || !boneRowContainer) return;
+    
+    // Estado inicial: oculto
+    if (odSymbolWrapper) odSymbolWrapper.style.display = 'none';
+    if (oiSymbolWrapper) oiSymbolWrapper.style.display = 'none';
+    if (enmascararBoneBox) enmascararBoneBox.style.display = 'none';
+    boneRowContainer.classList.remove('bone-symbols-visible');
+    
+    toggleBtn.addEventListener('click', function() {
+        boneSymbolsVisible = !boneSymbolsVisible;
+        
+        // Cambiar el texto del botón
+        this.textContent = boneSymbolsVisible ? '🔲 Ocultar Símbolos' : '🔲 Símbolos Vía Ósea';
+        this.style.backgroundColor = boneSymbolsVisible ? '#dc2626' : '#6b21a5';
+        
+        if (boneSymbolsVisible) {
+            // Mostrar los wrappers de símbolos
+            if (odSymbolWrapper) odSymbolWrapper.style.display = 'block';
+            if (oiSymbolWrapper) oiSymbolWrapper.style.display = 'block';
+            if (enmascararBoneBox) {
+                enmascararBoneBox.style.display = 'block';
+                enmascararBoneBox.classList.add('visible');
+            }
+            // Cambiar a 4 columnas
+            boneRowContainer.classList.add('bone-symbols-visible');
+            // Actualizar el panel de enmascaramiento
+            if (typeof actualizarPanelEnmascararBoneSymbols === 'function') {
+                setTimeout(actualizarPanelEnmascararBoneSymbols, 200);
+            }
+        } else {
+            // Ocultar los wrappers de símbolos
+            if (odSymbolWrapper) odSymbolWrapper.style.display = 'none';
+            if (oiSymbolWrapper) oiSymbolWrapper.style.display = 'none';
+            if (enmascararBoneBox) {
+                enmascararBoneBox.style.display = 'none';
+                enmascararBoneBox.classList.remove('visible');
+            }
+            // Volver a 2 columnas
+            boneRowContainer.classList.remove('bone-symbols-visible');
+        }
+    });
+});
+
+</script>
+
+
+<script>
+// ============================================
+// COMUNICACIÓN CON AudioLogo.html
+// ============================================
+window.addEventListener('message', function(event) {
+    if (event.data.accion === 'obtenerTodoAudiometria') {
+        const valores = obtenerValoresAudiometria();
+
+         // ✅ Asegurar que freqs incluya 750
+        const freqs = ['250', '500', '750', '1000', '1500', '2000', '3000', '4000', '6000', '8000'];
+        
+        capturarGraficaAudiometria().then(canvas => {
+            const grafica = canvas.toDataURL('image/png');
+            
+            event.source.postMessage({
+                accion: 'obtenerTodoAudiometria',
+                datos: {
+                    tieneDatos: true,
+                    valores_od: valores.od,
+                    valores_oi: valores.oi,
+                    freqs: freqs,  // ✅ AGREGAR ESTO
+                    pta: ultimosPTA || {},
+                    diagnostico_od: document.getElementById('diagnostico_od')?.value || '',
+                    diagnostico_oi: document.getElementById('diagnostico_oi')?.value || '',
+                    observaciones: document.getElementById('observaciones_audiometria')?.value || '',
+                    otoscopia: document.getElementById('otoscopia_audiometria')?.value || '',
+                    grafica: grafica
+                }
+            }, '*');
+        }).catch(() => {
+            event.source.postMessage({
+                accion: 'obtenerTodoAudiometria',
+                datos: {
+                    tieneDatos: false,
+                    error: 'Error capturando gráfica'
+                }
+            }, '*');
+        });
+    }
+});
+
+// ============================================
+// BOTÓN VOLVER AL DASHBOARD - CORREGIDO
+// ============================================
+document.addEventListener('DOMContentLoaded', function() {
+    const btnVolver = document.querySelector('.btn-back-floating');
+    
+    if (btnVolver) {
+        btnVolver.addEventListener('click', function(e) {
+            e.preventDefault();
+            
+            console.log('🔄 Volviendo al dashboard...');
+            
+            // PRIMERA OPCIÓN: Si existe window.api.volverDashboard
+            if (window.api && typeof window.api.volverDashboard === 'function') {
+                try {
+                    window.api.volverDashboard();
+                    return;
+                } catch (err) {
+                    console.warn('Error con volverDashboard:', err);
+                }
+            }
+            
+            // SEGUNDA OPCIÓN: Si existe window.api.navigateTo
+            if (window.api && typeof window.api.navigateTo === 'function') {
+                try {
+                    window.api.navigateTo('dashboard');
+                    return;
+                } catch (err) {
+                    console.warn('Error con navigateTo:', err);
+                }
+            }
+            
+            // TERCERA OPCIÓN: Si existe window.api.cerrarVentana
+            if (window.api && typeof window.api.cerrarVentana === 'function') {
+                try {
+                    window.api.cerrarVentana();
+                    return;
+                } catch (err) {
+                    console.warn('Error con cerrarVentana:', err);
+                }
+            }
+            
+            // CUARTA OPCIÓN: Navegación con localStorage
+            try {
+                // Guardar que venimos de audiometría
+                localStorage.setItem('volverDesde', 'audiometria');
+                localStorage.setItem('volverAHtml', 'citas.html');
+                
+                // Intentar con window.location
+                if (window.location.href.includes('audiometria-tonal-clinica')) {
+                    window.location.href = '../citas.html';
+                } else {
+                    window.location.href = 'citas.html';
+                }
+                return;
+            } catch (err) {
+                console.warn('Error con navegación local:', err);
+            }
+            
+            // QUINTA OPCIÓN: Mensaje al usuario
+            alert('No se pudo volver automáticamente. Por favor, cierre esta ventana y abra el Dashboard desde el menú principal.');
+        });
+        
+        console.log('✅ Botón Volver configurado correctamente');
+    } else {
+        console.warn('⚠️ Botón Volver no encontrado en el DOM');
+    }
+});
+
+// ============================================
+// EVENTO DE REDIMENSIONAMIENTO CORREGIDO
+// ============================================
+let resizeTimeout;
+window.addEventListener("resize", function() {
+    clearTimeout(resizeTimeout);
+    resizeTimeout = setTimeout(() => {
+        if (chart) {
+            // Forzar redibujado del chart
+            chart.resize();
+            // Sincronizar canvases
+            resizeDrawingCanvas();
+            if (drawCtx) {
+                drawCtx.clearRect(0, 0, drawingCanvas.width, drawingCanvas.height);
+            }
+            // Redibujar todo
+            if (typeof redrawAll === 'function') {
+                redrawAll();
+            }
+            if (typeof sincronizarCanvasDesdeInputs === 'function') {
+                sincronizarCanvasDesdeInputs();
+            }
+            console.log('🔄 Canvas redimensionado por resize de ventana');
+        }
+    }, 200);
+});
+
+
+// ============================================
+// MENÚ DE OPCIONES PARA CADA FRECUENCIA
+// ============================================
+
+let menuActivo = null;
+
+function abrirMenuOpciones(ear, freq, valorActual) {
+    // Cerrar menú anterior si existe
+    if (menuActivo) {
+        menuActivo.remove();
+        menuActivo = null;
+         document.removeEventListener('click', cerrarMenuOpciones); 
+    }
+    
+    // Crear el menú flotante
+    const menu = document.createElement('div');
+    menu.id = 'menuOpcionesFrecuencia';
+    menu.style.position = 'fixed';
+    menu.style.background = 'white';
+    menu.style.border = '2px solid #1e3a8a';
+    menu.style.borderRadius = '8px';
+    menu.style.padding = '10px';
+    menu.style.boxShadow = '0 6px 20px rgba(0,0,0,0.2)';
+    menu.style.zIndex = '10002';
+    menu.style.minWidth = '150px';
+    
+    // Título
+    const title = document.createElement('div');
+    title.style.fontSize = '12px';
+    title.style.fontWeight = 'bold';
+    title.style.color = '#1e293b';
+    title.style.borderBottom = '1px solid #e2e8f0';
+    title.style.paddingBottom = '6px';
+    title.style.marginBottom = '6px';
+    title.textContent = `${ear.toUpperCase()} ${freq} Hz - ${valorActual} dB`;
+    menu.appendChild(title);
+    
+    // Opciones
+    const opciones = [
+        { label: 'SIN RESPUESTA', value: 'NR', icon: '🚫' },
+        { label: 'SIN RESPUESTA TIPO 2', value: 'NR2', icon: '⛔' },
+        { label: 'RESPUESTA NORMAL', value: 'normal', icon: '✅' },
+        { label: 'CAMBIAR VALOR', value: 'cambiar', icon: '✏️' }
+    ];
+    
+    opciones.forEach(op => {
+        const btn = document.createElement('button');
+        btn.textContent = `${op.icon} ${op.label}`;
+        btn.style.display = 'block';
+        btn.style.width = '100%';
+        btn.style.textAlign = 'left';
+        btn.style.padding = '6px 10px';
+        btn.style.margin = '3px 0';
+        btn.style.border = 'none';
+        btn.style.borderRadius = '4px';
+        btn.style.background = 'transparent';
+        btn.style.cursor = 'pointer';
+        btn.style.fontSize = '12px';
+        btn.style.transition = 'background 0.2s';
+        
+        btn.onmouseover = () => { btn.style.background = '#f1f5f9'; };
+        btn.onmouseout = () => { btn.style.background = 'transparent'; };
+        
+        btn.onclick = (e) => {
+            e.stopPropagation();
+            manejarOpcion(ear, freq, op.value, valorActual);
+            menu.remove();
+            menuActivo = null;
+            document.removeEventListener('click', cerrarMenuOpciones); // ← AÑADE ESTA LÍNEA
+        };
+        
+        menu.appendChild(btn);
+    });
+    
+    // Posicionar el menú
+    const rect = event.target.getBoundingClientRect();
+    menu.style.left = `${Math.min(rect.left, window.innerWidth - 180)}px`;
+    menu.style.top = `${Math.min(rect.bottom + 5, window.innerHeight - 250)}px`;
+    
+    document.body.appendChild(menu);
+    menuActivo = menu;
+    
+    // Cerrar al hacer clic fuera
+    setTimeout(() => {
+        document.addEventListener('click', cerrarMenuOpciones);
+    }, 10);
+}
+
+function cerrarMenuOpciones(e) {
+    if (menuActivo && !menuActivo.contains(e.target)) {
+        menuActivo.remove();
+        menuActivo = null;
+        document.removeEventListener('click', cerrarMenuOpciones);
+    }
+}
+
+// ============================================
+// MANEJAR OPCIÓN SELECCIONADA
+// ============================================
+
+// ============================================
+// MANEJAR OPCIÓN SELECCIONADA
+// ============================================
+
+function manejarOpcion(ear, freq, opcion, valorActual) {
+    const inputId = ear === 'od' ? `od-bone_${freq}` : `oi-bone_${freq}`;
+    const input = document.getElementById(inputId);
+    if (!input) return;
+    
+    switch(opcion) {
+        case 'NR':
+            // 🔥 SIN RESPUESTA - NO CAMBIAR EL VALOR DEL INPUT
+            // Solo activar el flag para mostrar la imagen en la posición actual
+            if (ear === 'od') {
+                usarImagenOD[freq] = true;
+                // Guardar coordenadas originales si no existen
+                if (!coordenadasOriginalesOD[freq]) {
+                    coordenadasOriginalesOD[freq] = { valor: input.value };
+                }
+            } else {
+                usarImagenOI[freq] = true;
+                if (!coordenadasOriginalesOI[freq]) {
+                    coordenadasOriginalesOI[freq] = { valor: input.value };
+                }
+            }
+            mostrarNotificacionAudiometria(`🖼️ ${ear.toUpperCase()} ${freq}Hz: Mostrando imagen SIN RESPUESTA`, false);
+            
+            // Forzar redibujado
+            setTimeout(() => {
+                if (typeof sincronizarCanvasDesdeInputs === 'function') {
+                    sincronizarCanvasDesdeInputs();
+                }
+                if (typeof redrawAll === 'function') redrawAll();
+                if (typeof dibujarImagenesDesdeFiltro === 'function') dibujarImagenesDesdeFiltro();
+            }, 50);
+            break;
+            
+        case 'NR2':
+            // SIN RESPUESTA TIPO 2
+            if (ear === 'od') {
+                usarImagenOD[freq] = 'NR2';
+                if (!coordenadasOriginalesOD[freq]) {
+                    coordenadasOriginalesOD[freq] = { valor: input.value };
+                }
+            } else {
+                usarImagenOI[freq] = 'NR2';
+                if (!coordenadasOriginalesOI[freq]) {
+                    coordenadasOriginalesOI[freq] = { valor: input.value };
+                }
+            }
+            mostrarNotificacionAudiometria(`🖼️ ${ear.toUpperCase()} ${freq}Hz: Mostrando imagen TIPO 2`, false);
+            
+            setTimeout(() => {
+                if (typeof sincronizarCanvasDesdeInputs === 'function') {
+                    sincronizarCanvasDesdeInputs();
+                }
+                if (typeof redrawAll === 'function') redrawAll();
+                if (typeof dibujarImagenesDesdeFiltro === 'function') dibujarImagenesDesdeFiltro();
+            }, 50);
+            break;
+            
+        case 'normal':
+            // RESTAURAR - quitar la imagen y volver al símbolo normal
+            if (ear === 'od') {
+                delete usarImagenOD[freq];
+                delete coordenadasOriginalesOD[freq];
+            } else {
+                delete usarImagenOI[freq];
+                delete coordenadasOriginalesOI[freq];
+            }
+            mostrarNotificacionAudiometria(`✅ ${ear.toUpperCase()} ${freq}Hz: Restaurado símbolo normal`, false);
+            
+            setTimeout(() => {
+                if (typeof sincronizarCanvasDesdeInputs === 'function') {
+                    sincronizarCanvasDesdeInputs();
+                }
+                if (typeof redrawAll === 'function') redrawAll();
+                if (typeof dibujarImagenesDesdeFiltro === 'function') dibujarImagenesDesdeFiltro();
+            }, 50);
+            break;
+            
+        case 'cambiar':
+            // CAMBIAR VALOR - esto SÍ modifica el input
+            const nuevoValor = prompt(`Ingrese nuevo valor en dB para ${ear.toUpperCase()} ${freq}Hz:`, valorActual);
+            if (nuevoValor !== null && nuevoValor.trim() !== '') {
+                const num = parseFloat(nuevoValor);
+                if (!isNaN(num) && num >= -10 && num <= 120) {
+                    input.value = num;
+                    // Si tenía imagen activa, desactivarla
+                    if (ear === 'od') {
+                        delete usarImagenOD[freq];
+                        delete coordenadasOriginalesOD[freq];
+                    } else {
+                        delete usarImagenOI[freq];
+                        delete coordenadasOriginalesOI[freq];
+                    }
+                    mostrarNotificacionAudiometria(`✏️ ${ear.toUpperCase()} ${freq}Hz: ${num} dB`, false);
+                    
+                    input.dispatchEvent(new Event('input'));
+                    setTimeout(() => {
+                        actualizarFiltroViaOsea();
+                        if (typeof sincronizarCanvasDesdeInputs === 'function') {
+                            sincronizarCanvasDesdeInputs();
+                        }
+                        if (typeof redrawAll === 'function') redrawAll();
+                        if (typeof dibujarImagenesDesdeFiltro === 'function') dibujarImagenesDesdeFiltro();
+                    }, 100);
+                } else {
+                    mostrarNotificacionAudiometria('❌ Valor inválido (debe ser entre -10 y 120)', true);
+                }
+            }
+            break;
+    }
+}
+
+// ============================================
+// DIBUJAR IMÁGENES DESDE FILTRO (NO 110dB)
+// ============================================
+
+function dibujarImagenesDesdeFiltro() {
+    const drawingCanvas = document.getElementById('drawingCanvas');
+    const chart = obtenerChart ? obtenerChart() : window.chart;
+    
+    if (!drawingCanvas || !chart) {
+        return;
+    }
+    
+    const drawCtx = drawingCanvas.getContext('2d');
+    const scaleX = drawingCanvas._scaleX || 1;
+    const scaleY = drawingCanvas._scaleY || 1;
+    
+    // Verificar que las imágenes estén cargadas
+    if (!window._imgOD || !window._imgOI) {
+        if (typeof cargarImagenes === 'function') {
+            cargarImagenes().then(() => dibujarImagenesDesdeFiltro());
+        }
+        return;
+    }
+    
+    const imgOD = window._imgOD;
+    const imgOI = window._imgOI;
+    const frecuencias = ['250', '500', '750', '1000', '1500', '2000', '3000', '4000', '6000', '8000'];
+    const freqs = window.freqs || [];
+    const xPositions = window.xPositions || [];
+    
+    // 🔥 RECORRER FRECUENCIAS CON IMAGEN ACTIVA
+    frecuencias.forEach((freq) => {
+        const freqIndex = freqs.indexOf(freq);
+        if (freqIndex === -1 || freqIndex >= xPositions.length) return;
+        
+        // Verificar si OD tiene imagen activa
+        if (usarImagenOD[freq]) {
+            const inputOD = document.getElementById(`od-bone_${freq}`);
+            if (inputOD && inputOD.value !== '') {
+                const dbValue = parseFloat(inputOD.value);
+                if (!isNaN(dbValue)) {
+                    // 🔥 OBTENER POSICIÓN EN EL dB DEL INPUT (NO 110)
+                    const chartX = chart.scales.x.getPixelForValue(xPositions[freqIndex]);
+                    const chartY = chart.scales.y.getPixelForValue(dbValue);
+                    const x = chartX * scaleX;
+                    const y = chartY * scaleY;
+                    
+                    const w = 20;
+                    const h = 20;
+                    drawCtx.drawImage(imgOD, x - w/2, y - h/2, w, h);
+                }
+            }
+        }
+        
+        // Verificar si OI tiene imagen activa
+        if (usarImagenOI[freq]) {
+            const inputOI = document.getElementById(`oi-bone_${freq}`);
+            if (inputOI && inputOI.value !== '') {
+                const dbValue = parseFloat(inputOI.value);
+                if (!isNaN(dbValue)) {
+                    // 🔥 OBTENER POSICIÓN EN EL dB DEL INPUT (NO 110)
+                    const chartX = chart.scales.x.getPixelForValue(xPositions[freqIndex]);
+                    const chartY = chart.scales.y.getPixelForValue(dbValue);
+                    const x = chartX * scaleX;
+                    const y = chartY * scaleY;
+                    
+                    const w = 20;
+                    const h = 20;
+                    drawCtx.drawImage(imgOI, x - w/2, y - h/2, w, h);
+                }
+            }
+        }
+    });
+}
+
+// ============================================
+// FILTRO PARA VÍA ÓSEA
+// ============================================
+
+
+
+
+
+let filtroViaOseaActivo = 'ambos'; // 'od', 'oi', 'ambos'
+
+function actualizarFiltroViaOsea() {
+    const listaOD = document.getElementById('filtroODLista');
+    const listaOI = document.getElementById('filtroOILista');
+    const valoresOD = document.getElementById('filtroODValores');
+    const valoresOI = document.getElementById('filtroOIValores');
+    
+    if (!listaOD || !listaOI) return;
+    
+    const odInputs = document.querySelectorAll('#od-bone-inputs input');
+    const oiInputs = document.querySelectorAll('#oi-bone-inputs input');
+    
+    let odValores = [];
+    let oiValores = [];
+    
+    odInputs.forEach(input => {
+        if (input.value && input.value.trim() !== '') {
+            const freq = input.id.replace('od-bone_', '');
+            odValores.push({ freq, valor: input.value, input });
+        }
+    });
+    
+    oiInputs.forEach(input => {
+        if (input.value && input.value.trim() !== '') {
+            const freq = input.id.replace('oi-bone_', '');
+            oiValores.push({ freq, valor: input.value, input });
+        }
+    });
+    
+    valoresOD.textContent = odValores.length > 0 ? odValores.map(v => `${v.freq}:${v.valor}dB`).join(' | ') : 'Sin datos';
+    valoresOI.textContent = oiValores.length > 0 ? oiValores.map(v => `${v.freq}:${v.valor}dB`).join(' | ') : 'Sin datos';
+    
+    let mostrarOD = filtroViaOseaActivo === 'od' || filtroViaOseaActivo === 'ambos';
+    let mostrarOI = filtroViaOseaActivo === 'oi' || filtroViaOseaActivo === 'ambos';
+    
+    const containerOD = document.getElementById('filtroODResultado');
+    const containerOI = document.getElementById('filtroOIResultado');
+    
+    if (containerOD) {
+        containerOD.style.display = mostrarOD ? 'block' : 'none';
+        if (odValores.length > 0 && mostrarOD) {
+            let html = '';
+            odValores.forEach(v => {
+                html += `<span class="filtro-item od" data-freq="${v.freq}" data-ear="od" style="cursor:pointer;" onclick="abrirMenuOpciones('od', '${v.freq}', '${v.valor}')">${v.freq}:${v.valor}dB</span>`;
+            });
+            listaOD.innerHTML = html;
+        } else {
+            listaOD.textContent = mostrarOD ? '--' : '--';
+        }
+    }
+    
+    if (containerOI) {
+        containerOI.style.display = mostrarOI ? 'block' : 'none';
+        if (oiValores.length > 0 && mostrarOI) {
+            let html = '';
+            oiValores.forEach(v => {
+                html += `<span class="filtro-item oi" data-freq="${v.freq}" data-ear="oi" style="cursor:pointer;" onclick="abrirMenuOpciones('oi', '${v.freq}', '${v.valor}')">${v.freq}:${v.valor}dB</span>`;
+            });
+            listaOI.innerHTML = html;
+        } else {
+            listaOI.textContent = mostrarOI ? '--' : '--';
+        }
+    }
+}
+
+// Conectar los botones del filtro
+document.addEventListener('DOMContentLoaded', function() {
+    const btnOD = document.getElementById('btnFiltrarOD');
+    const btnOI = document.getElementById('btnFiltrarOI');
+    const btnAmbos = document.getElementById('btnFiltrarAmbos');
+    
+    if (btnOD) {
+        btnOD.addEventListener('click', function() {
+            filtroViaOseaActivo = 'od';
+            btnOD.style.opacity = '1';
+            btnOI.style.opacity = '0.5';
+            btnAmbos.style.opacity = '0.5';
+            actualizarFiltroViaOsea();
+        });
+    }
+    
+    if (btnOI) {
+        btnOI.addEventListener('click', function() {
+            filtroViaOseaActivo = 'oi';
+            btnOD.style.opacity = '0.5';
+            btnOI.style.opacity = '1';
+            btnAmbos.style.opacity = '0.5';
+            actualizarFiltroViaOsea();
+        });
+    }
+    
+    if (btnAmbos) {
+        btnAmbos.addEventListener('click', function() {
+            filtroViaOseaActivo = 'ambos';
+            btnOD.style.opacity = '0.5';
+            btnOI.style.opacity = '0.5';
+            btnAmbos.style.opacity = '1';
+            actualizarFiltroViaOsea();
+        });
+    }
+    
+    // Estado inicial: ambos activos
+    if (btnOD) btnOD.style.opacity = '0.5';
+    if (btnOI) btnOI.style.opacity = '0.5';
+    if (btnAmbos) btnAmbos.style.opacity = '1';
+    
+    // Actualizar cada vez que cambien los inputs de vía ósea
+    const observer = new MutationObserver(function() {
+        actualizarFiltroViaOsea();
+    });
+    
+    const odContainer = document.getElementById('od-bone-inputs');
+    const oiContainer = document.getElementById('oi-bone-inputs');
+    
+    if (odContainer) observer.observe(odContainer, { childList: true, subtree: true, attributes: true });
+    if (oiContainer) observer.observe(oiContainer, { childList: true, subtree: true, attributes: true });
+    
+    // También escuchar eventos input directamente
+    document.querySelectorAll('#od-bone-inputs input, #oi-bone-inputs input').forEach(input => {
+        input.addEventListener('input', function() {
+            setTimeout(actualizarFiltroViaOsea, 50);
+        });
+    });
+    
+    // Inicializar
+    setTimeout(actualizarFiltroViaOsea, 300);
+});
+
+</script>
+ <script src="../renderer/focus-fix.js"></script>
+ <script src="../renderer/simbolos-en-chart/enmascaramientosinrespuestaosea.js"></script>
+
+ 
+</body>
+</html>
+

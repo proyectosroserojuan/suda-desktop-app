@@ -1,0 +1,320 @@
+* {
+  box-sizing: border-box;
+  font-family: Arial, sans-serif;
+}
+
+body {
+  margin: 0;
+  height: 100vh;
+}
+
+/* CONTENEDOR PRINCIPAL */
+.login-container {
+  display: flex;
+  height: 100vh;
+}
+
+/* LADO IZQUIERDO */
+.login-left {
+  flex: 1;
+  background: linear-gradient(135deg, #1e3c72, #2a5298, #ffffff);
+  color: white;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+/* ============================================
+   ESTILOS PARA EL TÍTULO DE BIENVENIDA
+   ============================================ */
+
+/* Título principal con sombra */
+.login-left h1 {
+  font-size: 36px;
+  margin-bottom: 10px;
+  text-shadow: 
+    0 2px 4px rgba(0, 0, 0, 0.3),
+    0 4px 8px rgba(0, 0, 0, 0.2),
+    0 8px 16px rgba(0, 0, 0, 0.1);
+  line-height: 1.3;
+}
+
+/* 🔴 S.U.D.A en NEGRILLA con sombra especial */
+.uda-destacado {
+  font-weight: 900;
+  font-size: 2.8rem;
+  color: #ffffff;
+  text-shadow: 
+    0 0 20px rgba(255, 255, 255, 0.3),
+    0 0 40px rgba(255, 215, 0, 0.2),
+    0 2px 4px rgba(0, 0, 0, 0.4),
+    0 4px 8px rgba(0, 0, 0, 0.3),
+    0 8px 16px rgba(0, 0, 0, 0.2);
+  letter-spacing: 3px;
+  display: inline-block;
+}
+
+/* Subtítulo del sistema */
+.subtitulo-sistema {
+  display: block;
+  font-size: 1.2rem;
+  font-weight: 300;
+  color: rgba(255, 255, 255, 0.85);
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  margin-top: 4px;
+  letter-spacing: 1px;
+}
+
+/* Nombre del licenciado */
+.login-left p {
+  font-size: 1.2rem;
+  font-weight: 400;
+  color: rgba(255, 255, 255, 0.9);
+  margin-top: 12px;
+  letter-spacing: 3px;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+  padding-top: 12px;
+}
+
+/* Versión con brillo dorado para S.U.D.A (alternativa más llamativa) */
+.uda-destacado-gold {
+  font-weight: 900;
+  font-size: 2.8rem;
+  color: #ffffff;
+  text-shadow: 
+    0 0 20px rgba(255, 215, 0, 0.4),
+    0 0 40px rgba(255, 215, 0, 0.2),
+    0 0 80px rgba(255, 215, 0, 0.1),
+    0 2px 4px rgba(0, 0, 0, 0.4);
+  letter-spacing: 3px;
+  background: linear-gradient(180deg, #ffffff 0%, #fef3c7 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.3));
+}
+
+.login-left h1 {
+  font-size: 36px;
+  margin-bottom: 10px;
+}
+
+.login-left p {
+  font-size: 16px;
+  opacity: 0.9;
+}
+
+/* LADO DERECHO */
+.login-right {
+  flex: 1;
+  background-color: white;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 80px;
+}
+
+.login-right h2 {
+  margin-bottom: 30px;
+}
+
+.login-right input {
+  margin-bottom: 15px;
+  padding: 12px;
+  font-size: 14px;
+}
+
+.login-right button {
+  padding: 12px;
+  background-color: #2a5298;
+  color: white;
+  border: none;
+  cursor: pointer;
+  font-size: 15px;
+}
+
+.login-right button:hover {
+  background-color: #1e3c72;
+}
+
+.login-right input {
+  border: 1px solid #ccc;
+  border-radius: 6px;
+}
+
+.login-right button {
+  border-radius: 6px;
+}
+
+.login-right a {
+  text-decoration: none;
+  color: #2a5298;
+  font-size: 14px;
+}
+
+/* CENTRAR CONTENIDO DERECHO */
+.login-right {
+  flex: 1;
+  background-color: #f4f6f9;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* TARJETA BLANCA */
+.login-card {
+  background: white;
+  padding: 40px;
+  width: 100%;
+  max-width: 350px;
+  border-radius: 12px;
+
+  /* 👇 SOMBRA PRO */
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+
+  display: flex;
+  flex-direction: column;
+}
+
+/* INPUTS */
+.login-card input {
+  margin-bottom: 15px;
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+/* BOTÓN */
+.login-card button {
+  padding: 12px;
+  background: linear-gradient(135deg, #2a5298, #1e3c72);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 15px;
+}
+
+/* CONTENEDOR DEL LOGO */
+.logo-container {
+  width: 100%;
+  max-width: 350px;
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.logo-container img {
+  max-width: 100%;
+  height: auto;
+  max-height: 100px; /* Ajusta según el tamaño deseado */
+  object-fit: contain;
+}
+
+.login-card button:hover {
+  opacity: 0.9;
+}
+
+/* LINK */
+.login-card a {
+  text-align: center;
+  text-decoration: none;
+  color: #2a5298;
+  font-size: 14px;
+}
+
+.login-card {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.login-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+}
+
+/* Versión alternativa más elegante */
+.audiologo-info {
+  text-align: center;
+  margin-top: 20px;
+  padding: 20px;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  border-radius: 15px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+}
+
+/* Nombre con efecto curvo */
+.nombre-curvo {
+  font-family: 'Playfair Display', 'Georgia', serif;
+  font-size: 20px;
+  font-weight: 600;
+  background: linear-gradient(120deg, #1e3c72, #2a5298, #1e3c72);
+  background-size: 200% auto;
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: shine 3s linear infinite;
+  margin-bottom: 8px;
+  letter-spacing: 1px;
+}
+
+@keyframes shine {
+  0% {
+    background-position: 0% center;
+  }
+  100% {
+    background-position: 200% center;
+  }
+}
+
+/* Título con estilo serio y profesional */
+.titulo-serio {
+  font-family: 'Montserrat', 'Arial', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: #2d3748;
+  border-top: 1px solid #cbd5e0;
+  border-bottom: 1px solid #cbd5e0;
+  display: inline-block;
+  padding: 8px 20px;
+  background-color: white;
+  border-radius: 30px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+/* CONTENEDOR DE LA ANIMACIÓN LOTTIE */
+.lottie-animation {
+  margin-bottom: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  animation: fadeInUp 0.8s ease-out;
+}
+
+/* Animación de entrada para la animación */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Ajuste responsive para la animación */
+@media (max-width: 768px) {
+  .lottie-animation lottie-player {
+    width: 150px !important;
+    height: 150px !important;
+  }
+}
+
+/* Convertir animación Lottie a color blanco */
+.lottie-white {
+  filter: brightness(0) invert(1);
+  -webkit-filter: brightness(0) invert(1);
+}

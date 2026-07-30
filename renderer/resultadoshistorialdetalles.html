@@ -1,0 +1,759 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Citas | Sistema Médico</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, 'Segoe UI', Roboto, Helvetica, sans-serif;
+            background: #f0f4f9;
+            padding: 28px 32px;
+            color: #1e293b;
+        }
+
+        /* Header corporativo con más azul */
+/* Header corporativo con más azul */
+.header-corporativo {
+    background: linear-gradient(135deg, #0e469b 0%, #1a3a6a 50%, #d7e2fa 100%);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 24px;      /* Reducido de 20px 32px */
+    border-radius: 16px;
+    margin-bottom: 28px;
+    gap: 12px;              /* Reducido de 20px */
+    box-shadow: 0 4px 20px rgba(37, 99, 235, 0.2);
+    flex-wrap: nowrap;      /* ¡NUEVO! Evita que se envuelvan */
+    min-height: 80px;       /* Altura mínima para consistencia */
+}
+
+.logo-empresa {
+    height: 80px;           /* Cambia a altura fija */
+    width: auto;            /* Ancho automático para mantener proporción */
+    object-fit: contain;
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 8px 16px;      /* Padding horizontal para que respire */
+    flex-shrink: 0;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+        .header-logo {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+
+
+
+
+        .logo-icon img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+    
+        }
+
+        .logo-text {
+            color: #ffffff;
+        }
+
+        .logo-text h1 {
+            font-size: 1.3rem;
+            font-weight: 700;
+            letter-spacing: -0.3px;
+        }
+
+        .logo-text span {
+            display: block;
+            font-size: 0.7rem;
+            color: rgba(255, 255, 255, 0.7);
+            font-weight: 400;
+        }
+
+.header-stats {
+    display: flex;
+    gap: 10px;              /* Reducido de 16px */
+    align-items: center;
+    flex-shrink: 0;         /* Evita que se encojan */
+}
+
+.stat-item {
+    background: rgba(255, 255, 255, 0.15);
+    padding: 6px 14px;      /* Reducido de 8px 20px */
+    border-radius: 10px;
+    text-align: center;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    white-space: nowrap;    /* Evita que el texto se parta */
+}
+
+.stat-item .number {
+    font-size: 1.1rem;      /* Reducido de 1.25rem */
+    font-weight: 700;
+    color: #ffffff;
+}
+
+.stat-item .label {
+    font-size: 0.6rem;      /* Reducido de 0.65rem */
+    color: rgba(255, 255, 255, 0.7);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    display: block;
+}
+.btn-primary {
+    background: #ffffff;
+    color: #1a3a6a;
+    border: none;
+    padding: 8px 16px;      /* Reducido de 10px 24px */
+    border-radius: 30px;
+    font-weight: 600;
+    cursor: pointer;
+    font-size: 0.75rem;     /* Reducido de 0.85rem */
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;    /* Evita que el texto se parta */
+}
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 16px rgba(255, 255, 255, 0.3);
+        }
+
+        /* Container */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* Filtros con más azul */
+        .filters-section {
+            background: #ffffff;
+            border-radius: 12px;
+            padding: 20px 24px;
+            margin-bottom: 24px;
+            border: 1px solid #dbeafe;
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+            align-items: center;
+            box-shadow: 0 2px 8px rgba(37, 99, 235, 0.06);
+        }
+
+        .filters-section select,
+        .filters-section input {
+            padding: 10px 14px;
+            border: 1.5px solid #dbeafe;
+            border-radius: 10px;
+            font-size: 0.85rem;
+            font-family: inherit;
+            transition: all 0.2s;
+            background: #ffffff;
+            color: #1e293b;
+        }
+
+        .filters-section select:focus,
+        .filters-section input:focus {
+            border-color: #2563eb;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+        }
+
+        .filters-section select {
+            min-width: 160px;
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23475569' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            padding-right: 36px;
+        }
+
+        .filters-section input {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        /* Tabla */
+        .citas-table {
+            background: #ffffff;
+            border-radius: 12px;
+            border: 1px solid #dbeafe;
+            overflow-x: auto;
+            box-shadow: 0 2px 8px rgba(37, 99, 235, 0.06);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            text-align: left;
+            padding: 14px 18px;
+            background: #eff6ff;
+            font-weight: 600;
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #1a3a6a;
+            border-bottom: 2px solid #dbeafe;
+        }
+
+        td {
+            padding: 12px 18px;
+            border-bottom: 1px solid #eff6ff;
+            font-size: 0.85rem;
+        }
+
+        tr:hover {
+            background: #f8faff;
+        }
+
+        /* Badges con más azul */
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            font-weight: 600;
+        }
+
+        .badge-success { background: #dcfce7; color: #166534; }
+        .badge-warning { background: #fef3c7; color: #92400e; }
+        .badge-danger { background: #fee2e2; color: #991b1b; }
+        .badge-info { background: #dbeafe; color: #1e40af; }
+        .badge-secondary { background: #e2e8f0; color: #475569; }
+
+        .badge-examen {
+            background: #dbeafe;
+            color: #1a3a6a;
+            font-weight: 600;
+        }
+
+        .badge-sin-examen {
+            background: #f1f5f9;
+            color: #64748b;
+            font-weight: 600;
+        }
+
+        /* Prioridad */
+        .badge-prioridad {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            font-weight: 600;
+        }
+
+        .badge-prioridad.alta {
+            background: #fee2e2;
+            color: #dc2626;
+        }
+
+        .badge-prioridad.alta::before {
+            content: "★";
+            font-size: 0.75rem;
+        }
+
+        .badge-prioridad.normal {
+            background: #eff6ff;
+            color: #1a3a6a;
+        }
+
+        .badge-prioridad.normal::before {
+            content: "○";
+            font-size: 0.75rem;
+        }
+
+        /* Fila prioritaria */
+        .cita-prioritaria {
+            border-left: 4px solid #ef4444;
+            background-color: #fef2f2;
+        }
+
+        .cita-prioritaria:hover {
+            background-color: #fee2e2;
+        }
+
+        /* Botón de acción con más azul */
+        .btn-accion {
+            background: #1a3a6a;
+            color: white;
+            border: none;
+            padding: 6px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.75rem;
+            transition: all 0.2s;
+        }
+
+        .btn-accion:hover:not(:disabled) {
+            background: #2563eb;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+        }
+
+        .btn-accion:disabled {
+            background: #e2e8f0;
+            color: #94a3b8;
+            cursor: not-allowed;
+        }
+
+        /* Estados vacíos */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #94a3b8;
+        }
+
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 16px;
+            color: #2563eb;
+        }
+
+        .empty-state h3 {
+            color: #1a3a6a;
+            margin-bottom: 4px;
+        }
+
+        .empty-state p {
+            font-size: 0.9rem;
+        }
+
+        .loading-state {
+            text-align: center;
+            padding: 60px 20px;
+        }
+
+        .loading-state .spinner {
+            display: inline-block;
+            width: 32px;
+            height: 32px;
+            border: 3px solid #dbeafe;
+            border-top: 3px solid #2563eb;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin-bottom: 12px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .error-state {
+            background: #fee2e2;
+            color: #991b1b;
+            padding: 16px 24px;
+            border-radius: 10px;
+            text-align: center;
+            border: 1px solid #fecaca;
+        }
+
+        /* Responsive */
+/* Responsive */
+@media (max-width: 768px) {
+    body {
+        padding: 16px;
+    }
+
+    .header-corporativo {
+        padding: 12px 16px;
+        gap: 8px;
+        min-height: 70px;
+    }
+
+    .logo-empresa {
+        height: 50px;        /* Logo más pequeño en móvil */
+        padding: 4px 10px;
+    }
+
+    .logo-text h1 {
+        font-size: 0.9rem;   /* Texto más pequeño */
+    }
+
+    .logo-text span {
+        font-size: 0.6rem;
+        display: none;       /* Oculta el subtítulo en móvil para ahorrar espacio */
+    }
+
+    .stat-item {
+        padding: 4px 10px;
+    }
+
+    .stat-item .number {
+        font-size: 0.9rem;
+    }
+
+    .stat-item .label {
+        font-size: 0.5rem;
+    }
+
+    .btn-primary {
+        padding: 6px 12px;
+        font-size: 0.65rem;
+    }
+
+    .filters-section {
+        flex-direction: column;
+    }
+
+    .filters-section select,
+    .filters-section input {
+        width: 100%;
+    }
+
+    th, td {
+        padding: 8px 12px;
+        font-size: 0.75rem;
+    }
+
+    td .badge,
+    td .badge-prioridad {
+        font-size: 0.65rem;
+        padding: 3px 8px;
+    }
+}
+
+/* Para pantallas muy pequeñas */
+@media (max-width: 480px) {
+    .header-corporativo {
+        padding: 8px 12px;
+        gap: 6px;
+        min-height: 60px;
+    }
+
+    .logo-empresa {
+        height: 40px;
+        padding: 4px 8px;
+    }
+
+    .logo-text h1 {
+        font-size: 0.75rem;
+    }
+
+    .stat-item {
+        padding: 3px 8px;
+    }
+
+    .stat-item .number {
+        font-size: 0.75rem;
+    }
+
+    .stat-item .label {
+        font-size: 0.4rem;
+    }
+
+    .btn-primary {
+        padding: 4px 10px;
+        font-size: 0.55rem;
+        gap: 4px;
+    }
+
+    .btn-primary i {
+        font-size: 0.7rem;
+    }
+}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header Corporativo con Logo -->
+        <header class="header-corporativo">
+<div class="header-logo">
+    <img src="../img/saninlogo.jpg" alt="Logo U.D.A." class="logo-empresa" onerror="this.style.display='none'; this.parentElement.innerHTML='<span style=\'font-weight:700;color:#ffffff;font-size:1.5rem;\'>U.D.A.</span>'">
+    <div class="logo-text">
+        <h1>Gestión de Citas</h1>
+        <span>Sistema de administración médica</span>
+    </div>
+</div>
+            <div class="header-stats">
+                <div class="stat-item">
+                    <span class="number" id="totalCitas">0</span>
+                    <span class="label">Total</span>
+                </div>
+                <div class="stat-item">
+                    <span class="number" id="citasPendientes">0</span>
+                    <span class="label">Pendientes</span>
+                </div>
+                <button class="btn-primary" id="btnActualizar">
+                    <i class="fas fa-sync-alt"></i> Actualizar
+                </button>
+            </div>
+        </header>
+
+        <!-- Filtros -->
+        <div class="filters-section">
+            <select id="filtroEstado">
+                <option value="todos">Todos los estados</option>
+                <option value="pendiente">Pendiente</option>
+                <option value="confirmada">Confirmada</option>
+                <option value="atendida">Atendida</option>
+                <option value="cancelada">Cancelada</option>
+            </select>
+            <select id="filtroExamen">
+                <option value="todos">Todos</option>
+                <option value="con">Con examen</option>
+                <option value="sin">Sin examen</option>
+            </select>
+            <select id="filtroPrioridad">
+                <option value="todos">Todas las prioridades</option>
+                <option value="alta">Alta</option>
+                <option value="normal">Normal</option>
+            </select>
+            <input type="text" id="buscador" placeholder="Buscar paciente...">
+        </div>
+
+        <!-- Tabla de Citas -->
+        <div class="citas-table">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Paciente</th>
+                        <th>Fecha</th>
+                        <th>Hora</th>
+                        <th>Estado</th>
+                        <th>Examen</th>
+                        <th>Prioridad</th>
+                        <th>Acción</th>
+                    </tr>
+                </thead>
+                <tbody id="citasBody">
+                    <tr>
+                        <td colspan="7" class="loading-state">
+                            <div class="spinner"></div>
+                            <p>Cargando citas...</p>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        let citasData = [];
+
+        document.addEventListener('DOMContentLoaded', () => {
+            cargarCitas();
+            
+            document.getElementById('filtroEstado').addEventListener('change', aplicarFiltros);
+            document.getElementById('filtroExamen').addEventListener('change', aplicarFiltros);
+            document.getElementById('filtroPrioridad').addEventListener('change', aplicarFiltros);
+            document.getElementById('buscador').addEventListener('input', aplicarFiltros);
+            document.getElementById('btnActualizar').addEventListener('click', cargarCitas);
+        });
+
+        async function cargarCitas() {
+            try {
+                const tbody = document.getElementById('citasBody');
+                
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="7" class="loading-state">
+                            <div class="spinner"></div>
+                            <p>Cargando citas...</p>
+                        </td>
+                    </tr>
+                `;
+
+                console.log('Solicitando citas...');
+                const response = await window.api.obtenerCitasConEstadoExamen();
+                console.log('Respuesta:', response);
+                
+                if (!response.ok) {
+                    throw new Error(response.error || 'Error desconocido');
+                }
+
+                citasData = response.citas || [];
+                document.getElementById('totalCitas').textContent = citasData.length;
+                document.getElementById('citasPendientes').textContent = 
+                    citasData.filter(c => c.estado === 'pendiente' || c.estado === 'confirmada').length;
+                
+                renderizarCitas(citasData);
+
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('citasBody').innerHTML = `
+                    <tr>
+                        <td colspan="7" class="error-state">
+                            <i class="fas fa-exclamation-circle"></i>
+                            Error al cargar citas: ${error.message}
+                        </td>
+                    </tr>
+                `;
+            }
+        }
+
+        function renderizarCitas(citas) {
+            const tbody = document.getElementById('citasBody');
+            
+            if (!citas || citas.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="7" class="empty-state">
+                            <i class="fas fa-calendar-times"></i>
+                            <h3>No hay citas registradas</h3>
+                            <p>Comience creando una nueva cita en el sistema</p>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            tbody.innerHTML = citas.map(cita => {
+                const prioridad = cita.prioridad || 'normal';
+                const esPrioritaria = prioridad === 'alta';
+                
+                return `
+                    <tr class="${esPrioritaria ? 'cita-prioritaria' : ''}">
+                        <td>
+                            <strong>${cita.paciente_nombre || 'Paciente'}</strong>
+                        </td>
+                        <td>${formatearFecha(cita.fecha_cita)}</td>
+                        <td>${cita.hora_cita || '--:--'}</td>
+                        <td>
+                            <span class="badge ${getEstadoBadge(cita.estado)}">
+                                ${cita.estado || 'pendiente'}
+                            </span>
+                        </td>
+                        <td>
+                            <span class="${cita.tiene_examen ? 'badge-examen' : 'badge-sin-examen'}">
+                                ${cita.tiene_examen ? 'Con examen' : 'Sin examen'}
+                            </span>
+                        </td>
+                        <td>
+                            <span class="badge-prioridad ${prioridad === 'alta' ? 'alta' : 'normal'}">
+                                ${prioridad === 'alta' ? 'Alta' : 'Normal'}
+                            </span>
+                        </td>
+                        <td>
+                            <button 
+                                class="btn-accion" 
+                                onclick="verExamen(${cita.id}, this)"
+                                ${!cita.tiene_examen ? 'disabled' : ''}
+                            >
+                                ${cita.tiene_examen ? 'Ver resultados' : 'Sin examen'}
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function aplicarFiltros() {
+            const estadoFiltro = document.getElementById('filtroEstado').value;
+            const examenFiltro = document.getElementById('filtroExamen').value;
+            const prioridadFiltro = document.getElementById('filtroPrioridad').value;
+            const busqueda = document.getElementById('buscador').value.toLowerCase().trim();
+
+            let filtradas = citasData;
+
+            if (estadoFiltro !== 'todos') {
+                filtradas = filtradas.filter(c => c.estado === estadoFiltro);
+            }
+
+            if (examenFiltro === 'con') {
+                filtradas = filtradas.filter(c => c.tiene_examen === true);
+            } else if (examenFiltro === 'sin') {
+                filtradas = filtradas.filter(c => c.tiene_examen === false);
+            }
+
+            if (prioridadFiltro !== 'todos') {
+                filtradas = filtradas.filter(c => (c.prioridad || 'normal') === prioridadFiltro);
+            }
+
+            if (busqueda) {
+                filtradas = filtradas.filter(c => 
+                    (c.paciente_nombre || '').toLowerCase().includes(busqueda)
+                );
+            }
+
+            renderizarCitas(filtradas);
+        }
+
+        async function verExamen(citaId, button) {
+            try {
+                const textoOriginal = button.textContent;
+                button.textContent = 'Cargando...';
+                button.disabled = true;
+
+                console.log('Buscando exámenes para cita ID:', citaId);
+                
+                const response = await window.api.obtenerCitaConExamen(citaId);
+                console.log('Respuesta:', response);
+                
+                if (!response.ok) {
+                    throw new Error(response.error || 'Error al obtener examen');
+                }
+
+                const cita = response.cita;
+                
+                if (!cita) {
+                    alert('No se encontró la cita.');
+                    return;
+                }
+
+                const tieneExamen = cita.examenes && (cita.examenes.audiometria || cita.examenes.logoaudiometria);
+                
+                if (!tieneExamen) {
+                    alert('Esta cita no tiene exámenes asociados.');
+                    return;
+                }
+
+                window.api.abrirVentanaDetalles({ cita: cita });
+
+                button.textContent = textoOriginal;
+                button.disabled = false;
+
+            } catch (error) {
+                console.error('Error:', error);
+                alert(`Error: ${error.message}`);
+                if (button) {
+                    button.textContent = 'Ver resultados';
+                    button.disabled = false;
+                }
+            }
+        }
+
+        function formatearFecha(fecha) {
+            if (!fecha) return 'Fecha no disponible';
+            try {
+                const date = new Date(fecha);
+                return date.toLocaleDateString('es-ES', {
+                    year: 'numeric',
+                    month: 'short',
+                    day: 'numeric'
+                });
+            } catch {
+                return fecha;
+            }
+        }
+
+        function getEstadoBadge(estado) {
+            const estados = {
+                'pendiente': 'badge-warning',
+                'confirmada': 'badge-info',
+                'atendida': 'badge-success',
+                'cancelada': 'badge-danger'
+            };
+            return estados[estado] || 'badge-warning';
+        }
+    </script>
+</body>
+</html>

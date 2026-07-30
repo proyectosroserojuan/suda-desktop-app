@@ -1,0 +1,859 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Registro de Pacientes | Clínica Audiología</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background: #ffffff;
+      font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, sans-serif;
+      padding: 20px 24px;
+      color: #1e293b;
+    }
+
+    .logo-empresa-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+
+    .logo-empresa-top img {
+      height: 70px;
+      object-fit: contain;
+      border-radius: 12px;
+    }
+
+    .logo-texto-temporal {
+      font-weight: 700;
+      font-size: 1.2rem;
+      color: #001e81;
+    }
+
+    .logo-texto-temporal span {
+      display: block;
+      font-size: 0.7rem;
+      color: #475569;
+    }
+
+    .btn-dashboard {
+      background: #1e3a8a;
+      color: white;
+      border: none;
+      padding: 10px 24px;
+      border-radius: 40px;
+      font-weight: 600;
+      cursor: pointer;
+      font-size: 0.85rem;
+      transition: all 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-dashboard:hover {
+      background: #0f2b4d;
+      transform: translateY(-1px);
+    }
+
+    .main-layout {
+      display: grid;
+      grid-template-columns: 380px 1fr;
+      gap: 24px;
+      align-items: start;
+    }
+
+    .form-sidebar {
+      position: sticky;
+      top: 20px;
+    }
+
+    .form-card {
+      background: #ffffff;
+      border-radius: 20px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      border: 1px solid #e2e8f0;
+      overflow: hidden;
+    }
+
+    .form-header {
+      background: #ffffff;
+      padding: 16px 20px;
+      border-bottom: 1px solid #e2e8f0;
+    }
+
+    .form-header h2 {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: #0f2b4d;
+    }
+
+    .form-body {
+      padding: 20px;
+      max-height: calc(100vh - 160px);
+      overflow-y: auto;
+    }
+
+    .form-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .group {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .group label {
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: #4a5b7a;
+    }
+
+    .group input {
+      width: 100%;
+      padding: 8px 12px;
+      border: 1.5px solid #e2e8f0;
+      border-radius: 10px;
+      font-size: 0.85rem;
+      font-family: inherit;
+    }
+
+    .group input:focus {
+      border-color: #3b82f6;
+      outline: none;
+    }
+
+    .btn-save {
+      background: #2563eb;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 40px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      width: 100%;
+      margin-top: 8px;
+    }
+
+    .btn-save:hover {
+      background: #1d4ed8;
+      transform: translateY(-1px);
+    }
+
+    .btn-cancelar {
+      background: #64748b;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 40px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      width: 100%;
+      margin-top: 8px;
+    }
+
+    .btn-cancelar:hover {
+      background: #475569;
+    }
+
+    .pacientes-panel {
+      background: white;
+      border-radius: 20px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      border: 1px solid #e2e8f0;
+      overflow: hidden;
+    }
+
+    .panel-header {
+      background: #ffffff;
+      padding: 16px 20px;
+      border-bottom: 1px solid #e2e8f0;
+    }
+
+    .panel-header h3 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #0f2b4d;
+      margin-bottom: 12px;
+    }
+
+    .search-box {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 16px;
+    }
+
+    .search-box input {
+      flex: 1;
+      padding: 8px 12px;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      font-size: 0.85rem;
+    }
+
+    .btn-search {
+      background: #3b82f6;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 10px;
+      cursor: pointer;
+    }
+
+    .tabla-container {
+      overflow-x: auto;
+      padding: 0 20px 20px 20px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.8rem;
+    }
+
+    th, td {
+      padding: 10px 8px;
+      text-align: left;
+      border-bottom: 1px solid #e2e8f0;
+    }
+
+    th {
+      background: #f8fafc;
+      font-weight: 700;
+      color: #475569;
+    }
+
+    tr:hover {
+      background: #f8fafc;
+    }
+
+    .acciones-cell {
+      white-space: nowrap;
+    }
+
+    .btn-accion-text {
+      padding: 6px 12px;
+      margin: 0 3px;
+      border: none;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .btn-editar-text {
+      background-color: #3b82f6;
+      color: white;
+    }
+
+    .btn-editar-text:hover {
+      background-color: #2563eb;
+    }
+
+    .btn-eliminar-text {
+      background-color: #ef4444;
+      color: white;
+    }
+
+    .btn-eliminar-text:hover {
+      background-color: #dc2626;
+    }
+
+    .paginador {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      padding: 16px;
+      border-top: 1px solid #e2e8f0;
+    }
+
+    .paginador button {
+      padding: 6px 12px;
+      border: 1px solid #e2e8f0;
+      background: white;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    .paginador button:hover:not(:disabled) {
+      background: #3b82f6;
+      color: white;
+    }
+
+    .paginador button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .paginador .active {
+      background: #3b82f6;
+      color: white;
+    }
+
+    .mensaje {
+      padding: 10px 16px;
+      border-radius: 12px;
+      font-size: 0.8rem;
+      margin-top: 12px;
+      display: none;
+    }
+
+    .mensaje.exito {
+      background: #e0f2fe;
+      color: #075985;
+      border-left: 4px solid #0ea5e9;
+    }
+
+    .mensaje.error {
+      background: #ffe4e2;
+      color: #b91c1c;
+      border-left: 4px solid #ef4444;
+    }
+  </style>
+</head>
+<body>
+
+<div class="logo-empresa-top">
+  <img src="../img/saninlogo.jpg" alt="Logo U.D.A." onerror="this.style.display='none';">
+  <div class="logo-texto-temporal" style="display: none;" id="fallbackLogo">
+    <strong>AUDIOLOGÍA CLÍNICA</strong>
+    <span>Especialistas en Audición</span>
+  </div>
+  <button class="btn-dashboard" id="btnVolverDashboard">← Volver al Dashboard</button>
+</div>
+
+<div class="main-layout">
+  <!-- Columna izquierda: Formulario -->
+  <div class="form-sidebar">
+    <div class="form-card">
+      <div class="form-header">
+        <h2 id="formTitle">Registrar Paciente</h2>
+      </div>
+      <div class="form-body">
+        <form id="formPaciente">
+          <div class="form-grid">
+            <div class="group">
+              <label>👤 NOMBRE COMPLETO</label>
+              <input id="nombre" type="text" placeholder="Ej: María José Pérez González" required>
+            </div>
+
+            <div class="group">
+              <label>DOCUMENTO</label>
+              <input id="documento" type="text" placeholder="CC / DNI / Pasaporte" required>
+            </div>
+
+            <!--
+            <div class="group">
+              <label>FECHA DE NACIMIENTO</label>
+              <input id="fechaNacimiento" type="date" required>
+            </div>
+            -->
+          
+
+<div class="group">
+  <label>EDAD</label>
+  <input id="edad" type="number" style="background: #ffffff;">
+</div>
+
+            <div class="group">
+              <label>TELÉFONO</label>
+              <input id="telefono" type="tel" placeholder="Ej: 3001234567">
+            </div>
+
+            <div class="group">
+              <label>CORREO ELECTRÓNICO</label>
+              <input id="email" type="email" placeholder="paciente@ejemplo.com">
+            </div>
+          </div>
+
+          <!-- UN SOLO BOTÓN QUE CAMBIA DE TEXTO -->
+          <!-- DOS BOTONES -->
+<button type="submit" class="btn-save" id="btnGuardar">Guardar Paciente</button>
+<button type="button" class="btn-cancelar" id="btnCancelarEdicion" style="display: none;">Cancelar Edición</button>
+          
+
+          
+          <div id="mensaje" class="mensaje"></div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Columna derecha: Tabla de pacientes -->
+  <div class="pacientes-panel">
+    <div class="panel-header">
+      <h3>Todos los Pacientes</h3>
+
+      <div class="search-box">
+        <input type="text" id="searchInput" placeholder="🔍 Buscar por nombre o documento...">
+        <button class="btn-search" id="btnBuscar">Buscar</button>
+        <button class="btn-search" id="btnLimpiarBusqueda" style="background: #64748b;">Limpiar</button>
+      </div>
+    </div>
+
+    <div class="tabla-container">
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Nombre</th>
+            <th>Documento</th>
+            <th>Fecha Nac.</th>
+            <th>EDAD</th>
+            <th>Teléfono</th>
+            <th>Email</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody id="tablaPacientesBody">
+          <tr><td colspan="7">Cargando pacientes...</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="paginador" id="paginador"></div>
+  </div>
+</div>
+
+
+<script>
+  let todosLosPacientes = [];
+  let pacientesFiltrados = [];
+  let paginaActual = 1;
+  const registrosPorPagina = 10;
+  let pacienteEditandoId = null;
+
+  function mostrarMensaje(texto, tipo) {
+    const mensajeDiv = document.getElementById('mensaje');
+    mensajeDiv.textContent = texto;
+    mensajeDiv.className = `mensaje ${tipo}`;
+    mensajeDiv.style.display = 'block';
+    setTimeout(() => {
+      mensajeDiv.style.display = 'none';
+    }, 3000);
+  }
+
+  function formatearFecha(fechaStr) {
+    if (!fechaStr) return '';
+    try {
+      const fecha = new Date(fechaStr);
+      return fecha.toLocaleDateString('es-CO');
+    } catch (e) {
+      return fechaStr;
+    }
+  }
+
+  function limpiarFormulario() {
+    document.getElementById('nombre').value = '';
+    document.getElementById('documento').value = '';
+ //   document.getElementById('fechaNacimiento').value = '';
+    document.getElementById('telefono').value = '';
+    document.getElementById('email').value = '';
+      document.getElementById('edad').value = '';  // 🔹 AÑADIR ESTO
+  }
+
+  async function cargarPacientes() {
+    try {
+      const result = await window.api.obtenerPacientes();
+      if (result && result.ok) {
+        todosLosPacientes = result.pacientes;
+        console.log('Pacientes cargados:', todosLosPacientes); // Para depuración
+        aplicarFiltros();
+      } else {
+        mostrarMensaje('Error cargando pacientes', 'error');
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      mostrarMensaje('Error al cargar pacientes', 'error');
+    }
+  }
+
+
+  /* Función para calcular la edad
+function calcularEdad(fechaNacimiento) {
+  if (!fechaNacimiento) return '';
+  
+  const hoy = new Date();
+  const fechaNac = new Date(fechaNacimiento);
+  
+  // Verificar si la fecha es válida
+  if (isNaN(fechaNac.getTime())) return '';
+  
+  let edad = hoy.getFullYear() - fechaNac.getFullYear();
+  const mes = hoy.getMonth() - fechaNac.getMonth();
+  
+  // Si aún no ha cumplido años este año
+  if (mes < 0 || (mes === 0 && hoy.getDate() < fechaNac.getDate())) {
+    edad--;
+  }
+  
+  return edad;
+}
+*/
+
+/* Event listener para calcular edad automáticamente
+document.getElementById('fechaNacimiento').addEventListener('change', function() {
+  const fechaNacimiento = this.value;
+  const edad = calcularEdad(fechaNacimiento);
+  document.getElementById('edad').value = edad;
+});
+*/
+
+  function aplicarFiltros() {
+    const searchText = document.getElementById('searchInput').value.toLowerCase();
+
+    pacientesFiltrados = todosLosPacientes.filter(paciente => {
+      if (searchText) {
+        const nombreMatch = paciente.nombre?.toLowerCase().includes(searchText);
+        const docMatch = paciente.documento?.toLowerCase().includes(searchText);
+        if (!nombreMatch && !docMatch) return false;
+      }
+      return true;
+    });
+
+    paginaActual = 1;
+    renderizarTabla();
+    renderizarPaginador();
+  }
+
+function renderizarTabla() {
+  const tbody = document.getElementById('tablaPacientesBody');
+  const inicio = (paginaActual - 1) * registrosPorPagina;
+  const fin = inicio + registrosPorPagina;
+  const pacientesPagina = pacientesFiltrados.slice(inicio, fin);
+
+  if (pacientesPagina.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="8">No hay pacientes registrados</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = pacientesPagina.map(paciente => {
+    let fechaNac = paciente.fecha_nacimiento || paciente.fechaNacimiento || '';
+    // 🔹 CALCULAR EDAD PARA MOSTRAR EN LA TABLA
+  //  const edad = calcularEdad(fechaNac);
+    
+    return `
+      <tr>
+        <td>${paciente.id}</td>
+        <td>${paciente.nombre || ''}</td>
+        <td>${paciente.documento || ''}</td>
+        <td>${formatearFecha(fechaNac)}</td>
+       <td>${paciente.edad || ''}</td>
+        <td>${paciente.telefono || ''}</td>
+        <td>${paciente.email || ''}</td>
+        <td class="acciones-cell">
+          <button class="btn-accion-text btn-editar-text" onclick="editarPaciente(${paciente.id})">Editar</button>
+          <button class="btn-accion-text btn-eliminar-text" onclick="eliminarPaciente(${paciente.id})">Eliminar</button>
+        </td>
+      </tr>
+    `;
+  }).join('');
+}
+
+  function renderizarPaginador() {
+    const totalPaginas = Math.ceil(pacientesFiltrados.length / registrosPorPagina);
+    const paginadorDiv = document.getElementById('paginador');
+    
+    if (totalPaginas <= 1) {
+      paginadorDiv.innerHTML = '';
+      return;
+    }
+
+    let html = `<button onclick="cambiarPagina(1)" ${paginaActual === 1 ? 'disabled' : ''}>«</button>`;
+    html += `<button onclick="cambiarPagina(${paginaActual - 1})" ${paginaActual === 1 ? 'disabled' : ''}>‹</button>`;
+    
+    for (let i = 1; i <= totalPaginas; i++) {
+      if (i === 1 || i === totalPaginas || (i >= paginaActual - 2 && i <= paginaActual + 2)) {
+        html += `<button onclick="cambiarPagina(${i})" class="${paginaActual === i ? 'active' : ''}">${i}</button>`;
+      } else if (i === paginaActual - 3 || i === paginaActual + 3) {
+        html += `<button disabled>...</button>`;
+      }
+    }
+    
+    html += `<button onclick="cambiarPagina(${paginaActual + 1})" ${paginaActual === totalPaginas ? 'disabled' : ''}>›</button>`;
+    html += `<button onclick="cambiarPagina(${totalPaginas})" ${paginaActual === totalPaginas ? 'disabled' : ''}>»</button>`;
+    
+    paginadorDiv.innerHTML = html;
+  }
+
+  window.cambiarPagina = function(pagina) {
+    paginaActual = pagina;
+    renderizarTabla();
+    renderizarPaginador();
+  };
+
+  // Función para formatear fecha a YYYY-MM-DD para input date
+  function formatearFechaParaInput(fechaStr) {
+    if (!fechaStr) return '';
+    try {
+      // Si es un objeto Date o string, convertir a Date
+      let fecha = new Date(fechaStr);
+      // Verificar si la fecha es válida
+      if (isNaN(fecha.getTime())) return '';
+      
+      // Formatear a YYYY-MM-DD
+      const año = fecha.getFullYear();
+      const mes = String(fecha.getMonth() + 1).padStart(2, '0');
+      const dia = String(fecha.getDate()).padStart(2, '0');
+      
+      return `${año}-${mes}-${dia}`;
+    } catch (e) {
+      console.error('Error formateando fecha:', e);
+      return '';
+    }
+  }
+
+  // Editar paciente - VERSIÓN CORREGIDA
+window.editarPaciente = async function(id) {
+  try {
+    console.log('Editando paciente ID:', id);
+    
+    const result = await window.api.obtenerPacientePorId(id);
+    let paciente;
+    
+    if (result && result.ok && result.paciente) {
+      paciente = result.paciente;
+      console.log('Paciente obtenido:', paciente);
+    } else {
+      paciente = todosLosPacientes.find(p => p.id === id);
+      console.log('Paciente local:', paciente);
+    }
+    
+    if (paciente) {
+      // Cargar datos en el formulario
+      document.getElementById('nombre').value = paciente.nombre || '';
+      document.getElementById('documento').value = paciente.documento || '';
+      document.getElementById('edad').value = paciente.edad || ''; 
+      
+    //  const fechaNacimiento = paciente.fecha_nacimiento || paciente.fechaNacimiento || '';
+    //  const fechaFormateada = formatearFechaParaInput(fechaNacimiento);
+      
+      // Asignar la fecha formateada al input
+   //   const fechaInput = document.getElementById('fechaNacimiento');
+     // if (fechaInput) {
+    //    fechaInput.value = fechaFormateada;
+        
+        // 🔹 CALCULAR Y MOSTRAR LA EDAD AUTOMÁTICAMENTE
+     //   const edad = calcularEdad(fechaFormateada);
+     //   document.getElementById('edad').value = edad;
+   //   }
+      
+      document.getElementById('telefono').value = paciente.telefono || '';
+      document.getElementById('email').value = paciente.email || '';
+      
+      pacienteEditandoId = id;
+      
+      const btnGuardar = document.getElementById('btnGuardar');
+      btnGuardar.innerHTML = 'ACTUALIZAR PACIENTE';
+      btnGuardar.style.background = '#2563eb';
+      
+      document.getElementById('formTitle').innerHTML = 'EDITAR PACIENTE';
+      
+      const btnCancelar = document.getElementById('btnCancelarEdicion');
+      btnCancelar.style.display = 'block';
+      
+      mostrarMensaje('Editando paciente - Modifique los datos y presione Actualizar', 'exito');
+      
+      document.querySelector('.form-sidebar').scrollIntoView({ behavior: 'smooth' });
+    } else {
+      mostrarMensaje('No se encontró el paciente', 'error');
+    }
+  } catch (error) {
+    console.error('Error en editarPaciente:', error);
+    mostrarMensaje('Error al cargar paciente: ' + error.message, 'error');
+  }
+};
+  // Eliminar paciente
+  window.eliminarPaciente = async function(id) {
+    if (!confirm('¿Está seguro de ELIMINAR este paciente? Esta acción no se puede deshacer.')) {
+      return;
+    }
+    
+    try {
+      const result = await window.api.eliminarPaciente(id);
+      if (result && result.ok) {
+        mostrarMensaje('✅ Paciente eliminado correctamente', 'exito');
+        await cargarPacientes();
+      } else {
+        mostrarMensaje('Error al eliminar paciente: ' + (result?.error || 'Error desconocido'), 'error');
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      mostrarMensaje('Error al eliminar el paciente', 'error');
+    }
+  };
+
+  // Cancelar edición - FUNCIÓN CORREGIDA
+  function cancelarEdicion() {
+    // Limpiar formulario
+    limpiarFormulario();
+    
+    // Resetear el ID de edición
+    pacienteEditandoId = null;
+    
+    // Restaurar el botón guardar
+    const btnGuardar = document.getElementById('btnGuardar');
+    btnGuardar.innerHTML = '💾 Guardar Paciente';
+    btnGuardar.style.background = '#2563eb';
+    
+    // Restaurar el título
+    document.getElementById('formTitle').innerHTML = 'Registrar Paciente';
+    
+    // OCULTAR el botón cancelar
+    const btnCancelar = document.getElementById('btnCancelarEdicion');
+    btnCancelar.style.display = 'none';
+    
+    // Mostrar mensaje
+    mostrarMensaje('Edición cancelada - Puede registrar un nuevo paciente', 'exito');
+  }
+
+  
+
+  // Guardar o actualizar paciente
+  document.getElementById('formPaciente').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const nombre = document.getElementById('nombre').value.trim();
+    const documento = document.getElementById('documento').value.trim();
+   // const fechaNacimiento = document.getElementById('fechaNacimiento').value;
+    const telefono = document.getElementById('telefono').value.trim();
+    const email = document.getElementById('email').value.trim();
+   const edad = document.getElementById('edad').value;
+   const edadFinal = edad !== '' ? parseInt(edad) : null;
+    
+   
+   /*
+    if (!nombre || !documento || !fechaNacimiento) {
+      mostrarMensaje('Complete todos los campos obligatorios', 'error');
+      return;
+    }
+      */
+
+      if (!nombre || !documento) {
+     mostrarMensaje('Complete todos los campos obligatorios', 'error');
+      return;
+    }
+
+
+
+    
+    const pacienteData = {
+      nombre: nombre,
+      documento: documento,
+       edad: edadFinal,  // Usa la variable validada
+    //  fecha_nacimiento: fechaNacimiento,
+      telefono: telefono || '',
+      email: email || ''
+    };
+    
+    try {
+      let result;
+      
+      if (pacienteEditandoId) {
+        // ACTUALIZAR paciente existente
+        result = await window.api.actualizarPaciente(pacienteEditandoId, pacienteData);
+        if (result && result.ok) {
+          mostrarMensaje('✅ Paciente ACTUALIZADO correctamente', 'exito');
+          
+          // RESTAURAR EL BOTÓN A SU ESTADO NORMAL
+          const btnGuardar = document.getElementById('btnGuardar');
+          btnGuardar.innerHTML = '💾 Guardar Paciente';
+          btnGuardar.style.background = '#2563eb';
+          document.getElementById('formTitle').innerHTML = '📝 Registrar Paciente';
+          
+          // OCULTAR el botón cancelar
+          const btnCancelar = document.getElementById('btnCancelarEdicion');
+          btnCancelar.style.display = 'none';
+          
+          pacienteEditandoId = null;
+          limpiarFormulario();
+        } else {
+          mostrarMensaje('Error: ' + (result?.error || 'Error desconocido'), 'error');
+          return;
+        }
+      } else {
+        // CREAR nuevo paciente
+        result = await window.api.crearPaciente(pacienteData);
+        if (result && result.ok) {
+          mostrarMensaje('✅ Paciente registrado exitosamente', 'exito');
+          limpiarFormulario();
+        } else {
+          mostrarMensaje('Error: ' + (result?.error || 'Error desconocido'), 'error');
+          return;
+        }
+      }
+      
+      if (result && result.ok) {
+        await cargarPacientes();
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      mostrarMensaje('Error al guardar el paciente', 'error');
+    }
+  });
+
+  // Event listeners para búsqueda
+  document.getElementById('btnBuscar').addEventListener('click', aplicarFiltros);
+  document.getElementById('btnLimpiarBusqueda').addEventListener('click', () => {
+    document.getElementById('searchInput').value = '';
+    aplicarFiltros();
+  });
+  document.getElementById('searchInput').addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') aplicarFiltros();
+  });
+
+  // Botón cancelar edición - EVENT LISTENER CORRECTO (FUERA DE LA FUNCIÓN)
+  const btnCancelarEdicion = document.getElementById('btnCancelarEdicion');
+  if (btnCancelarEdicion) {
+    btnCancelarEdicion.addEventListener('click', cancelarEdicion);
+  }
+
+  /* Configurar fecha máxima
+  const hoy = new Date();
+  const fechaMax = `${hoy.getFullYear()}-12-31`;
+  const fechaMin = `${hoy.getFullYear() - 120}-01-01`;
+  const fechaInput = document.getElementById('fechaNacimiento');
+  if (fechaInput) {
+    fechaInput.max = fechaMax;
+    fechaInput.min = fechaMin;
+  }
+    */
+
+
+  // Inicializar
+  async function init() {
+    await cargarPacientes();
+  }
+  init();
+
+  // Botón volver
+  const volverBtn = document.getElementById('btnVolverDashboard');
+  if (volverBtn) {
+    volverBtn.addEventListener('click', () => {
+      if (window.api && typeof window.api.volverDashboard === 'function') {
+        window.api.volverDashboard();
+      }
+    });
+  }
+</script>
+
+</body>
+</html>

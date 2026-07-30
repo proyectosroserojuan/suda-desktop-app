@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Citas Pendientes | Clínica Audiología</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: #ffffff;
+      font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, sans-serif;
+      padding: 20px 24px;
+      color: #1e293b;
+    }
+
+    .logo-empresa-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+
+    .logo-empresa-top img {
+      height: 70px;
+      object-fit: contain;
+      border-radius: 12px;
+    }
+
+    .logo-texto-temporal {
+      font-weight: 700;
+      font-size: 1.2rem;
+      color: #001e81;
+    }
+
+    .logo-texto-temporal span {
+      display: block;
+      font-size: 0.7rem;
+      color: #475569;
+    }
+
+    .btn-dashboard {
+      background: #1e3a8a;
+      color: white;
+      border: none;
+      padding: 10px 24px;
+      border-radius: 40px;
+      font-weight: 600;
+      cursor: pointer;
+      font-size: 0.85rem;
+      transition: all 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-dashboard:hover {
+      background: #0f2b4d;
+      transform: translateY(-1px);
+    }
+
+    .nav-buttons {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 24px;
+      justify-content: center;
+    }
+
+    .btn-nav {
+      background: #f1f5f9;
+      color: #475569;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 40px;
+      font-weight: 600;
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: all 0.2s;
+    }
+
+    .btn-nav.active {
+      background: #2563eb;
+      color: white;
+    }
+
+    .btn-nav:hover {
+      transform: translateY(-1px);
+    }
+
+    .main-header {
+      text-align: center;
+      margin-bottom: 32px;
+    }
+
+    .main-header h1 {
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: #001e81;
+      margin-bottom: 8px;
+    }
+
+    .citas-panel {
+      background: white;
+      border-radius: 20px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      border: 1px solid #e2e8f0;
+      overflow: hidden;
+    }
+
+    .panel-header {
+      background: #ffffff;
+      padding: 16px 20px;
+      border-bottom: 1px solid #e2e8f0;
+    }
+
+    .panel-header h3 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #0f2b4d;
+      margin-bottom: 12px;
+    }
+
+    .filtros {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 16px;
+    }
+
+    .filtro-group {
+      flex: 1;
+      min-width: 140px;
+    }
+
+    .filtro-group label {
+      font-size: 0.7rem;
+      font-weight: 600;
+      color: #64748b;
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    .filtro-group input,
+    .filtro-group select {
+      width: 100%;
+      padding: 6px 10px;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      font-size: 0.8rem;
+    }
+
+    .search-box {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 16px;
+    }
+
+    .search-box input {
+      flex: 1;
+      padding: 8px 12px;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      font-size: 0.85rem;
+    }
+
+    .btn-search {
+      background: #3b82f6;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 10px;
+      cursor: pointer;
+    }
+
+    .tabla-container {
+      overflow-x: auto;
+      padding: 0 20px 20px 20px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.8rem;
+    }
+
+    th, td {
+      padding: 10px 8px;
+      text-align: left;
+      border-bottom: 1px solid #e2e8f0;
+    }
+
+    th {
+      background: #f8fafc;
+      font-weight: 700;
+      color: #475569;
+    }
+
+    tr:hover {
+      background: #f8fafc;
+    }
+
+    .badge {
+      padding: 2px 8px;
+      border-radius: 12px;
+      font-size: 0.7rem;
+      font-weight: 600;
+    }
+
+    .badge-pendiente {
+      background: #fef3c7;
+      color: #d97706;
+    }
+
+    .paginador {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      padding: 16px;
+      border-top: 1px solid #e2e8f0;
+    }
+
+    .paginador button {
+      padding: 6px 12px;
+      border: 1px solid #e2e8f0;
+      background: white;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    .paginador button:hover:not(:disabled) {
+      background: #3b82f6;
+      color: white;
+    }
+
+    .paginador button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .paginador .active {
+      background: #3b82f6;
+      color: white;
+    }
+  </style>
+</head>
+<body>
+
+<div class="logo-empresa-top">
+  <img src="../img/saninlogo.jpg" alt="Logo U.D.A." onerror="this.style.display='none';">
+  <div class="logo-texto-temporal" style="display: none;" id="fallbackLogo">
+    <strong>AUDIOLOGÍA CLÍNICA</strong>
+    <span>Especialistas en Audición</span>
+  </div>
+  <button class="btn-dashboard" id="btnVolverDashboard">← Volver al Dashboard</button>
+</div>
+
+<div class="main-header">
+  <h1>⏳ CITAS PENDIENTES</h1>
+  <p>Citas no atendidas fuera de la semana actual</p>
+</div>
+
+<div class="nav-buttons">
+  <button class="btn-nav" id="btnCitasSemana">Citas de la Semana</button>
+  <button class="btn-nav" id="btnCitasRealizadas">Citas Realizadas</button>
+  <button class="btn-nav active" id="btnCitasPendientesNoSemana">Citas Pendientes (No semana)</button>
+</div>
+
+<div class="citas-panel">
+  <div class="panel-header">
+    <h3>📋 Citas Pendientes (Fuera de semana actual)</h3>
+    
+    <div class="filtros">
+      <div class="filtro-group">
+        <label>Filtrar por fecha</label>
+        <input type="date" id="filtroFecha">
+      </div>
+      <div class="filtro-group">
+        <label>Filtrar por entidad</label>
+        <select id="filtroEntidad">
+          <option value="">Todas</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="search-box">
+      <input type="text" id="searchInput" placeholder="🔍 Buscar por nombre o cédula...">
+      <button class="btn-search" id="btnBuscar">Buscar</button>
+      <button class="btn-search" id="btnLimpiarBusqueda" style="background: #64748b;">Limpiar</button>
+    </div>
+  </div>
+
+  <div class="tabla-container">
+    <table>
+      <thead>
+        <tr>
+          <th>Fecha</th><th>Hora</th><th>Paciente</th><th>Documento</th><th>Entidad</th><th>Tipo Atención</th><th>Estado</th>
+        </tr>
+      </thead>
+      <tbody id="tablaCitasBody">
+        <tr><td colspan="8">Cargando citas...</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="paginador" id="paginador"></div>
+</div>
+
+<script>
+  let todasLasCitas = [];
+  let citasFiltradas = [];
+  let paginaActual = 1;
+  const registrosPorPagina = 10;
+  let entidadesLista = [];
+
+  function getStartOfWeek(date) {
+    const d = new Date(date);
+    const day = d.getDay();
+    const diff = (day === 0 ? 6 : day - 1);
+    d.setDate(d.getDate() - diff);
+    d.setHours(0, 0, 0, 0);
+    return d;
+  }
+
+  function formatearFecha(fechaStr) {
+    if (!fechaStr) return '';
+    try {
+      const fecha = new Date(fechaStr);
+      return fecha.toLocaleDateString('es-CO');
+    } catch (e) {
+      return fechaStr;
+    }
+  }
+
+  function formatearHora(horaStr) {
+    if (!horaStr) return '';
+    try {
+      let horas, minutos;
+      if (horaStr.includes(':')) {
+        const partes = horaStr.split(':');
+        horas = parseInt(partes[0]);
+        minutos = partes[1];
+      } else {
+        return horaStr;
+      }
+      const periodo = horas >= 12 ? 'PM' : 'AM';
+      let horas12 = horas % 12;
+      horas12 = horas12 === 0 ? 12 : horas12;
+      return `${horas12}:${minutos} ${periodo}`;
+    } catch (e) {
+      return horaStr;
+    }
+  }
+
+  function obtenerTipoAtencion(motivo) {
+    if (!motivo) return 'No especificado';
+    const tipos = ['Audiometría', 'Logoaudiometria', 'Impedanciometria', 'Control'];
+    for (const tipo of tipos) {
+      if (motivo.includes(tipo)) return tipo;
+    }
+    return motivo.split(' - ')[0] || 'Consulta';
+  }
+
+  async function cargarEntidades() {
+    try {
+      const result = await window.api.obtenerEntidades();
+      if (result && result.ok) {
+        entidadesLista = result.entidades;
+        const filtroEntidad = document.getElementById('filtroEntidad');
+        filtroEntidad.innerHTML = '<option value="">Todas</option>';
+        entidadesLista.forEach(entidad => {
+          const option = document.createElement('option');
+          option.value = entidad.id;
+          option.textContent = entidad.nombre;
+          filtroEntidad.appendChild(option);
+        });
+      }
+    } catch (error) {
+      console.error('Error:', error);
+    }
+  }
+
+  async function cargarCitas() {
+    try {
+      const result = await window.api.obtenerTodasLasCitas();
+      if (result && result.ok) {
+        todasLasCitas = result.citas;
+        aplicarFiltros();
+      } else {
+        console.error('Error cargando citas');
+      }
+    } catch (error) {
+      console.error('Error:', error);
+    }
+  }
+
+  function aplicarFiltros() {
+    const filtroFecha = document.getElementById('filtroFecha').value;
+    const filtroEntidad = document.getElementById('filtroEntidad').value;
+    const searchText = document.getElementById('searchInput').value.toLowerCase();
+    
+    const startOfWeek = getStartOfWeek(new Date());
+    const endOfWeek = new Date(startOfWeek);
+    endOfWeek.setDate(startOfWeek.getDate() + 6);
+
+    // Mostrar citas PENDIENTES que NO están en la semana actual
+    citasFiltradas = todasLasCitas.filter(cita => {
+      if (cita.estado !== 'pendiente') return false;
+      
+      const fechaCita = new Date(cita.fecha_cita);
+      fechaCita.setHours(0, 0, 0, 0);
+      
+      // Excluir citas de la semana actual
+      if (fechaCita >= startOfWeek && fechaCita <= endOfWeek) return false;
+      
+      if (filtroFecha && cita.fecha_cita !== filtroFecha) return false;
+      if (filtroEntidad && cita.entidad_id != filtroEntidad) return false;
+      if (searchText) {
+        const nombreMatch = cita.paciente_nombre?.toLowerCase().includes(searchText);
+        const docMatch = cita.documento?.toLowerCase().includes(searchText);
+        if (!nombreMatch && !docMatch) return false;
+      }
+      return true;
+    });
+
+    paginaActual = 1;
+    renderizarTabla();
+    renderizarPaginador();
+  }
+
+  function renderizarTabla() {
+    const tbody = document.getElementById('tablaCitasBody');
+    const inicio = (paginaActual - 1) * registrosPorPagina;
+    const fin = inicio + registrosPorPagina;
+    const citasPagina = citasFiltradas.slice(inicio, fin);
+
+    if (citasPagina.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="8">No hay citas pendientes fuera de la semana actual</td></tr>';
+      return;
+    }
+
+    tbody.innerHTML = citasPagina.map(cita => {
+      const fechaFormateada = formatearFecha(cita.fecha_cita);
+      const horaFormateada = formatearHora(cita.hora_cita);
+      const tipoAtencion = obtenerTipoAtencion(cita.motivo);
+      
+      return `
+        <tr>
+          <td>${fechaFormateada || ''}</td>
+          <td>${horaFormateada || ''}</td>
+          <td><strong>${cita.paciente_nombre || ''}</strong></td>
+          <td>${cita.documento || ''}</td>
+          <td>${cita.entidad_nombre || ''}</td>
+          <td>${tipoAtencion}</td>
+          <td><span class="badge badge-pendiente">Pendiente</span></td>
+        </tr>
+      `;
+    }).join('');
+  }
+
+  function renderizarPaginador() {
+    const totalPaginas = Math.ceil(citasFiltradas.length / registrosPorPagina);
+    const paginadorDiv = document.getElementById('paginador');
+    
+    if (totalPaginas <= 1) {
+      paginadorDiv.innerHTML = '';
+      return;
+    }
+
+    let html = `<button onclick="cambiarPagina(1)" ${paginaActual === 1 ? 'disabled' : ''}>«</button>`;
+    html += `<button onclick="cambiarPagina(${paginaActual - 1})" ${paginaActual === 1 ? 'disabled' : ''}>‹</button>`;
+    
+    for (let i = 1; i <= totalPaginas; i++) {
+      if (i === 1 || i === totalPaginas || (i >= paginaActual - 2 && i <= paginaActual + 2)) {
+        html += `<button onclick="cambiarPagina(${i})" class="${paginaActual === i ? 'active' : ''}">${i}</button>`;
+      } else if (i === paginaActual - 3 || i === paginaActual + 3) {
+        html += `<button disabled>...</button>`;
+      }
+    }
+    
+    html += `<button onclick="cambiarPagina(${paginaActual + 1})" ${paginaActual === totalPaginas ? 'disabled' : ''}>›</button>`;
+    html += `<button onclick="cambiarPagina(${totalPaginas})" ${paginaActual === totalPaginas ? 'disabled' : ''}>»</button>`;
+    
+    paginadorDiv.innerHTML = html;
+  }
+
+  window.cambiarPagina = function(pagina) {
+    paginaActual = pagina;
+    renderizarTabla();
+    renderizarPaginador();
+  };
+
+  // Navegación
+  document.getElementById('btnCitasSemana')?.addEventListener('click', () => {
+    window.api?.navegar('citassemana.html');
+  });
+  
+  document.getElementById('btnCitasRealizadas')?.addEventListener('click', () => {
+    window.api?.navegar('citas-realizadas.html');
+  });
+
+  // Event listeners
+  document.getElementById('filtroFecha')?.addEventListener('change', aplicarFiltros);
+  document.getElementById('filtroEntidad')?.addEventListener('change', aplicarFiltros);
+  document.getElementById('btnBuscar')?.addEventListener('click', aplicarFiltros);
+  document.getElementById('btnLimpiarBusqueda')?.addEventListener('click', () => {
+    document.getElementById('searchInput').value = '';
+    aplicarFiltros();
+  });
+  document.getElementById('searchInput')?.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') aplicarFiltros();
+  });
+
+  document.getElementById('btnVolverDashboard')?.addEventListener('click', () => {
+    window.api?.volverDashboard();
+  });
+
+  async function init() {
+    await cargarEntidades();
+    await cargarCitas();
+  }
+  init();
+</script>
+</body>
+</html>
