@@ -7,6 +7,7 @@ const fs = require('fs');
 
 
 
+
 // ============================================
 // 🟢 HANDLERS PARA CONTROL DE POSTGRESQL
 // ============================================
@@ -176,6 +177,8 @@ const { guardarLogoaudiometria, obtenerLogoaudiometrias, obtenerLogoaudiometriaP
 const { obtenerCitasConDetalles, obtenerCitasPorMes, obtenerEstadisticasPorEntidad } = require('./db/reportes');
 const { obtenerCitasConEstadoExamen, obtenerCitaConExamen } = require('./db/citas');
 const { existeExamenPorCitaId } = require('./db/examenes_unificados');
+const pdfRegeneratorService = require('./services/pdfRegeneratorService');
+const EnvioService = require('./services/EnvioService');
 
 
 //const pdfViewerService = require('./services/pdfViewerService');
@@ -196,6 +199,123 @@ ipcMain.handle('obtener-citas-con-estado-examen', async () => {
         return { ok: true, citas };
     } catch (error) {
         console.error('Error:', error);
+        return { ok: false, error: error.message };
+    }
+});
+
+// ============================================================
+// 🟢 HANDLER PARA REGENERAR PDF DESDE BASE DE DATOS
+// ============================================================
+
+// En main.js - Asegurar que el handler usa el servicio correctamente
+ipcMain.handle('regenerar-pdf', async (event, citaId) => {
+    try {
+        console.log('🔄 Regenerando PDF para cita:', citaId);
+        
+        // 1. Obtener datos de la cita
+        const citasDB = require('./db/citas');
+        const cita = await citasDB.obtenerCitaPorId(citaId);
+        if (!cita) {
+            throw new Error('No se encontró la cita');
+        }
+        
+        console.log('📋 Datos de la cita obtenidos:', {
+            id: cita.id,
+            paciente: cita.paciente_nombre,
+            entidad: cita.entidad_nombre
+        });
+        
+        // 2. Obtener datos del examen
+        const examenesDB = require('./db/examenes_unificados');
+        const examenData = await examenesDB.obtenerExamenPorCitaId(citaId);
+        
+        if (!examenData) {
+            throw new Error('No se encontró el examen en la base de datos');
+        }
+        
+        console.log('📊 Datos del examen obtenidos:', {
+            id: examenData.id,
+            tipo: examenData.tipo_examen,
+            tiene_grafica: !!examenData.grafica_base64,
+            tiene_valores_od: !!examenData.valores_od
+        });
+        
+        // 3. IMPORTAR Y USAR EL SERVICIO
+        const pdfRegeneratorService = require('./services/pdfRegeneratorService');
+        
+        // 4. REGENERAR PDF
+        const pdfPath = await pdfRegeneratorService.regenerarPDF(cita, examenData);
+        
+        console.log('✅ PDF regenerado exitosamente:', pdfPath);
+        return { ok: true, pdfPath };
+        
+    } catch (error) {
+        console.error('❌ Error regenerando PDF:', error);
+        return { ok: false, error: error.message };
+    }
+});
+
+
+
+// Handler para abrir WhatsApp
+ipcMain.handle('abrir-whatsapp', async (event, telefono, mensaje) => {
+    try {
+        // 🔥 USAR EnvioService en lugar de whatsappService
+        const resultado = EnvioService.abrirWhatsApp(telefono, mensaje);
+        return resultado;
+    } catch (error) {
+        console.error('❌ Error en abrir-whatsapp:', error);
+        return { ok: false, error: error.message };
+    }
+});
+
+// Handler para generar mensaje de resultados
+ipcMain.handle('generar-mensaje-resultados', async (event, paciente, tipoExamen) => {
+    try {
+        // 🔥 USAR EnvioService en lugar de whatsappService
+        const mensaje = EnvioService.generarMensajeResultados(paciente, tipoExamen);
+        return { ok: true, mensaje };
+    } catch (error) {
+        return { ok: false, error: error.message };
+    }
+});
+
+// En main.js - Agregar este handler
+ipcMain.handle('verificar-archivo', async (event, filePath) => {
+    try {
+        const fs = require('fs');
+        const existe = fs.existsSync(filePath);
+        return { ok: existe };
+    } catch (error) {
+        return { ok: false, error: error.message };
+    }
+});
+
+
+// Handler para abrir PDF en ventana
+ipcMain.handle('abrir-pdf-ventana', async (event, pdfPath) => {
+    try {
+        const pdfRegeneratorService = require('./services/pdfRegeneratorService');
+        await pdfRegeneratorService.mostrarPDFEnVentana(pdfPath);
+        return { ok: true };
+    } catch (error) {
+        console.error('❌ Error abriendo PDF en ventana:', error);
+        return { ok: false, error: error.message };
+    }
+});
+
+// Handler para leer archivo como base64
+ipcMain.handle('leer-archivo-base64', async (event, filePath) => {
+    try {
+        const fs = require('fs');
+        if (!fs.existsSync(filePath)) {
+            throw new Error('El archivo no existe');
+        }
+        const buffer = fs.readFileSync(filePath);
+        const base64 = buffer.toString('base64');
+        return { ok: true, base64 };
+    } catch (error) {
+        console.error('❌ Error leyendo archivo:', error);
         return { ok: false, error: error.message };
     }
 });

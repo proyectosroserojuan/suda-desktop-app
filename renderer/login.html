@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <title>Login</title>
-  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="login.css">
   <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
 </head>
 <body>
@@ -68,5 +68,30 @@
 
   <script src="login.js"></script>
    <script src="../renderer/focus-fix.js"></script>
+   <script>
+// ============================================
+// ESCALA UNIFORME PARA EL LOGIN
+// ============================================
+
+function calcularEscala() {
+    const ancho = window.innerWidth;
+    const alto = window.innerHeight;
+    let escala = Math.min(ancho / 1366, alto / 768);
+    return Math.max(0.6, Math.min(1.5, escala));
+}
+
+function aplicarEscala() {
+    const escala = calcularEscala();
+    document.documentElement.style.setProperty('--escala', escala);
+}
+
+document.addEventListener('DOMContentLoaded', aplicarEscala);
+
+let tiempoEspera;
+window.addEventListener('resize', function() {
+    clearTimeout(tiempoEspera);
+    tiempoEspera = setTimeout(aplicarEscala, 150);
+});
+</script>
 </body>
 </html>

@@ -6,150 +6,222 @@
     <title>Audiología Clínica</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: Arial, sans-serif; background: #f0f2f5; padding: 20px; }
-        
-        .header {
-            background: #ffffff;
-            color: rgb(0, 0, 0);
-            padding: 15px 30px;
-            border-radius: 12px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-        
-        .tabs {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
-        }
-        
-        .tab-btn {
-            padding: 12px 30px;
-            border: none;
-            border-radius: 8px;
-            font-weight: 600;
-            cursor: pointer;
-            background: #e2e8f0;
-            color: #334155;
-            font-size: 1rem;
-        }
-        
-        .tab-btn.active {
-            background: #0084ff;
-            color: white;
-        }
-        
-        .tab-btn.grabar {
-            background: #27ae60;
-            color: white;
-            margin-left: auto;
-        }
-        
-        .tab-btn.grabar:hover { background: #219a52; }
-        
-        .tab-pane {
-            /* CAMBIO IMPORTANTE: En lugar de display:none, usamos position:absolute y opacity */
-            position: absolute;
-            top: 180px; /* Ajusta según tu layout */
-            left: 20px;
-            right: 20px;
-            opacity: 0;
-            visibility: hidden;
-            transition: opacity 0.3s ease;
-            height: 800px;
-            pointer-events: none;
-        }
-        
-        .tab-pane.active {
-            position: relative;
-            top: auto;
-            left: auto;
-            right: auto;
-            opacity: 1;
-            visibility: visible;
-            pointer-events: auto;
-        }
-        
-        iframe {
-            width: 100%;
-            height: 800px;
-            border: none;
-            border-radius: 8px;
-            background: white;
-        }
-        
-        .loading-overlay {
-            position: fixed;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            background: rgba(0,0,0,0.7);
-            display: none;
-            justify-content: center;
-            align-items: center;
-            z-index: 9999;
-        }
-        
-        .loading-content {
-            background: white;
-            padding: 30px;
-            border-radius: 12px;
-            text-align: center;
-        }
-        
-        .spinner {
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #1e3a8a;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 15px;
-        }
-        
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        
-        .notificacion {
-            position: fixed;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            padding: 15px 30px;
-            border-radius: 8px;
-            color: white;
-            font-weight: bold;
-            z-index: 10001;
-            animation: fadeInOut 3s ease forwards;
-        }
-        
-        .notificacion.exito { background: #27ae60; }
-        .notificacion.error { background: #e74c3c; }
-        
-        @keyframes fadeInOut {
-            0% { opacity: 0; transform: translateX(-50%) translateY(20px); }
-            15% { opacity: 1; transform: translateX(-50%) translateY(0); }
-            85% { opacity: 1; transform: translateX(-50%) translateY(0); }
-            100% { opacity: 0; transform: translateX(-50%) translateY(-20px); }
-        }
+        * { 
+    margin: 0; 
+    padding: 0; 
+    box-sizing: border-box; 
+}
 
-        /* Estilos para el modal de resultados */
+:root {
+    --escala: 1;
+}
+
+body { 
+    font-family: Arial, sans-serif; 
+    background: #ffffff; 
+    padding: calc(20px * var(--escala)); 
+    max-width: calc(1600px * var(--escala));
+    margin: 0 auto;
+    font-size: calc(16px * var(--escala));
+}
+
+.header {
+    background: #ffffff;
+    color: rgb(0, 0, 0);
+    padding: calc(15px * var(--escala)) calc(30px * var(--escala));
+    border-radius: calc(12px * var(--escala));
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: calc(20px * var(--escala));
+    font-size: calc(16px * var(--escala));
+}
+
+.header h1 {
+    font-size: calc(20px * var(--escala));
+}
+
+.tabs {
+    display: flex;
+    gap: calc(10px * var(--escala));
+    margin-bottom: calc(20px * var(--escala));
+    flex-wrap: wrap;
+}
+
+.tab-btn {
+    padding: calc(12px * var(--escala)) calc(30px * var(--escala));
+    border: none;
+    border-radius: calc(8px * var(--escala));
+    font-weight: 600;
+    cursor: pointer;
+    background: #e2e8f0;
+    color: #334155;
+    font-size: calc(1rem * var(--escala));
+}
+
+.tab-btn.active {
+    background: #0084ff;
+    color: white;
+}
+
+.tab-btn.grabar {
+    background: #27ae60;
+    color: white;
+    margin-left: auto;
+}
+
+.tab-btn.grabar:hover { 
+    background: #219a52; 
+}
+
+.tab-pane {
+    position: absolute;
+    top: calc(180px * var(--escala));
+    left: calc(20px * var(--escala));
+    right: calc(20px * var(--escala));
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease;
+    height: calc(800px * var(--escala));
+    pointer-events: none;
+}
+
+.tab-pane.active {
+    position: relative;
+    top: auto;
+    left: auto;
+    right: auto;
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+}
+
+iframe {
+    width: 100%;
+    height: calc(800px * var(--escala));
+    border: none;
+    border-radius: calc(8px * var(--escala));
+    background: white;
+}
+
+.loading-overlay {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0,0,0,0.7);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+}
+
+.loading-content {
+    background: white;
+    padding: calc(30px * var(--escala));
+    border-radius: calc(12px * var(--escala));
+    text-align: center;
+}
+
+.loading-content p {
+    font-size: calc(16px * var(--escala));
+}
+
+.spinner {
+    border: calc(4px * var(--escala)) solid #f3f3f3;
+    border-top: calc(4px * var(--escala)) solid #1e3a8a;
+    border-radius: 50%;
+    width: calc(40px * var(--escala));
+    height: calc(40px * var(--escala));
+    animation: spin 1s linear infinite;
+    margin: 0 auto calc(15px * var(--escala));
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.notificacion {
+    position: fixed;
+    bottom: calc(20px * var(--escala));
+    left: 50%;
+    transform: translateX(-50%);
+    padding: calc(15px * var(--escala)) calc(30px * var(--escala));
+    border-radius: calc(8px * var(--escala));
+    color: white;
+    font-weight: bold;
+    z-index: 10001;
+    animation: fadeInOut 3s ease forwards;
+    font-size: calc(14px * var(--escala));
+}
+
+.notificacion.exito { background: #27ae60; }
+.notificacion.error { background: #e74c3c; }
+
+@keyframes fadeInOut {
+    0% { opacity: 0; transform: translateX(-50%) translateY(calc(20px * var(--escala))); }
+    15% { opacity: 1; transform: translateX(-50%) translateY(0); }
+    85% { opacity: 1; transform: translateX(-50%) translateY(0); }
+    100% { opacity: 0; transform: translateX(-50%) translateY(calc(-20px * var(--escala))); }
+}
+
+/* Estilos para el modal de resultados */
 #modalResultados button:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+    transform: translateY(calc(-2px * var(--escala)));
+    box-shadow: 0 calc(6px * var(--escala)) calc(20px * var(--escala)) rgba(0,0,0,0.15);
 }
 #modalResultados button:active {
-  transform: translateY(0px);
+    transform: translateY(0px);
 }
 #btnVerResultado:hover { background: #1a4b6e; }
 #btnImprimir:hover { background: #3a5a6a; }
 #btnVerDetalles:hover { background: #4a6a5a; }
 #btnCerrarModal:hover { background: #f0f7ff; }
+
+/* Estilos del modal (inline con escala) */
+#modalResultados > div {
+    padding: calc(45px * var(--escala)) calc(40px * var(--escala)) calc(35px * var(--escala)) !important;
+    max-width: calc(420px * var(--escala)) !important;
+    width: 92% !important;
+}
+
+#modalResultados h3 {
+    font-size: calc(18px * var(--escala)) !important;
+}
+
+#modalResultados p {
+    font-size: calc(14px * var(--escala)) !important;
+}
+
+#modalResultados button {
+    font-size: calc(15px * var(--escala)) !important;
+    padding: calc(15px * var(--escala)) !important;
+    margin-bottom: calc(12px * var(--escala)) !important;
+}
+
+/* Logo en el modal */
+#modalResultados .logo-container {
+    width: calc(180px * var(--escala)) !important;
+    height: calc(100px * var(--escala)) !important;
+    margin: 0 auto calc(12px * var(--escala)) !important;
+}
+
+#modalResultados .logo-container img {
+    width: calc(180px * var(--escala)) !important;
+    height: calc(100px * var(--escala)) !important;
+}
+
+#modalResultados .logo-container div {
+    width: calc(180px * var(--escala)) !important;
+    height: calc(100px * var(--escala)) !important;
+    font-size: calc(48px * var(--escala)) !important;
+}
+
+#modalResultados .divider {
+    width: calc(50px * var(--escala)) !important;
+    height: calc(2px * var(--escala)) !important;
+    margin: calc(10px * var(--escala)) auto 0 !important;
+}
     </style>
 </head>
 <body>
@@ -166,10 +238,12 @@
 </div>
 
 <div class="tab-pane active" id="audiometria">
-    <iframe src="AudiometriaTonal.html" id="iframeAudiometria"></iframe>
+  <iframe src="AudiometriaTonal.html?modo=combinado" id="iframeAudiometria"></iframe>
+    
 </div>
 <div class="tab-pane" id="logoaudiometria">
     <iframe src="Logoaudiometria.html?modo=combinado" id="iframeLogoaudiometria"></iframe>
+
 </div>
 
 <div id="loadingOverlay" class="loading-overlay">
@@ -612,6 +686,32 @@ function inicializarModal() {
         });
     }
 }
+
+
+// ============================================
+// SISTEMA DE ESCALA UNIFORME
+// ============================================
+
+function calcularEscala() {
+    const ancho = window.innerWidth;
+    const alto = window.innerHeight;
+    let escala = Math.min(ancho / 1366, alto / 768);
+    return Math.max(0.7, Math.min(1.5, escala));
+}
+
+function aplicarEscala() {
+    const escala = calcularEscala();
+    document.documentElement.style.setProperty('--escala', escala);
+    console.log('📐 Escala aplicada:', escala.toFixed(2));
+}
+
+document.addEventListener('DOMContentLoaded', aplicarEscala);
+
+let tiempoEspera;
+window.addEventListener('resize', function() {
+    clearTimeout(tiempoEspera);
+    tiempoEspera = setTimeout(aplicarEscala, 150);
+});
 
 // Inicializar cuando el DOM esté listo
 if (document.readyState === 'loading') {

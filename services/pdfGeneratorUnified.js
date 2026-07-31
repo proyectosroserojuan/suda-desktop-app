@@ -94,6 +94,70 @@ class PDFGeneratorUnified {
   }
 
   /**
+ * 🔥 NUEVA FUNCIÓN - Genera PDF con corrección automática
+ * Esta función NO modifica tu código existente
+ */
+async generarPDFCorregido(html, nombrePaciente, tipoExamen) {
+    console.log('\n========== 🔧 generarPDFCorregido ==========');
+    
+    // 1. Crear ventana con tamaño fijo
+    const win = new BrowserWindow({
+        width: 1200,
+        height: 900,
+        show: false,
+        webPreferences: {
+            nodeIntegration: true,
+            contextIsolation: false,
+            zoomFactor: 1.0  // 🔥 CLAVE: evita escalado
+        }
+    });
+    
+    // 2. Cargar HTML
+    await win.loadURL(`data:text/html;charset=utf-8,${encodeURIComponent(html)}`);
+    await new Promise(resolve => setTimeout(resolve, 2000));
+    
+    // 3. Aplicar correcciones automáticas
+    await win.webContents.executeJavaScript(`
+        // Convertir position:fixed a absolute
+        document.querySelectorAll('[style*="position: fixed"]').forEach(el => {
+            el.style.position = 'absolute';
+        });
+        
+        // Corregir márgenes negativos de imágenes
+        document.querySelectorAll('img[style*="margin-left: -"]').forEach(img => {
+            const match = img.style.marginLeft.match(/-?([0-9.]+)px/);
+            if (match) {
+                const offset = parseFloat(match[0]);
+                img.style.marginLeft = '0';
+                img.style.transform = 'translateX(' + offset + 'px)';
+            }
+        });
+    `);
+    
+    await new Promise(resolve => setTimeout(resolve, 500));
+    
+    // 4. Generar PDF
+    const downloadsPath = this.getDownloadsPath();
+    const fecha = new Date();
+    const fechaStr = `${fecha.getFullYear()}-${fecha.getMonth()+1}-${fecha.getDate()}_${fecha.getHours()}-${fecha.getMinutes()}-${fecha.getSeconds()}`;
+    const pdfPath = path.join(downloadsPath, `${nombrePaciente.replace(/\s+/g, '_')}_${tipoExamen}_${fechaStr}.pdf`);
+    
+    const pdfData = await win.webContents.printToPDF({
+        pageSize: 'A4',
+        printBackground: true,
+        landscape: false,
+        margins: { top: 0.1, bottom: 0.1, left: 0.1, right: 0.1 },
+        scale: 1.0
+    });
+    
+    fs.writeFileSync(pdfPath, pdfData);
+    win.close();
+    
+    console.log(`✅ PDF generado: ${pdfPath}`);
+    return pdfPath;
+}
+
+  /**
    * GENERAR PDF DE LOGOAUDIOMETRÍA
    */
   async generarPDFLogoaudiometria(datos, entidad) {
@@ -144,7 +208,7 @@ class PDFGeneratorUnified {
       const imagenes = await this.cargarImagenes();
       const html = this.generarCombinadoHTML(datosAudiometria, datosLogoaudiometria, entidad, imagenes);
       
-      return await this.generarPDFDesdeHTML(html, datosAudiometria.paciente?.nombre || 'paciente', 'Examen_Audiologico_Completo');
+      return await this.generarPDFCorregido(html, datosAudiometria.paciente?.nombre || 'paciente', 'Examen_Audiologico_Completo');
     } catch (error) {
       console.error('❌ Error en generarPDFCombinado:', error);
       throw error;
@@ -1221,5 +1285,9 @@ freqsConDatos.forEach(f => {
     `;
   }
 }
+
+
+
+
 
 module.exports = new PDFGeneratorUnified();

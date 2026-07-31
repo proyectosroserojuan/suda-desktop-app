@@ -17,6 +17,27 @@ onCargarDetalles: (callback) => {
     });
 },
 
+
+    // NUEVAS FUNCIONES PARA REGENERAR PDF
+    regenerarPDF: async (citaId) => {
+        return await ipcRenderer.invoke('regenerar-pdf', citaId);
+    },
+    
+    obtenerExamenPorCitaYtipo: async (citaId, tipoExamen) => {
+        return await ipcRenderer.invoke('obtener-examen-por-cita-tipo', citaId, tipoExamen);
+    },
+    
+    abrirPDFEnVentana: async (pdfPath) => {
+        return await ipcRenderer.invoke('abrir-pdf-ventana', pdfPath);
+    },
+
+
+    // Funciones para WhatsApp
+abrirWhatsApp: (telefono, mensaje) => ipcRenderer.invoke('abrir-whatsapp', telefono, mensaje),
+generarMensajeResultados: (paciente, tipoExamen) => ipcRenderer.invoke('generar-mensaje-resultados', paciente, tipoExamen),
+// En preload.js - Agregar al objeto api
+verificarArchivo: (filePath) => ipcRenderer.invoke('verificar-archivo', filePath),
+
   // Agregar estos métodos al objeto api
 obtenerCitasConEstadoExamen: () => ipcRenderer.invoke('obtener-citas-con-estado-examen'),
 obtenerCitaConExamen: (citaId) => ipcRenderer.invoke('obtener-cita-con-examen', citaId),
