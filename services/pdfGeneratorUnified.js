@@ -94,70 +94,6 @@ class PDFGeneratorUnified {
   }
 
   /**
- * 🔥 NUEVA FUNCIÓN - Genera PDF con corrección automática
- * Esta función NO modifica tu código existente
- */
-async generarPDFCorregido(html, nombrePaciente, tipoExamen) {
-    console.log('\n========== 🔧 generarPDFCorregido ==========');
-    
-    // 1. Crear ventana con tamaño fijo
-    const win = new BrowserWindow({
-        width: 1200,
-        height: 900,
-        show: false,
-        webPreferences: {
-            nodeIntegration: true,
-            contextIsolation: false,
-            zoomFactor: 1.0  // 🔥 CLAVE: evita escalado
-        }
-    });
-    
-    // 2. Cargar HTML
-    await win.loadURL(`data:text/html;charset=utf-8,${encodeURIComponent(html)}`);
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    
-    // 3. Aplicar correcciones automáticas
-    await win.webContents.executeJavaScript(`
-        // Convertir position:fixed a absolute
-        document.querySelectorAll('[style*="position: fixed"]').forEach(el => {
-            el.style.position = 'absolute';
-        });
-        
-        // Corregir márgenes negativos de imágenes
-        document.querySelectorAll('img[style*="margin-left: -"]').forEach(img => {
-            const match = img.style.marginLeft.match(/-?([0-9.]+)px/);
-            if (match) {
-                const offset = parseFloat(match[0]);
-                img.style.marginLeft = '0';
-                img.style.transform = 'translateX(' + offset + 'px)';
-            }
-        });
-    `);
-    
-    await new Promise(resolve => setTimeout(resolve, 500));
-    
-    // 4. Generar PDF
-    const downloadsPath = this.getDownloadsPath();
-    const fecha = new Date();
-    const fechaStr = `${fecha.getFullYear()}-${fecha.getMonth()+1}-${fecha.getDate()}_${fecha.getHours()}-${fecha.getMinutes()}-${fecha.getSeconds()}`;
-    const pdfPath = path.join(downloadsPath, `${nombrePaciente.replace(/\s+/g, '_')}_${tipoExamen}_${fechaStr}.pdf`);
-    
-    const pdfData = await win.webContents.printToPDF({
-        pageSize: 'A4',
-        printBackground: true,
-        landscape: false,
-        margins: { top: 0.1, bottom: 0.1, left: 0.1, right: 0.1 },
-        scale: 1.0
-    });
-    
-    fs.writeFileSync(pdfPath, pdfData);
-    win.close();
-    
-    console.log(`✅ PDF generado: ${pdfPath}`);
-    return pdfPath;
-}
-
-  /**
    * GENERAR PDF DE LOGOAUDIOMETRÍA
    */
   async generarPDFLogoaudiometria(datos, entidad) {
@@ -208,7 +144,7 @@ async generarPDFCorregido(html, nombrePaciente, tipoExamen) {
       const imagenes = await this.cargarImagenes();
       const html = this.generarCombinadoHTML(datosAudiometria, datosLogoaudiometria, entidad, imagenes);
       
-      return await this.generarPDFCorregido(html, datosAudiometria.paciente?.nombre || 'paciente', 'Examen_Audiologico_Completo');
+      return await this.generarPDFDesdeHTML(html, datosAudiometria.paciente?.nombre || 'paciente', 'Examen_Audiologico_Completo');
     } catch (error) {
       console.error('❌ Error en generarPDFCombinado:', error);
       throw error;
@@ -268,47 +204,101 @@ async generarPDFCorregido(html, nombrePaciente, tipoExamen) {
     return { headerBase64, footerBase64, oidoLogoBase64, qrBase64, selloBase64 };
   }
 
-  async generarPDFDesdeHTML(html, nombrePaciente, tipoExamen) {
-    const debugPath = path.join(this.getDownloadsPath(), `debug_${tipoExamen}.html`);
-    fs.writeFileSync(debugPath, html);
-    console.log(`💾 HTML guardado en: ${debugPath}`);
-    
-    const win = new BrowserWindow({
-      width: 1200,
-      height: 900,
-      show: false,
-      webPreferences: {
-        nodeIntegration: true,
-        contextIsolation: false
-      }
+async generarPDFDesdeHTML(html, nombrePaciente, tipoExamen) {
+  const debugPath = path.join(this.getDownloadsPath(), `debug_${tipoExamen}.html`);
+  fs.writeFileSync(debugPath, html);
+  console.log(`💾 HTML guardado en: ${debugPath}`);
+  
+  // 🔥 CONFIGURACIÓN FIJA - SIEMPRE IGUAL EN CUALQUIER PANTALLA
+  const win = new BrowserWindow({
+    width: 1200,        // <-- FIJO
+    height: 900,        // <-- FIJO
+    show: false,
+    webPreferences: {
+      nodeIntegration: true,
+      contextIsolation: false,
+      zoomFactor: 1.0
+    }
+  });
+  
+  // Cargar el HTML
+  await win.loadURL(`data:text/html;charset=utf-8,${encodeURIComponent(html)}`);
+  
+  // Esperar a que se cargue completamente
+  await new Promise(resolve => setTimeout(resolve, 2500));
+  
+  const downloadsPath = this.getDownloadsPath();
+  const fecha = new Date();
+  const fechaStr = `${fecha.getFullYear()}-${fecha.getMonth()+1}-${fecha.getDate()}_${fecha.getHours()}-${fecha.getMinutes()}-${fecha.getSeconds()}`;
+  const pdfPath = path.join(downloadsPath, `${nombrePaciente.replace(/\s+/g, '_')}_${tipoExamen}_${fechaStr}.pdf`);
+  
+  // 🔥 GENERAR PDF CON CONFIGURACIÓN FIJA
+  const pdfData = await win.webContents.printToPDF({
+    pageSize: 'A4',
+    printBackground: true,
+    landscape: false,
+    margins: {
+      top: 0.1,
+      bottom: 0.1,
+      left: 0.1,
+      right: 0.1
+    },
+    scale: 1.0,
+    displayHeaderFooter: false
+  });
+  
+  fs.writeFileSync(pdfPath, pdfData);
+  win.close();
+  
+  console.log(`\n✅ PDF generado: ${pdfPath}`);
+  console.log(`📏 Tamaño del PDF: ${(pdfData.length / 1024).toFixed(2)} KB`);
+  return pdfPath;
+}
+/**
+ * MÉTODO DE DEBUG - Genera un HTML de vista previa con el mismo viewport fijo
+ * que se usará para el PDF, para verificar sin compilar
+ */
+async generarVistaPrevia(datosAudiometria, datosLogoaudiometria, entidad) {
+  console.log('\n========== GENERANDO VISTA PREVIA ==========');
+  
+  // Generar el HTML combinado (igual que en PDF)
+  const imagenes = await this.cargarImagenes();
+  const html = this.generarCombinadoHTML(datosAudiometria, datosLogoaudiometria, entidad, imagenes);
+  
+  // Crear una ventana del mismo tamaño que se usará para el PDF
+  const win = new BrowserWindow({
+    width: 1200,
+    height: 900,
+    show: true,  // <-- Mostrar la ventana para ver la vista previa
+    webPreferences: {
+      nodeIntegration: true,
+      contextIsolation: false,
+      zoomFactor: 1.0
+    }
+  });
+  
+  // Cargar el HTML
+  await win.loadURL(`data:text/html;charset=utf-8,${encodeURIComponent(html)}`);
+  
+  // Forzar el mismo viewport fijo
+  await win.webContents.executeJavaScript(`
+    document.documentElement.style.width = '1200px';
+    document.body.style.width = '1200px';
+    document.body.style.margin = '0 auto';
+  `);
+  
+  console.log('✅ Ventana de vista previa abierta');
+  console.log('📐 Tamaño fijo: 1200x900');
+  console.log('💡 Cierra la ventana para continuar');
+  
+  // Esperar a que el usuario cierre la ventana
+  return new Promise((resolve) => {
+    win.on('closed', () => {
+      console.log('✅ Vista previa cerrada');
+      resolve();
     });
-    
-    await win.loadURL(`data:text/html;charset=utf-8,${encodeURIComponent(html)}`);
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    
-    const downloadsPath = this.getDownloadsPath();
-    const fecha = new Date();
-    const fechaStr = `${fecha.getFullYear()}-${fecha.getMonth()+1}-${fecha.getDate()}_${fecha.getHours()}-${fecha.getMinutes()}-${fecha.getSeconds()}`;
-    const pdfPath = path.join(downloadsPath, `${nombrePaciente.replace(/\s+/g, '_')}_${tipoExamen}_${fechaStr}.pdf`);
-    
-    const pdfData = await win.webContents.printToPDF({
-      pageSize: 'A4',
-      printBackground: true,
-      landscape: false,
-      margins: {
-        top: 0.1,
-        bottom: 0.1,
-        left: 0.1,
-        right: 0.1
-      }
-    });
-    
-    fs.writeFileSync(pdfPath, pdfData);
-    win.close();
-    
-    console.log(`\n✅ PDF generado: ${pdfPath}`);
-    return pdfPath;
-  }
+  });
+}
 
   /**
    * GENERAR HTML COMBINADO (AMBOS EXÁMENES EN UNA SOLA HOJA)
@@ -1284,10 +1274,119 @@ freqsConDatos.forEach(f => {
       </html>
     `;
   }
+
+  /**
+ * MÉTODO DE PRUEBA - Simula el PDF en diferentes tamaños de pantalla
+ * SIN compilar la app
+ */
+async probarPDFEnDiferentesPantallas(datosAudiometria, datosLogoaudiometria, entidad) {
+  console.log('\n========== PRUEBA DE PDF EN DIFERENTES PANTALLAS ==========');
+  
+  const imagenes = await this.cargarImagenes();
+  const html = this.generarCombinadoHTML(datosAudiometria, datosLogoaudiometria, entidad, imagenes);
+  
+  // Guardar HTML para revisar
+  const debugPath = path.join(this.getDownloadsPath(), 'debug_prueba_pantallas.html');
+  fs.writeFileSync(debugPath, html);
+  console.log(`💾 HTML guardado en: ${debugPath}`);
+  console.log('📂 Abre este archivo en Chrome para ver cómo se verá el PDF');
+  console.log('🔍 Presiona F12 y selecciona "Toggle device toolbar" (ícono de teléfono)');
+  console.log('📱 Puedes cambiar el tamaño de pantalla para simular diferentes monitores');
+  console.log('');
+  console.log('✅ Si el HTML se ve bien en cualquier tamaño, el PDF se verá igual');
+  console.log('===============================================================\n');
+  
+  // Abrir el HTML en el navegador predeterminado
+  const { exec } = require('child_process');
+  if (process.platform === 'win32') {
+    exec(`start ${debugPath}`);
+  } else if (process.platform === 'darwin') {
+    exec(`open ${debugPath}`);
+  } else {
+    exec(`xdg-open ${debugPath}`);
+  }
+  
+  return debugPath;
 }
 
 
+/**
+ * VERIFICACIÓN EN CONSOLA DEL NAVEGADOR
+ * Expone datos para que puedas inspeccionarlos desde F12
+ */
+async verificarEnConsola(datosAudiometria, datosLogoaudiometria, entidad) {
+  console.log('\n========== VERIFICACIÓN EN CONSOLA ==========');
+  
+  // Generar el HTML combinado
+  const imagenes = await this.cargarImagenes();
+  const html = this.generarCombinadoHTML(datosAudiometria, datosLogoaudiometria, entidad, imagenes);
+  
+  // Guardar HTML
+  const debugPath = path.join(this.getDownloadsPath(), 'verificacion_consola.html');
+  fs.writeFileSync(debugPath, html);
+  
+  // Crear ventana con DevTools abiertos
+  const win = new BrowserWindow({
+    width: 1200,
+    height: 900,
+    show: true,
+    webPreferences: {
+      nodeIntegration: true,
+      contextIsolation: false,
+      zoomFactor: 1.0,
+      devTools: true  // <-- FORZAR DEVTOOLS
+    }
+  });
+  
+  // Cargar el HTML
+  await win.loadURL(`data:text/html;charset=utf-8,${encodeURIComponent(html)}`);
+  
+  // ABRIR DEVTOOLS AUTOMÁTICAMENTE
+  win.webContents.openDevTools({ mode: 'detach' });
+  
+  // Inyectar datos en la consola del navegador
+  await win.webContents.executeJavaScript(`
+    // Exponer datos para inspeccionar en consola
+    window.__datosPrueba = {
+      anchoVentana: window.innerWidth,
+      altoVentana: window.innerHeight,
+      fecha: new Date().toLocaleString(),
+      elementos: {
+        header: document.querySelector('.header') ? '✅ OK' : '❌ No encontrado',
+        fecha: document.querySelector('.fecha') ? '✅ OK' : '❌ No encontrado',
+        paciente: document.querySelector('.datos-paciente') ? '✅ OK' : '❌ No encontrado',
+        otoscopia: document.querySelector('.otoscopia-container') ? '✅ OK' : '❌ No encontrado',
+        graficas: document.querySelectorAll('.grafica-img').length,
+        diagnosticos: document.querySelectorAll('.diagnostico-texto').length
+      }
+    };
+    
+    console.log('✅ VERIFICACIÓN EN CONSOLA');
+    console.log('📐 Tamaño de ventana:', window.innerWidth, 'x', window.innerHeight);
+    console.log('📊 Elementos encontrados:', window.__datosPrueba.elementos);
+    console.log('');
+    console.log('💡 Para probar diferentes tamaños, usa:');
+    console.log('   - document.documentElement.style.width = "1920px"');
+    console.log('   - document.documentElement.style.width = "1366px"');
+    console.log('   - document.documentElement.style.width = "2560px"');
+    console.log('');
+    console.log('📱 O cambia el tamaño desde el "Toggle device toolbar" (ícono 📱)');
+  `);
+  
+  console.log('✅ Ventana abierta con DevTools');
+  console.log('📐 Tamaño fijo: 1200x900');
+  console.log('🔍 Revisa la consola del navegador (F12)');
+  console.log('💡 Cierra la ventana cuando termines');
+  
+  return new Promise((resolve) => {
+    win.on('closed', () => {
+      console.log('✅ Verificación completada');
+      resolve();
+    });
+  });
+}
 
 
+}
 
 module.exports = new PDFGeneratorUnified();

@@ -719,6 +719,129 @@ if (document.readyState === 'loading') {
 } else {
     inicializarModal();
 }
+
+// ============================================
+// 🔥 PRUEBA EN CONSOLA - SIN COMPILAR
+// ============================================
+
+async function probarPDF() {
+    console.log('\n========== 🧪 PRUEBA PDF EN CONSOLA ==========');
+    
+    try {
+        // Obtener datos del paciente
+        const pacienteData = localStorage.getItem('pacienteActual');
+        const paciente = pacienteData ? JSON.parse(pacienteData) : null;
+        
+        // Obtener datos de los iframes
+        const iframeAudiometria = document.getElementById('iframeAudiometria');
+        const iframeLogoaudiometria = document.getElementById('iframeLogoaudiometria');
+        
+        function obtenerDatos(iframe, accion) {
+            return new Promise((resolve) => {
+                const handler = (event) => {
+                    if (event.data && event.data.accion === accion) {
+                        window.removeEventListener('message', handler);
+                        resolve(event.data.datos);
+                    }
+                };
+                window.addEventListener('message', handler);
+                iframe.contentWindow.postMessage({ accion: accion }, '*');
+                setTimeout(() => resolve(null), 5000);
+            });
+        }
+        
+        const datosAudiometria = await obtenerDatos(iframeAudiometria, 'obtenerTodoAudiometria');
+        const datosLogoaudiometria = await obtenerDatos(iframeLogoaudiometria, 'obtenerTodoLogoaudiometria');
+        
+        // Preparar datos para PDF
+        const datosPDFAudiometria = {
+            paciente: { nombre: paciente?.nombre || 'Prueba', documento: paciente?.documento || '123' },
+            valores_od: datosAudiometria?.valores_od || {},
+            valores_oi: datosAudiometria?.valores_oi || {},
+            freqs: ['250', '500', '750', '1000', '1500', '2000', '3000', '4000', '6000', '8000'],
+            diagnostico_od: datosAudiometria?.diagnostico_od || '',
+            diagnostico_oi: datosAudiometria?.diagnostico_oi || '',
+            observaciones: datosAudiometria?.observaciones || '',
+            otoscopia: datosAudiometria?.otoscopia || '',
+            grafica_base64: datosAudiometria?.grafica || '',
+            pta: {
+                od_air: datosAudiometria?.pta?.od_air || null,
+                oi_air: datosAudiometria?.pta?.oi_air || null,
+                od_bone: datosAudiometria?.pta?.od_bone || null,
+                oi_bone: datosAudiometria?.pta?.oi_bone || null
+            }
+        };
+        
+        const datosPDFLogoaudiometria = {
+            paciente: { nombre: paciente?.nombre || 'Prueba', documento: paciente?.documento || '123' },
+            valores_od: {
+                urv: datosLogoaudiometria?.urv_od || null,
+                upalabra: datosLogoaudiometria?.upalabra_od || null,
+                udisc: datosLogoaudiometria?.udisc_od || null,
+                pmax: datosLogoaudiometria?.pmax_od || null
+            },
+            valores_oi: {
+                urv: datosLogoaudiometria?.urv_oi || null,
+                upalabra: datosLogoaudiometria?.upalabra_oi || null,
+                udisc: datosLogoaudiometria?.udisc_oi || null,
+                pmax: datosLogoaudiometria?.pmax_oi || null
+            },
+            diagnostico: datosLogoaudiometria?.diagnostico || '',
+            diagnostico_od: datosLogoaudiometria?.diagnostico_od || '',
+            diagnostico_oi: datosLogoaudiometria?.diagnostico_oi || '',
+            grafica_base64: datosLogoaudiometria?.grafica || '',
+            nr_flags: datosLogoaudiometria?.nr_flags || { od: {}, oi: {} }
+        };
+        
+        console.log('📊 Datos preparados para PDF');
+        console.log('   - Audiometría:', datosPDFAudiometria.valores_od);
+        console.log('   - Logoaudiometría:', datosPDFLogoaudiometria.valores_od);
+        
+        // 🔥 GENERAR PDF
+        console.log('\n📄 Generando PDF combinado...');
+        
+        const result = await window.api.generarPDFCombinado(
+            datosPDFAudiometria, 
+            datosPDFLogoaudiometria, 
+            'U.D.A'
+        );
+        
+        console.log('✅ Resultado:', result);
+        
+        if (result && result.ok) {
+            console.log('📁 Ruta del PDF:', result.path);
+            console.log('💡 Para abrirlo: window.api.abrirPDFNativo("' + result.path + '")');
+            
+            // Verificar si el archivo existe
+            try {
+                const fs = require('fs');
+                if (fs.existsSync(result.path)) {
+                    const stats = fs.statSync(result.path);
+                    console.log('📏 Tamaño:', (stats.size / 1024).toFixed(2), 'KB');
+                }
+            } catch (e) {
+                console.log('⚠️ No se pudo verificar el tamaño del archivo');
+            }
+            
+            console.log('\n✅ PDF generado correctamente en TODAS las pantallas');
+            console.log('   (El PDF siempre se genera en 1200x900)');
+        } else {
+            console.error('❌ Error:', result?.error || 'Error desconocido');
+        }
+        
+    } catch (error) {
+        console.error('❌ Error:', error.message);
+        console.error('Stack:', error.stack);
+    }
+    
+    console.log('\n========== FIN PRUEBA ==========');
+}
+
+// Exponer función global
+window.probarPDF = probarPDF;
+
+console.log('✅ Función "probarPDF()" disponible en consola');
+console.log('💡 Escribe: probarPDF() y presiona Enter');
 </script>
 
 <!-- ========================================== -->
