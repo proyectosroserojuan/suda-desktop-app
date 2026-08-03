@@ -842,6 +842,148 @@ window.probarPDF = probarPDF;
 
 console.log('✅ Función "probarPDF()" disponible en consola');
 console.log('💡 Escribe: probarPDF() y presiona Enter');
+
+
+// ============================================
+// 🎯 SISTEMA DE COMUNICACIÓN PARA Ctrl+G (CORREGIDO)
+// ============================================
+
+// 1. ESCUCHAR Ctrl+G EN EL PADRE
+document.addEventListener('keydown', function(event) {
+    const esCtrlG = (event.ctrlKey || event.metaKey) && (event.key === 'g' || event.key === 'G');
+    
+    if (esCtrlG) {
+        event.preventDefault();
+        console.log('⌨️ Ctrl+G en padre - Ejecutando grabarTodos()');
+        grabarTodos();
+    }
+});
+
+// 2. ESCUCHAR MENSAJES DESDE LOS IFRAMES
+window.addEventListener('message', function(event) {
+    if (event.data && event.data.accion === 'ctrlGrabar') {
+        console.log('📩 Ctrl+G recibido desde iframe - Ejecutando grabarTodos()');
+        grabarTodos();
+    }
+});
+
+// 3. FUNCIÓN PARA INYECTAR CÓDIGO EN UN IFRAME
+function inyectarScriptEnIframe(iframe) {
+    try {
+        const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+        if (!iframeDoc) return false;
+        
+        // Verificar si ya tiene el script
+        if (iframeDoc.querySelector('script[data-ctrl-g]')) {
+            return true;
+        }
+        
+        // Crear el script
+        const script = iframeDoc.createElement('script');
+        script.setAttribute('data-ctrl-g', 'true');
+        script.textContent = `
+            // ============================================
+            // 🎯 Ctrl+G PARA GRABAR (inyectado desde el padre)
+            // ============================================
+            document.addEventListener('keydown', function(e) {
+                const esCtrlG = (e.ctrlKey || e.metaKey) && (e.key === 'g' || e.key === 'G');
+                
+                if (esCtrlG) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    console.log('⌨️ Ctrl+G en iframe - Enviando mensaje al padre');
+                    window.parent.postMessage({ accion: 'ctrlGrabar' }, '*');
+                    
+                    // INTENTAR LLAMAR DIRECTAMENTE (fallback)
+                    try {
+                        if (window.parent && window.parent.grabarTodos) {
+                            window.parent.grabarTodos();
+                        }
+                    } catch(err) {}
+                }
+            });
+            console.log('✅ Ctrl+G activado en iframe');
+        `;
+        
+        iframeDoc.body.appendChild(script);
+        console.log('✅ Ctrl+G inyectado en iframe:', iframe.src || 'iframe');
+        return true;
+        
+    } catch (e) {
+        console.log('⚠️ No se puede inyectar en iframe (cross-origin):', iframe.src);
+        return false;
+    }
+}
+
+// 4. FUNCIÓN PARA INYECTAR EN TODOS LOS IFRAMES
+function inyectarAtajoEnIframes() {
+    const iframes = document.querySelectorAll('iframe');
+    let inyectados = 0;
+    
+    iframes.forEach(iframe => {
+        // Intentar inyectar inmediatamente
+        if (inyectarScriptEnIframe(iframe)) {
+            inyectados++;
+        } else {
+            // Si falla, esperar a que cargue
+            iframe.addEventListener('load', function() {
+                setTimeout(() => {
+                    inyectarScriptEnIframe(iframe);
+                }, 300);
+            });
+        }
+    });
+    
+    console.log(`📦 Ctrl+G inyectado en ${inyectados} de ${iframes.length} iframes`);
+}
+
+// 5. INYECTAR CUANDO EL DOM ESTÉ LISTO
+document.addEventListener('DOMContentLoaded', function() {
+    // Intentar varias veces con intervalos
+    const intervalos = [500, 1000, 2000, 3000];
+    intervalos.forEach((tiempo, index) => {
+        setTimeout(() => {
+            console.log(`🔄 Intento ${index + 1} de inyección...`);
+            inyectarAtajoEnIframes();
+        }, tiempo);
+    });
+});
+
+// 6. INYECTAR DESPUÉS DE CAMBIAR DE PESTAÑA
+const cambiarTabOriginal2 = window.cambiarTab;
+window.cambiarTab = function(tab) {
+    cambiarTabOriginal2(tab);
+    // Esperar a que el iframe se cargue
+    setTimeout(() => {
+        inyectarAtajoEnIframes();
+    }, 800);
+    // Intentar nuevamente después de un poco más
+    setTimeout(() => {
+        inyectarAtajoEnIframes();
+    }, 1500);
+};
+
+// 7. OBSERVAR CAMBIOS EN EL DOM (por si se agregan iframes dinámicamente)
+const observerIframes = new MutationObserver(function(mutations) {
+    mutations.forEach(function(mutation) {
+        if (mutation.addedNodes.length) {
+            mutation.addedNodes.forEach(function(node) {
+                if (node.tagName === 'IFRAME') {
+                    setTimeout(() => {
+                        inyectarScriptEnIframe(node);
+                    }, 500);
+                }
+            });
+        }
+    });
+});
+
+observerIframes.observe(document.body, {
+    childList: true,
+    subtree: true
+});
+
+console.log('✅ Sistema Ctrl+G completamente inicializado');
 </script>
 
 <!-- ========================================== -->

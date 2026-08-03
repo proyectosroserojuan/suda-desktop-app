@@ -327,6 +327,100 @@
             color: #2563eb;
         }
 
+        /* Estilos para filtros de fecha */
+.filtros-fecha-rapidos {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    padding: 8px 12px;
+    background: #f8fafc;
+    border-radius: 10px;
+    border: 1px solid #e2e8f0;
+    width: 100%;
+}
+
+.filtros-fecha-rango {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    padding: 8px 12px;
+    background: #f8fafc;
+    border-radius: 10px;
+    border: 1px solid #e2e8f0;
+    width: 100%;
+    margin-top: 8px;
+}
+
+.filtro-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #1a3a6a;
+    white-space: nowrap;
+}
+
+.btn-filtro-fecha {
+    background: #1a3a6a;
+    color: white;
+    border: none;
+    padding: 5px 14px;
+    border-radius: 20px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+}
+
+.btn-filtro-fecha:hover {
+    background: #2563eb;
+    transform: scale(1.05);
+}
+
+.btn-filtro-fecha.activo {
+    background: #2563eb;
+    box-shadow: 0 0 0 2px #ffffff, 0 0 0 4px #2563eb;
+}
+
+.btn-filtro-fecha.btn-aplicar {
+    background: #059669;
+}
+
+.btn-filtro-fecha.btn-aplicar:hover {
+    background: #047857;
+}
+
+.btn-filtro-fecha.btn-limpiar {
+    background: #64748b;
+}
+
+.btn-filtro-fecha.btn-limpiar:hover {
+    background: #475569;
+}
+
+.input-fecha {
+    padding: 5px 10px;
+    border: 1.5px solid #dbeafe;
+    border-radius: 8px;
+    font-size: 0.8rem;
+    font-family: inherit;
+    background: white;
+    color: #1e293b;
+}
+
+.input-fecha:focus {
+    border-color: #2563eb;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+.filtro-separador {
+    font-size: 0.75rem;
+    color: #64748b;
+    font-weight: 500;
+}
+
         .empty-state h3 {
             color: #1a3a6a;
             margin-bottom: 4px;
@@ -520,6 +614,26 @@
             <input type="text" id="buscador" placeholder="Buscar paciente...">
         </div>
 
+        <!-- Filtros rápidos de fecha -->
+<div class="filtros-fecha-rapidos">
+    <span class="filtro-label"><i class="fas fa-clock"></i> Rápido:</span>
+    <button class="btn-filtro-fecha" data-rango="hoy">Hoy</button>
+    <button class="btn-filtro-fecha" data-rango="ayer">Ayer</button>
+    <button class="btn-filtro-fecha" data-rango="anteayer">Anteayer</button>
+    <button class="btn-filtro-fecha" data-rango="semana">Semana pasada</button>
+    <button class="btn-filtro-fecha" data-rango="mes">Mes pasado</button>
+</div>
+
+<!-- Filtro por rango de fechas -->
+<div class="filtros-fecha-rango">
+    <span class="filtro-label"><i class="fas fa-calendar-alt"></i> Rango:</span>
+    <input type="date" id="fechaDesde" class="input-fecha">
+    <span class="filtro-separador">hasta</span>
+    <input type="date" id="fechaHasta" class="input-fecha">
+    <button class="btn-filtro-fecha btn-aplicar" id="btnFiltrarRango">Aplicar</button>
+    <button class="btn-filtro-fecha btn-limpiar" id="btnLimpiarFechas">Limpiar</button>
+</div>
+
         <!-- Tabla de Citas -->
         <div class="citas-table">
             <table>
@@ -548,16 +662,67 @@
 
     <script>
         let citasData = [];
+        let filtroFechaActual = null; // 'hoy', 'ayer', 'anteayer', 'semana', 'mes', o null
 
-        document.addEventListener('DOMContentLoaded', () => {
-            cargarCitas();
+document.addEventListener('DOMContentLoaded', () => {
+    cargarCitas();
+    
+    document.getElementById('filtroEstado').addEventListener('change', aplicarFiltros);
+    document.getElementById('filtroExamen').addEventListener('change', aplicarFiltros);
+    document.getElementById('filtroPrioridad').addEventListener('change', aplicarFiltros);
+    document.getElementById('buscador').addEventListener('input', aplicarFiltros);
+    document.getElementById('btnActualizar').addEventListener('click', cargarCitas);
+
+    // ===== MOVER AQUÍ LOS EVENT LISTENERS DE FECHA =====
+    
+    // Filtros rápidos de fecha
+    document.querySelectorAll('[data-rango]').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            const rango = this.dataset.rango;
             
-            document.getElementById('filtroEstado').addEventListener('change', aplicarFiltros);
-            document.getElementById('filtroExamen').addEventListener('change', aplicarFiltros);
-            document.getElementById('filtroPrioridad').addEventListener('change', aplicarFiltros);
-            document.getElementById('buscador').addEventListener('input', aplicarFiltros);
-            document.getElementById('btnActualizar').addEventListener('click', cargarCitas);
+            // Si ya está activo, lo desactivamos
+            if (filtroFechaActual === rango) {
+                filtroFechaActual = null;
+                this.classList.remove('activo');
+            } else {
+                // Desactivar todos los botones
+                document.querySelectorAll('[data-rango]').forEach(b => b.classList.remove('activo'));
+                filtroFechaActual = rango;
+                this.classList.add('activo');
+                // Limpiar campos de rango
+                document.getElementById('fechaDesde').value = '';
+                document.getElementById('fechaHasta').value = '';
+            }
+            aplicarFiltros();
         });
+    });
+
+    // Filtrar por rango de fechas
+    document.getElementById('btnFiltrarRango').addEventListener('click', function() {
+        const desde = document.getElementById('fechaDesde').value;
+        const hasta = document.getElementById('fechaHasta').value;
+        
+        if (!desde && !hasta) {
+            alert('Por favor, selecciona al menos una fecha');
+            return;
+        }
+        
+        // Limpiar filtros rápidos
+        document.querySelectorAll('[data-rango]').forEach(b => b.classList.remove('activo'));
+        filtroFechaActual = null;
+        aplicarFiltros();
+    });
+
+    // Limpiar filtros de fecha
+    document.getElementById('btnLimpiarFechas').addEventListener('click', function() {
+        document.getElementById('fechaDesde').value = '';
+        document.getElementById('fechaHasta').value = '';
+        document.querySelectorAll('[data-rango]').forEach(b => b.classList.remove('activo'));
+        filtroFechaActual = null;
+        aplicarFiltros();
+    });
+});
+
 
         async function cargarCitas() {
             try {
@@ -656,36 +821,92 @@
             }).join('');
         }
 
-        function aplicarFiltros() {
-            const estadoFiltro = document.getElementById('filtroEstado').value;
-            const examenFiltro = document.getElementById('filtroExamen').value;
-            const prioridadFiltro = document.getElementById('filtroPrioridad').value;
-            const busqueda = document.getElementById('buscador').value.toLowerCase().trim();
+function aplicarFiltros() {
+    const estadoFiltro = document.getElementById('filtroEstado').value;
+    const examenFiltro = document.getElementById('filtroExamen').value;
+    const prioridadFiltro = document.getElementById('filtroPrioridad').value;
+    const busqueda = document.getElementById('buscador').value.toLowerCase().trim();
+    
+    // Obtener fechas del rango
+    const fechaDesde = document.getElementById('fechaDesde').value;
+    const fechaHasta = document.getElementById('fechaHasta').value;
 
-            let filtradas = citasData;
+    let filtradas = citasData;
 
-            if (estadoFiltro !== 'todos') {
-                filtradas = filtradas.filter(c => c.estado === estadoFiltro);
+    // --- FILTRO POR FECHA RÁPIDA ---
+    if (filtroFechaActual) {
+        const hoy = new Date();
+        hoy.setHours(0, 0, 0, 0);
+        const ayer = new Date(hoy);
+        ayer.setDate(ayer.getDate() - 1);
+        const anteayer = new Date(hoy);
+        anteayer.setDate(anteayer.getDate() - 2);
+        const semanaPasada = new Date(hoy);
+        semanaPasada.setDate(semanaPasada.getDate() - 7);
+        const mesPasado = new Date(hoy);
+        mesPasado.setMonth(mesPasado.getMonth() - 1);
+
+        filtradas = filtradas.filter(c => {
+            if (!c.fecha_cita) return false;
+            const fechaCita = new Date(c.fecha_cita);
+            fechaCita.setHours(0, 0, 0, 0);
+
+            switch (filtroFechaActual) {
+                case 'hoy':
+                    return fechaCita.getTime() === hoy.getTime();
+                case 'ayer':
+                    return fechaCita.getTime() === ayer.getTime();
+                case 'anteayer':
+                    return fechaCita.getTime() === anteayer.getTime();
+                case 'semana':
+                    return fechaCita >= semanaPasada && fechaCita < hoy;
+                case 'mes':
+                    return fechaCita >= mesPasado && fechaCita < hoy;
+                default:
+                    return true;
             }
+        });
+    }
 
-            if (examenFiltro === 'con') {
-                filtradas = filtradas.filter(c => c.tiene_examen === true);
-            } else if (examenFiltro === 'sin') {
-                filtradas = filtradas.filter(c => c.tiene_examen === false);
-            }
+    // --- FILTRO POR RANGO DE FECHAS (desde - hasta) ---
+    if (fechaDesde || fechaHasta) {
+        const desde = fechaDesde ? new Date(fechaDesde) : new Date(0);
+        const hasta = fechaHasta ? new Date(fechaHasta) : new Date(8640000000000000);
+        
+        if (fechaDesde) desde.setHours(0, 0, 0, 0);
+        if (fechaHasta) hasta.setHours(23, 59, 59, 999);
+        
+        filtradas = filtradas.filter(c => {
+            if (!c.fecha_cita) return false;
+            const fechaCita = new Date(c.fecha_cita);
+            return fechaCita >= desde && fechaCita <= hasta;
+        });
+    }
 
-            if (prioridadFiltro !== 'todos') {
-                filtradas = filtradas.filter(c => (c.prioridad || 'normal') === prioridadFiltro);
-            }
+    // --- FILTROS EXISTENTES ---
+    if (estadoFiltro !== 'todos') {
+        filtradas = filtradas.filter(c => c.estado === estadoFiltro);
+    }
 
-            if (busqueda) {
-                filtradas = filtradas.filter(c => 
-                    (c.paciente_nombre || '').toLowerCase().includes(busqueda)
-                );
-            }
+    if (examenFiltro === 'con') {
+        filtradas = filtradas.filter(c => c.tiene_examen === true);
+    } else if (examenFiltro === 'sin') {
+        filtradas = filtradas.filter(c => c.tiene_examen === false);
+    }
 
-            renderizarCitas(filtradas);
-        }
+    if (prioridadFiltro !== 'todos') {
+        filtradas = filtradas.filter(c => (c.prioridad || 'normal') === prioridadFiltro);
+    }
+
+    if (busqueda) {
+        filtradas = filtradas.filter(c => 
+            (c.paciente_nombre || '').toLowerCase().includes(busqueda)
+        );
+    }
+
+    renderizarCitas(filtradas);
+}
+
 
         async function verExamen(citaId, button) {
             try {
