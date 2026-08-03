@@ -86,6 +86,23 @@ body {
     pointer-events: none;
 }
 
+.btn-back {
+    background: rgba(255, 255, 255, 0.15);
+    color: #ffffff;
+    border: 1.5px solid rgba(255, 255, 255, 0.25);
+    padding: 8px 16px;
+    border-radius: 30px;
+    font-weight: 600;
+    cursor: pointer;
+    font-size: 0.75rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+.btn-back:hover {
+    background: rgba(255, 255, 255, 0.25);
+}
+
 .tab-pane.active {
     position: relative;
     top: auto;
@@ -230,6 +247,10 @@ iframe {
     <h1></h1>
     <div>Paciente: <strong id="nombrePaciente">--</strong></div>
 </div>
+
+<button class="btn-back" id="btnVolverDashboard" style="background: #1e3a8a; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; margin-bottom: 15px; font-weight: bold;">
+    ← Volver al Dashboard
+</button>
 
 <div class="tabs">
     <button class="tab-btn active" onclick="cambiarTab('audiometria')">Audiometría Tonal</button>
@@ -984,6 +1005,21 @@ observerIframes.observe(document.body, {
 });
 
 console.log('✅ Sistema Ctrl+G completamente inicializado');
+
+
+// Botón volver
+document.addEventListener('DOMContentLoaded', function() {
+    const btn = document.getElementById('btnVolverDashboard');
+    if (btn) {
+        btn.addEventListener('click', function() {
+            if (window.api && window.api.volverDashboard) {
+                window.api.volverDashboard();
+            } else {
+                window.location.href = '../citas.html';
+            }
+        });
+    }
+});
 </script>
 
 <!-- ========================================== -->

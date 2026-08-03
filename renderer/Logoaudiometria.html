@@ -734,6 +734,21 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Si viene de AudioLogo (modo combinado), ocultar el botón de grabar
     if (modo === 'combinado') {
+
+           //  const logoTop = document.querySelector('.logo-empresa-top');
+     //   if (logoTop) {
+      //      logoTop.style.display = 'none';
+    //        console.log('🔒 Logo ocultado (modo combinado)');
+    //    }
+
+
+                // ✅ OCULTAR BOTÓN "Volver al Dashboard"
+        const btnVolver = document.querySelector('.btn-back-floating');
+        if (btnVolver) {
+            btnVolver.style.display = 'none';
+            console.log('🔒 Botón "Volver al Dashboard" ocultado (modo combinado)');
+        }
+
         const btnGrabar = document.getElementById('grabarBtn');
         if (btnGrabar) {
             btnGrabar.style.display = 'none';

@@ -373,6 +373,55 @@
     white-space: nowrap;
 }
 
+        /* Botón volver al dashboard */
+.btn-back {
+    background: rgba(255, 255, 255, 0.15);
+    color: #ffffff;
+    border: 1.5px solid rgba(255, 255, 255, 0.25);
+    padding: 8px 16px;
+    border-radius: 30px;
+    font-weight: 600;
+    cursor: pointer;
+    font-size: 0.75rem;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    white-space: nowrap;
+    backdrop-filter: blur(4px);
+}
+
+.btn-back:hover {
+    background: rgba(255, 255, 255, 0.25);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+}
+
+.btn-back i {
+    font-size: 0.85rem;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .btn-back {
+        padding: 6px 12px;
+        font-size: 0.65rem;
+    }
+    .btn-back i {
+        font-size: 0.7rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .btn-back {
+        padding: 4px 10px;
+        font-size: 0.55rem;
+    }
+    .btn-back span {
+        display: none; /* Oculta el texto en móviles, solo muestra ícono */
+    }
+}
+
 .btn-filtro-fecha:hover {
     background: #2563eb;
     transform: scale(1.05);
@@ -563,6 +612,10 @@
     .btn-primary i {
         font-size: 0.7rem;
     }
+
+
+
+
 }
     </style>
 </head>
@@ -573,10 +626,14 @@
 <div class="header-logo">
     <img src="../img/saninlogo.jpg" alt="Logo U.D.A." class="logo-empresa" onerror="this.style.display='none'; this.parentElement.innerHTML='<span style=\'font-weight:700;color:#ffffff;font-size:1.5rem;\'>U.D.A.</span>'">
     <div class="logo-text">
-        <h1>Gestión de Citas</h1>
-        <span>Sistema de administración médica</span>
+        <h1>Historico de Examenes</h1>
+        <span>S.U.D.A - Sistema de Unidad Diagnostica Auditiva</span>
     </div>
 </div>
+
+    <button class="btn-back" id="btnVolverDashboard">
+        <i class="fas fa-arrow-left"></i> Volver al Dashboard
+    </button>
             <div class="header-stats">
                 <div class="stat-item">
                     <span class="number" id="totalCitas">0</span>
@@ -908,49 +965,67 @@ function aplicarFiltros() {
 }
 
 
-        async function verExamen(citaId, button) {
-            try {
-                const textoOriginal = button.textContent;
-                button.textContent = 'Cargando...';
-                button.disabled = true;
+async function verExamen(citaId, button) {
+    try {
+        const textoOriginal = button.textContent;
+        button.textContent = 'Cargando...';
+        button.disabled = true;
 
-                console.log('Buscando exámenes para cita ID:', citaId);
-                
-                const response = await window.api.obtenerCitaConExamen(citaId);
-                console.log('Respuesta:', response);
-                
-                if (!response.ok) {
-                    throw new Error(response.error || 'Error al obtener examen');
-                }
-
-                const cita = response.cita;
-                
-                if (!cita) {
-                    alert('No se encontró la cita.');
-                    return;
-                }
-
-                const tieneExamen = cita.examenes && (cita.examenes.audiometria || cita.examenes.logoaudiometria);
-                
-                if (!tieneExamen) {
-                    alert('Esta cita no tiene exámenes asociados.');
-                    return;
-                }
-
-                window.api.abrirVentanaDetalles({ cita: cita });
-
-                button.textContent = textoOriginal;
-                button.disabled = false;
-
-            } catch (error) {
-                console.error('Error:', error);
-                alert(`Error: ${error.message}`);
-                if (button) {
-                    button.textContent = 'Ver resultados';
-                    button.disabled = false;
-                }
-            }
+        console.log('🔍 Buscando exámenes para cita ID:', citaId);
+        
+        // ✅ PASO 1: Primero verificar si existe examen (consulta RÁPIDA)
+        const existeResponse = await window.api.verificarExamenPorCita(citaId);
+        console.log('📌 Verificación rápida:', existeResponse);
+        
+        if (!existeResponse.ok) {
+            throw new Error(existeResponse.error || 'Error al verificar');
         }
+        
+        if (!existeResponse.existe) {
+            alert('❌ Esta cita no tiene exámenes asociados.');
+            button.textContent = textoOriginal;
+            button.disabled = false;
+            return;
+        }
+        
+        // ✅ PASO 2: Ahora sí, obtener los datos completos (solo si existe)
+        console.log('📥 Cargando datos completos del examen...');
+        const response = await window.api.obtenerCitaConExamen(citaId);
+        console.log('📥 Respuesta completa:', response);
+        
+        if (!response.ok) {
+            throw new Error(response.error || 'Error al obtener examen');
+        }
+
+        const cita = response.cita;
+        
+        if (!cita) {
+            alert('❌ No se encontró la cita.');
+            return;
+        }
+
+        const tieneExamen = cita.examenes && (cita.examenes.audiometria || cita.examenes.logoaudiometria);
+        
+        if (!tieneExamen) {
+            alert('❌ Esta cita no tiene exámenes asociados.');
+            return;
+        }
+
+        // ✅ PASO 3: Abrir ventana con los datos
+        window.api.abrirVentanaDetalles({ cita: cita });
+
+        button.textContent = textoOriginal;
+        button.disabled = false;
+
+    } catch (error) {
+        console.error('❌ Error:', error);
+        alert(`Error: ${error.message}`);
+        if (button) {
+            button.textContent = 'Ver resultados';
+            button.disabled = false;
+        }
+    }
+}
 
         function formatearFecha(fecha) {
             if (!fecha) return 'Fecha no disponible';
@@ -975,6 +1050,19 @@ function aplicarFiltros() {
             };
             return estados[estado] || 'badge-warning';
         }
+
+        // ============================================
+// BOTÓN VOLVER AL DASHBOARD
+// ============================================
+document.getElementById('btnVolverDashboard').addEventListener('click', function() {
+    // Usar la API de Electron si existe
+    if (window.api && typeof window.api.volverDashboard === 'function') {
+        window.api.volverDashboard();
+    } else {
+        // Fallback: Redirigir a dashboard.html
+        window.location.href = 'dashboard.html';
+    }
+});
     </script>
 </body>
 </html>

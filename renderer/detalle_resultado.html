@@ -262,7 +262,7 @@
                 <!-- HEADER -->
                 <div class="header">
                     <div>
-                        <h1>📊 Detalle del Examen</h1>
+                        <h1>Resultados del Examen</h1>
                         <div style="margin-top: 5px; font-size: 14px; opacity: 0.9;">
                             ${cita.paciente_nombre || 'Paciente'} | 
                             ${cita.entidad_nombre || 'Sin entidad'}
@@ -280,7 +280,7 @@
 
                 <!-- INFORMACIÓN DEL PACIENTE -->
                 <div class="section">
-                    <div class="section-title">👤 Información del Paciente</div>
+                    <div class="section-title">Información del Paciente</div>
                     <div class="grid-2">
                         <div class="info-item">
                             <div class="label">Nombre</div>
@@ -313,13 +313,13 @@
                 <div class="examen-tabs">
                     ${audiometria ? `
                         <div class="examen-tab active" onclick="cambiarTab('audiometria')">
-                            👂 Audiometría
+                          Audiometría
                             <span class="badge-small">${formatearFecha(audiometria.fecha_registro) || ''}</span>
                         </div>
                     ` : ''}
                     ${logoaudiometria ? `
                         <div class="examen-tab ${!audiometria ? 'active' : ''}" onclick="cambiarTab('logoaudiometria')">
-                            🗣️ Logoaudiometría
+                            Logoaudiometría
                             <span class="badge-small">${formatearFecha(logoaudiometria.fecha_registro) || ''}</span>
                         </div>
                     ` : ''}
@@ -331,7 +331,7 @@
                 html += `
                     <div class="examen-content active" id="contenido-audiometria">
                         <div class="section">
-                            <div class="section-title">👂 Audiometría</div>
+                            <div class="section-title">Audiometría</div>
                             <div class="grid-2">
                                 <div>
                                     <h3 style="color: #1a237e; margin-bottom: 10px;">Oído Derecho (OD)</h3>
@@ -369,7 +369,7 @@
                         <!-- GRÁFICA AUDIOMETRÍA -->
                         ${audiometria.grafica_base64 ? `
                             <div class="section">
-                                <div class="section-title">📈 Gráfica - Audiometría</div>
+                                <div class="section-title">Gráfica - Audiometría</div>
                                 <div class="grafica-container">
                                     <img src="${audiometria.grafica_base64}" alt="Gráfica Audiometría" style="max-width: 100%;">
                                 </div>
@@ -435,7 +435,7 @@
                         <!-- GRÁFICA LOGOAUDIOMETRÍA -->
                         ${logoaudiometria.grafica_base64 ? `
                             <div class="section">
-                                <div class="section-title">📈 Gráfica - Logoaudiometría</div>
+                                <div class="section-title">Gráfica - Logoaudiometría</div>
                                 <div class="grafica-container">
                                     <img src="${logoaudiometria.grafica_base64}" alt="Gráfica Logoaudiometría" style="max-width: 100%;">
                                 </div>
@@ -450,7 +450,7 @@
             if (otoscopia) {
                 html += `
                     <div class="section">
-                        <div class="section-title">🔍 Otoscopia</div>
+                        <div class="section-title">Otoscopia</div>
                         <div style="background: white; padding: 15px; border-radius: 6px; border: 1px solid #e9ecef;">
                             ${otoscopia}
                         </div>
@@ -463,7 +463,7 @@
             if (observaciones) {
                 html += `
                     <div class="section">
-                        <div class="section-title">📝 Observaciones</div>
+                        <div class="section-title">Observaciones</div>
                         <div class="observaciones-box">
                             ${observaciones}
                         </div>

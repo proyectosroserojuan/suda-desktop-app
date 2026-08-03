@@ -3137,7 +3137,7 @@ function calcularPTAAir(prefix) {
 
     if (cantidad !== 4) return '--';
 
-    return (suma / 4).toFixed(1);
+    return (suma / 4).toFixed(2);
 }
 
 function calcularPTABone(prefix) {
@@ -3162,7 +3162,7 @@ function calcularPTABone(prefix) {
         }
     });
     
-    return cantidad === 4 ? (suma / 4).toFixed(1) : '--';
+    return cantidad === 4 ? (suma / 4).toFixed(2) : '--';
 }
 
 let ultimosPTA = {
@@ -4873,6 +4873,18 @@ document.addEventListener('DOMContentLoaded', function() {
     const modo = params.get('modo');
     
     if (modo === 'combinado') {
+
+           //   const logoTop = document.querySelector('.logo-empresa-top');
+       // if (logoTop) {
+           // logoTop.style.display = 'none';
+         //   console.log('🔒 Logo ocultado (modo combinado)');
+      //  }
+
+            const btnVolver = document.querySelector('.btn-back-floating');
+        if (btnVolver) {
+            btnVolver.style.display = 'none';
+            console.log('🔒 Botón "Volver al Dashboard" ocultado (modo combinado)');
+        }
         // Ocultar el botón "GRABAR CITA"
         const botonGrabar = document.getElementById('grabarAudiometriaBtn');
         if (botonGrabar) {
@@ -4881,6 +4893,12 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         
     }
+
+    
+
+    
+
+
 })();
 
 // ============================================

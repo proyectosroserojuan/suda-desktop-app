@@ -268,7 +268,7 @@
       transition: all 0.3s ease;
       cursor: pointer;
       position: relative;
-      border-bottom: 4px solid #04003f;
+      border-bottom: 4px solid #a9aaaa;
     }
 
     .card:hover {
@@ -305,7 +305,7 @@
       width: 100%;
       border: none;
       border-radius: 40px;
-      background: #2a6ef7;
+      background: #032975;
       color: white;
       cursor: pointer;
       font-size: 13px;
@@ -361,8 +361,8 @@
   <aside class="sidebar">
     <div class="sidebar-logo">
       <img src="../img/lomodal.png" alt="Logo U.D.A." onerror="this.style.display='none'; this.parentElement.innerHTML='<h2>🏥 Clínica Auditiva</h2><span>Especialistas en Audición</span>'">
-      <h2>SUDA</h2>
-      <span>Especialistas en Audición</span>
+      <h2>S.U.D.A</h2>
+      <span>Sistema de Unidad Diagnostica Auditiva</span>
     </div>
     <nav id="navMenu">
       <!-- Botones dinámicos según rol -->
@@ -403,21 +403,21 @@
       { id: 'audiometriaCompleta', nombre: 'Audiometría Tonal Completa', descripcion: 'Evaluación completa con AC, BC, UCL y logoaudiometría', archivo: 'AudiometríaTonalCompleta.html', icono: '🔊' },
       { id: 'logoaudiometria', nombre: 'Logoaudiometría', descripcion: 'Pruebas de reconocimiento de palabras', archivo: 'Logoaudiometria.html', icono: '🗣️' },
       { id: 'impedanciometria', nombre: 'Impedanciometría', descripcion: 'Estudio de la impedancia acústica', archivo: 'Inpedanciometria.html', icono: '📊' },
-         { id: 'resultados', nombre: 'Resultados', descripcion: 'Consulta y gestión de resultados de citas', archivo: 'resultadoshistorialdetalles.html', icono: '📊' },
+      { id: 'resultados', nombre: 'Resultados', descripcion: 'Consulta y gestión de resultados de citas', archivo: 'resultadoshistorialdetalles.html', icono: '📊' },
       { id: 'informes', nombre: 'Informes', descripcion: 'Generación de reportes y certificados médicos', archivo: 'informes.html', icono: '📄' },
       { id: 'configuracion', nombre: 'Configuración', descripcion: 'Configuración del sistema y usuarios', archivo: 'configuracion.html', icono: '⚙️' }
     ],
     secretaria: [
       { id: 'pacientes', nombre: 'Pacientes', descripcion: 'Registro y gestión de pacientes', archivo: 'pacientes.html', icono: '	<i class="fas fa-users"></i>' },
       { id: 'citas', nombre: 'Agenda de Citas', descripcion: 'Agenda y control de citas programadas', archivo: 'citas.html', icono: '	<i class="fas fa-calendar-alt"></i>' },
-      { nombre: ' Reportes', archivo: 'reportes.html', icono: '<i class="fas fa-file-alt"></i> Informes' },
+      { id: 'Reportes', nombre: 'Reportes', archivo: 'reportes.html', descripcion: '', icono: '<i class="fas fa-file-alt"></i> Informes' },
       { id: 'citaseguimiento', nombre: 'Seguimiento de citas', descripcion: '', archivo: 'realizadasvistasecretaria.html', icono: '	<i class="fas fa-calendar-alt"></i>' },
     ],
     audiologo: [
       { id: 'audiometria', nombre: 'Audiometría Tonal', descripcion: '', archivo: 'AudiometriaTonal.html', icono: '<i class="fas fa-volume-up"></i>' },
      // { id: 'audiometriaCompleta', nombre: 'Audiometría Tonal Completa', descripcion: 'Evaluación completa con AC, BC, UCL', archivo: 'AudiometríaTonalCompleta.html', icono: '🔊' },
       { id: 'logoaudiometria', nombre: 'Logoaudiometría', descripcion: '', archivo: 'Logoaudiometria.html', icono: '<i class="fas fa-comment-dots"></i> ' },
-      { id: 'resultados', nombre: 'Resultados', archivo: 'resultadoshistorialdetalles.html', icono: '<i class="fas fa-file-alt"></i> Informes' },
+      { id: 'resultados', nombre: 'Resultados', descripcion: '', archivo: 'resultadoshistorialdetalles.html', icono: '<i class="fas fa-file-alt"></i> Informes' },
     //  { id: 'impedanciometria', nombre: 'Impedanciometría', descripcion: 'Estudio de la impedancia acústica', archivo: 'Inpedanciometria.html', icono: '📊' }
     ]
   };
