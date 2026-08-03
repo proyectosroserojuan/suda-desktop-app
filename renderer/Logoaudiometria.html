@@ -523,6 +523,16 @@ button.reset-btn:hover {
       <small style="color: #666; font-size: 10px;"></small>
   </div>
 
+  <!-- NUEVO TERCER PUNTO - entre U. Palabra y % Discriminación -->
+<div class="input-field">
+    <label>% Punto Intermedio <small></small></label>
+    <div style="display:flex; gap:6px;">
+        <input type="number" id="od_punto_intermedio" min="0" max="100" step="5" placeholder="Ej: 30, 40, 50">
+      
+    </div>
+    <small style="color: #666; font-size: 10px;">Punto entre U. Palabra y % Discriminación</small>
+</div>
+
   <!-- Dentro de OÍDO DERECHO, después del input-grid -->
   <div style="display: flex; justify-content: flex-end; margin-top: 10px;">
       <button type="button" class="btn-rehacer" data-ear="od" style="background: #8b8b8b; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 12px; margin: 0;">
@@ -598,6 +608,16 @@ button.reset-btn:hover {
       </div>
       <small style="color: #666; font-size: 10px;"></small>
   </div>
+
+  <!-- NUEVO TERCER PUNTO - entre U. Palabra y % Discriminación -->
+<div class="input-field">
+    <label>% Punto Intermedio <small></small></label>
+    <div style="display:flex; gap:6px;">
+        <input type="number" id="oi_punto_intermedio" min="0" max="100" step="5" placeholder="Ej: 30, 40, 50">
+        <button type="button" class="nr-btn" data-ear="oi" data-field="punto_intermedio">↓</button>
+    </div>
+    <small style="color: #666; font-size: 10px;">Punto entre U. Palabra y % Discriminación</small>
+</div>
 
   <div style="display: flex; justify-content: flex-end; margin-top: 10px;">
       <button type="button" class="btn-rehacer" data-ear="oi" style="background: #727272; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 12px; margin: 0;">
@@ -679,22 +699,22 @@ button.reset-btn:hover {
           
         </div>
 
-        <!-- COLUMNA DERECHA: DIAGNÓSTICOS + OTOSCOPIA -->
+        <!-- COLUMNA DERECHA: DIAGNÓSTICOS + OTOSCOPIA 
         <div style="display: flex; flex-direction: column; gap: 15px;">
           
-          <!-- Diagnóstico OD -->
+          Diagnóstico OD 
           <div class="diagnostico-section" style="margin-top: 0;">
               <h4 style="color: #e74c3c;">🔴 Diagnóstico Oído Derecho (OD)</h4>
               <textarea id="diagnostico_od" class="diagnostico-input" rows="3" placeholder="Escriba aquí el diagnóstico específico para oído derecho..."></textarea>
           </div>
 
-          <!-- Diagnóstico OI -->
+           Diagnóstico OI 
           <div class="diagnostico-section" style="margin-top: 0;">
               <h4 style="color: #3498db;">🔵 Diagnóstico Oído Izquierdo (OI)</h4>
               <textarea id="diagnostico_oi" class="diagnostico-input" rows="3" placeholder="Escriba aquí el diagnóstico específico para oído izquierdo..."></textarea>
           </div>
 
-          <!-- Otoscopia -->
+           Otoscopia 
           <div class="diagnostico-section" style="margin-top: 0;">
               <h4>🔍 OTOSCOPIA</h4>
               <textarea 
@@ -705,11 +725,13 @@ button.reset-btn:hover {
               ></textarea>
           </div>
 
-          <!-- Diagnóstico General -->
+           Diagnóstico General 
           <div class="diagnostico-section" style="margin-top: 0;">
               <h4>📋 Diagnóstico General</h4>
               <textarea id="diagnostico" class="diagnostico-input" rows="3" placeholder="Escriba aquí el diagnóstico del paciente..."></textarea>
           </div>
+
+          -->
           
         </div>
         
@@ -1089,6 +1111,9 @@ function getEarValues(ear) {
     let porcentajeRealInput = document.getElementById(`${ear}_porcentaje_real`);
     let porcentajeReal = porcentajeRealInput ? parseFloat(porcentajeRealInput.value) : null;
 
+       let puntoIntermedioInput = document.getElementById(`${ear}_punto_intermedio`);
+    let puntoIntermedio = puntoIntermedioInput ? parseFloat(puntoIntermedioInput.value) : null;
+
     if (isNaN(porcentaje)) {
         porcentaje = 100;
     }
@@ -1115,6 +1140,8 @@ function getEarValues(ear) {
     if (noResponseFlags[ear].porcentaje_real) {
         porcentajeReal = null;
     }
+
+
 
     if (porcentaje === 0) {
         uDiscriminacion = Math.max(uDiscriminacion, 100);
@@ -1167,7 +1194,8 @@ function getEarValues(ear) {
         uPalabra,
         porcentajePalabra,
         uDiscriminacion,
-        porcentaje
+        porcentaje,
+         puntoIntermedio  // 🔥 NUEVO
     };
 }
 
@@ -1175,6 +1203,18 @@ function getEarValues(ear) {
 document.querySelectorAll('[id$="_porcentaje_real"]').forEach(input => {
     input.addEventListener('input', function() {
         // Validar que el valor esté entre 0 y 100
+        let valor = parseFloat(this.value);
+        if (!isNaN(valor)) {
+            if (valor < 0) this.value = 0;
+            if (valor > 100) this.value = 100;
+        }
+        updateChart();
+    });
+});
+
+// Listener para el nuevo campo punto_intermedio
+document.querySelectorAll('[id$="_punto_intermedio"]').forEach(input => {
+    input.addEventListener('input', function() {
         let valor = parseFloat(this.value);
         if (!isNaN(valor)) {
             if (valor < 0) this.value = 0;
@@ -1245,6 +1285,17 @@ function generarPuntosClinicos(data, ear) {
         puntos.push({ x: data.uPalabra, y: data.porcentajePalabra });  // ✅ CORREGIDO
     }
 
+        // 🔥 NUEVO: Punto Intermedio (si existe)
+    if (data.puntoIntermedio !== null && !isNaN(data.puntoIntermedio) && 
+        data.puntoIntermedio >= 0 && data.puntoIntermedio <= 100) {
+        // Calcular la posición X entre U.Palabra y U.Discriminación
+        const xIntermedio = data.uPalabra + (data.uDiscriminacion - data.uPalabra) * 0.5;
+        puntos.push({ 
+            x: xIntermedio, 
+            y: data.puntoIntermedio 
+        });
+    }
+
     // Punto 3: U.Discriminación (% final)
     if (campos.udisc && campos.pmax) {
         puntos.push({
@@ -1264,6 +1315,12 @@ function generarCurvaSuave(data, ear) {
     const punto1x = data.uVoz;
     const punto2x = data.uPalabra;
     const punto3x = data.uDiscriminacion;
+
+        // 🔥 NUEVO: Calcular punto intermedio
+    const tienePuntoIntermedio = data.puntoIntermedio !== null && !isNaN(data.puntoIntermedio) && 
+                                  data.puntoIntermedio >= 0 && data.puntoIntermedio <= 100;
+    const xIntermedio = tienePuntoIntermedio ? punto2x + (punto3x - punto2x) * 0.5 : null;
+    const yIntermedio = tienePuntoIntermedio ? data.puntoIntermedio : null;
 
     for (let db = 0; db <= 120; db++) {
 
@@ -1304,6 +1361,14 @@ function generarCurvaSuave(data, ear) {
             // Tramo 1: U.Voz → U.Palabra (0% → porcentajePalabra)
             else if (db <= punto2x) {
                 y = ((db - punto1x) / (punto2x - punto1x)) * data.porcentajePalabra;
+            }
+
+
+                        // 🔥 NUEVO: Tramo con punto intermedio (si existe)
+            else if (tienePuntoIntermedio && db <= xIntermedio) {
+                // U.Palabra → Punto Intermedio
+                const progress = (db - punto2x) / (xIntermedio - punto2x);
+                y = data.porcentajePalabra + progress * (yIntermedio - data.porcentajePalabra);
             }
 
             // Tramo 2: U.Palabra → U.Discriminación (porcentajePalabra → porcentaje final)
@@ -1782,15 +1847,17 @@ function resetValues() {
     document.getElementById("od_udisc").value = "";
     document.getElementById("od_pmax").value = "";
     document.getElementById("od_porcentaje_real").value = "";
+     document.getElementById("od_punto_intermedio").value = ""; // 🔥 NUEVO
 
     document.getElementById("oi_urv").value = "";
     document.getElementById("oi_upalabra").value = "";
     document.getElementById("oi_udisc").value = "";
     document.getElementById("oi_pmax").value = "";
     document.getElementById("oi_porcentaje_real").value = "";
+     document.getElementById("oi_punto_intermedio").value = ""; // 🔥 NUEVO
 
-    noResponseFlags.od = { urv: false, upalabra: false, udisc: false, pmax: false, porcentaje_real: false };
-    noResponseFlags.oi = { urv: false, upalabra: false, udisc: false, pmax: false, porcentaje_real: false };
+    noResponseFlags.od = { urv: false, upalabra: false, udisc: false, pmax: false, porcentaje_real: false,punto_intermedio: false };
+    noResponseFlags.oi = { urv: false, upalabra: false, udisc: false, pmax: false, porcentaje_real: false, punto_intermedio: false };
     
     document.querySelectorAll('.nr-btn').forEach(btn => {
         btn.classList.remove('active');
@@ -1975,6 +2042,11 @@ function rehacerOido(ear) {
     if (porcentajeRealInput) {
         porcentajeRealInput.value = "";
     }
+
+        const puntoIntermedioInput = document.getElementById(`${ear}_punto_intermedio`); // 🔥 NUEVO
+    if (puntoIntermedioInput) {
+        puntoIntermedioInput.value = "";
+    }
     
     // Resetear flags NR para este oído
     noResponseFlags[ear] = {
@@ -1982,7 +2054,8 @@ function rehacerOido(ear) {
         upalabra: false,
         udisc: false,
         pmax: false,
-        porcentaje_real: false
+        porcentaje_real: false,
+        punto_intermedio: false  // 🔥 NUEVO
     };
     
     // Limpiar estilo activo de los botones NR de este oído
