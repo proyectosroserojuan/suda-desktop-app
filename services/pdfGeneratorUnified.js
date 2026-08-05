@@ -472,7 +472,7 @@ const tablaLogoaudiometriaRows = `
     `<div class="sin-grafica" style="padding:20px; font-size:10px;">⚠️ No se pudo generar la gráfica de Audiometría</div>`;
 
   const graficaLogoaudiometriaHTML = datosLogoaudiometria.grafica_base64 && datosLogoaudiometria.grafica_base64.length > 100 ?
-    `<img src="${datosLogoaudiometria.grafica_base64}" alt="Logoaudiometría" style="width:100%; max-height: 180px; object-fit: contain; margin-left: -68px;  ">` :
+    `<img src="${datosLogoaudiometria.grafica_base64}" alt="Logoaudiometría" style="width:80%; max-height: 180px; object-fit: contain;   ">` :
     `<div class="sin-grafica" style="padding:20px; font-size:10px;">⚠️ No se pudo generar la gráfica de Logoaudiometría</div>`;
 
   // OTOSCOPIA HTML

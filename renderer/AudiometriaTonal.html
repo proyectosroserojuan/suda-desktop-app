@@ -978,7 +978,7 @@ button:hover {
     <!-- 4 PANELES DE SÍMBOLOS -->
     <div class="symbols-side">
 <!-- NUEVO DIV PARA FILTRAR VÍA ÓSEA -->
-<!-- FILTRO VÍA ÓSEA - ESTILO CLÍNICO -->
+<!-- FILTRO VÍA ÓSEA - ESTILO CLÍNICO 
 <div id="filtroViaOsea" style="background: #ffffff; border-radius: 8px; padding: 14px 18px; margin-bottom: 12px; border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
     <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
         <div style="display: flex; align-items: center; gap: 10px;">
@@ -1014,6 +1014,7 @@ button:hover {
         </div>
     </div>
 </div>
+-->
     </div>
 </div>
 
@@ -2067,7 +2068,9 @@ function updateBoneSymbolPoint(prefix, freq) {
     }
 
     // Verificar si es "NR" (Sin Respuesta)
-    const esNR = valor.toUpperCase() === 'NR';
+    //const esNR = valor.toUpperCase() === 'NR';
+    // Verificar si es "SR" (Sin Respuesta) - igual que NR
+    const esNR = valor.toUpperCase() === 'NR' || valor.toUpperCase() === 'SR';
     const dbValue = esNR ? 110 : parseFloat(valor);
 
     if (esNR || !isNaN(dbValue)) {
@@ -3056,6 +3059,16 @@ function getValues(prefix, tipo = 'air') {
                 noResponse: true
             };
         }
+
+        // 🔥 NUEVO: Manejar "sr" como sin respuesta (igual que NR)
+if (rawValue === "SR") {
+    return {
+        x: xPositions[index],
+        y: 110,
+        noResponse: true,
+        esNR: true
+    };
+}
 
         // 🔥 NUEVO: Manejar "-" como sin respuesta (NR)
 if (rawValue === "-") {
@@ -4452,7 +4465,7 @@ boneSymbols.forEach(item => {
 // Recorrer los puntos de vía aérea que tienen esNR = true
 const allInputs = document.querySelectorAll('#od-inputs input, #oi-inputs input');
 allInputs.forEach(input => {
-    if (input.value.trim() === '-') {
+    if (input.value.trim() === 'sr') {
         const id = input.id;
         const ear = id.startsWith('od') ? 'od' : 'oi';
         const freq = id.split('_')[1];

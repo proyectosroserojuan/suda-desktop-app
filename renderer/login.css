@@ -129,6 +129,18 @@ body {
   opacity: 0.9;
 }
 
+/* Estilo especial para mensaje de bienvenida */
+.custom-message.welcome .msg-header {
+    background: #1a5276;
+    border-bottom: 2px solid #2e86c1;
+}
+
+.custom-message.welcome .msg-body p {
+    font-size: 16px;
+    font-weight: 500;
+    color: #1a5276;
+}
+
 /* LINK */
 .login-card a {
   text-align: center;
@@ -155,6 +167,252 @@ body {
   height: auto;
   max-height: calc(100px * var(--escala));
   object-fit: contain;
+}
+
+
+/* Sistema de mensajes personalizado */
+.custom-message {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: white;
+    padding: 30px 40px;
+    border-radius: 12px;
+    box-shadow: 0 10px 60px rgba(0,0,0,0.3);
+    z-index: 9999;
+    max-width: 400px;
+    text-align: center;
+    animation: slideDown 0.3s ease;
+}
+
+.custom-message.error {
+    border-left: 6px solid #525252;
+}
+
+.custom-message.success {
+    border-left: 6px solid #44bb44;
+}
+
+.custom-message h3 {
+    margin: 0 0 15px 0;
+    font-size: 20px;
+}
+
+.custom-message p {
+    margin: 0 0 20px 0;
+    color: #555;
+    font-size: 16px;
+}
+
+.custom-message button {
+    background: #2a5298;
+    color: white;
+    border: none;
+    padding: 10px 30px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background 0.2s;
+}
+
+.custom-message button:hover {
+    background: #1e3c72;
+}
+
+.custom-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 9998;
+}
+
+/* ============================================
+   SISTEMA DE MENSAJES - ESTILO CORPORATIVO SERIO
+   ============================================ */
+
+.custom-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 9998;
+    backdrop-filter: blur(2px);
+}
+
+.custom-message {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: #ffffff;
+    border: none;
+    box-shadow: 0 8px 40px rgba(0, 0, 0, 0.25);
+    z-index: 9999;
+    min-width: 400px;
+    max-width: 450px;
+    padding: 0;
+    border-radius: 2px;
+}
+
+/* BARRA DE TÍTULO - NEUTRA Y SOBRIA */
+.custom-message .msg-header {
+    background: #2c3e50;
+    color: #ffffff;
+    padding: 14px 24px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-family: 'Segoe UI', 'Arial', sans-serif;
+    cursor: default;
+    user-select: none;
+    border-bottom: 1px solid #34495e;
+}
+
+.custom-message .msg-header .icon {
+    font-size: 16px;
+    font-weight: 400;
+    width: 24px;
+    text-align: center;
+    opacity: 0.9;
+}
+
+.custom-message .msg-header h3 {
+    margin: 0;
+    font-size: 14px;
+    font-weight: 500;
+    color: #ffffff;
+    letter-spacing: 0.5px;
+    font-family: 'Segoe UI', 'Arial', sans-serif;
+    text-transform: uppercase;
+}
+
+/* CUERPO DEL MENSAJE */
+.custom-message .msg-body {
+    padding: 24px 24px 20px 24px;
+    background: #ffffff;
+}
+
+.custom-message .msg-body p {
+    margin: 0 0 20px 0;
+    color: #2c3e50;
+    font-size: 14px;
+    line-height: 1.6;
+    font-family: 'Segoe UI', 'Arial', sans-serif;
+    font-weight: 400;
+}
+
+/* BOTÓN - ESTILO CORPORATIVO */
+.custom-message .msg-body button {
+    background: #34495e;
+    color: #ffffff;
+    border: none;
+    padding: 8px 32px;
+    font-size: 13px;
+    font-family: 'Segoe UI', 'Arial', sans-serif;
+    cursor: pointer;
+    float: right;
+    min-width: 90px;
+    letter-spacing: 0.5px;
+    border-radius: 2px;
+    font-weight: 500;
+    transition: background 0.15s ease;
+    text-transform: uppercase;
+}
+
+.custom-message .msg-body button:hover {
+    background: #2c3e50;
+}
+
+.custom-message .msg-body button:active {
+    background: #1a2632;
+}
+
+.custom-message .msg-body button:focus {
+    outline: 2px solid #95a5a6;
+    outline-offset: 2px;
+}
+
+/* LIMPIAR FLOAT */
+.custom-message .msg-body::after {
+    content: '';
+    display: table;
+    clear: both;
+}
+
+/* VARIANTES DE COLOR (SUTILES, NO ESTRIDENTES) */
+.custom-message.error .msg-header {
+    background: #949494;
+    border-bottom-color: #adadad;
+}
+
+.custom-message.error .msg-header .icon {
+    color: #a7a3a3;
+}
+
+.custom-message.success .msg-header {
+    background: #9dada4;
+    border-bottom-color: #18241d;
+}
+
+.custom-message.success .msg-header .icon {
+    color: #2ecc71;
+}
+
+.custom-message.info .msg-header {
+    background: #2980b9;
+    border-bottom-color: #2471a3;
+}
+
+/* ANIMACIÓN SUTIL Y PROFESIONAL */
+@keyframes fadeInProfessional {
+    from {
+        opacity: 0;
+        transform: translate(-50%, -48%) scale(0.97);
+    }
+    to {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1);
+    }
+}
+
+.custom-message {
+    animation: fadeInProfessional 0.2s ease;
+}
+
+/* RESPONSIVE */
+@media (max-width: 480px) {
+    .custom-message {
+        min-width: 320px;
+        max-width: 360px;
+    }
+    
+    .custom-message .msg-body {
+        padding: 20px 20px 16px 20px;
+    }
+    
+    .custom-message .msg-body button {
+        width: 100%;
+        float: none;
+    }
+}
+
+
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translate(-50%, -60%);
+    }
+    to {
+        opacity: 1;
+        transform: translate(-50%, -50%);
+    }
 }
 
 /* AUDIOLOGO INFO */

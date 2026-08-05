@@ -133,13 +133,13 @@ function dibujarNR() {
         const valOD = inputOD ? inputOD.value.trim() : '';
         const valOI = inputOI ? inputOI.value.trim() : '';
         
-        if (valOD === '-' || valOD === 'NR' || valOD === 'NR2') {
+        if (valOD === 'sr' || valOD === 'NR' || valOD === 'NR2') {
             const chartX = chart.scales.x.getPixelForValue(xPositions[freqIndex]);
             const chartY = chart.scales.y.getPixelForValue(110);
             posOD.push({ x: chartX * scaleX, y: chartY * scaleY, freq });
         }
         
-        if (valOI === '-' || valOI === 'NR' || valOI === 'NR2') {
+        if (valOI === 'sr' || valOI === 'NR' || valOI === 'NR2') {
             const chartX = chart.scales.x.getPixelForValue(xPositions[freqIndex]);
             const chartY = chart.scales.y.getPixelForValue(110);
             posOI.push({ x: chartX * scaleX, y: chartY * scaleY, freq });
@@ -178,7 +178,7 @@ function dibujarNR() {
             for (let j = idxAnterior + 1; j < idxActual; j++) {
                 const freqIntermedia = frecuenciasNR[j];
                 const inputCheck = document.getElementById(ear === 'od' ? `od-bone_${freqIntermedia}` : `oi-bone_${freqIntermedia}`);
-                if (inputCheck && (inputCheck.value.trim() === '-' || inputCheck.value.trim() === 'NR' || inputCheck.value.trim() === 'NR2')) {
+                if (inputCheck && (inputCheck.value.trim() === 'sr' || inputCheck.value.trim() === 'NR' || inputCheck.value.trim() === 'NR2')) {
                     // Hay otra NR entre medio, no dibujar guión
                     hayNRIntermedio = false;
                     break;
@@ -229,7 +229,7 @@ function inicializarSinRespuestaOsea() {
         
         if (inputOD) {
             inputOD.addEventListener('input', function() {
-                if (this.value.trim() === '-' || this.value === '') {
+                if (this.value.trim() === 'sr' || this.value === '') {
                     setTimeout(dibujarNR, 50);
                 }
             });
@@ -237,7 +237,7 @@ function inicializarSinRespuestaOsea() {
         
         if (inputOI) {
             inputOI.addEventListener('input', function() {
-                if (this.value.trim() === '-' || this.value === '') {
+                if (this.value.trim() === 'sr' || this.value === '') {
                     setTimeout(dibujarNR, 50);
                 }
             });

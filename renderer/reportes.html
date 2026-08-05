@@ -380,6 +380,216 @@
             font-weight: 700;
         }
 
+        /* ===== MEJORAS DE INTERFAZ ===== */
+
+/* Tarjeta más moderna */
+.report-card {
+    background: white;
+    border-radius: 16px;
+    border: none;
+    padding: 32px;
+    max-width: 800px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+}
+
+.report-card h2 {
+    font-size: 1.2rem;
+    margin-bottom: 20px;
+    color: #1f2937;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.report-card h2::before {
+    content: "📊";
+    font-size: 1.4rem;
+}
+
+/* Botones con iconos mejorados */
+.btn-pdf {
+    background: #dc2626;
+    color: white;
+    padding: 12px 28px;
+}
+
+.btn-pdf:hover {
+    background: #b91c1c;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(220, 38, 38, 0.35);
+}
+
+.btn-excel {
+    background: #16a34a;
+    color: white;
+    padding: 12px 28px;
+}
+
+.btn-excel:hover {
+    background: #15803d;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(22, 163, 74, 0.35);
+}
+
+/* Mejora en preview de estadísticas */
+.preview-container {
+    background: #f8fafc;
+    border-radius: 12px;
+    padding: 20px;
+    border: 1px solid #e2e8f0;
+    margin-top: 24px;
+}
+
+.preview-container h3 {
+    font-size: 0.95rem;
+    color: #475569;
+    margin-bottom: 16px;
+    font-weight: 600;
+}
+
+.stat-total {
+    background: white;
+    padding: 20px;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+    text-align: center;
+    transition: transform 0.2s;
+}
+
+.stat-total:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.stat-total .number {
+    font-size: 2.8rem;
+    font-weight: 700;
+    color: #2563eb;
+}
+
+.stat-total .label {
+    font-size: 13px;
+    color: #64748b;
+    margin-top: 4px;
+}
+
+/* Entidades con mejor diseño */
+.stat-entidades {
+    background: white;
+    padding: 16px 20px;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+}
+
+.stat-entidades .entidad-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 6px 0;
+    border-bottom: 1px solid #f1f5f9;
+    font-size: 14px;
+}
+
+.stat-entidades .entidad-item:last-child {
+    border-bottom: none;
+}
+
+.stat-entidades .entidad-nombre {
+    color: #334155;
+}
+
+.stat-entidades .entidad-cantidad {
+    font-weight: 600;
+    color: #1e293b;
+    background: #e2e8f0;
+    padding: 0 10px;
+    border-radius: 20px;
+    font-size: 13px;
+}
+
+/* Estados con colores más suaves */
+.estado-item {
+    text-align: center;
+    padding: 10px;
+    border-radius: 8px;
+    background: #f8fafc;
+    transition: transform 0.2s;
+}
+
+.estado-item:hover {
+    transform: translateY(-2px);
+}
+
+.estado-item .cantidad {
+    font-size: 1.8rem;
+    font-weight: 700;
+}
+
+.estado-pendiente .cantidad { color: #d97706; }
+.estado-pendiente { background: #fffbeb; }
+
+.estado-atendida .cantidad { color: #059669; }
+.estado-atendida { background: #ecfdf5; }
+
+.estado-cancelada .cantidad { color: #dc2626; }
+.estado-cancelada { background: #fef2f2; }
+
+.estado-no_asistio .cantidad { color: #6b7280; }
+.estado-no_asistio { background: #f3f4f6; }
+
+/* Responsive mejorado */
+@media (max-width: 640px) {
+    .user-info {
+        flex-direction: column;
+        gap: 12px;
+        align-items: stretch;
+    }
+    
+    .user-info .user-details {
+        justify-content: center;
+    }
+    
+    .user-info > div:last-child {
+        display: flex !important;
+        flex-direction: column;
+        gap: 8px;
+    }
+    
+    .btn-back-dashboard,
+    .logout-btn {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .report-card {
+        padding: 20px;
+    }
+    
+    .stat-total .number {
+        font-size: 2rem;
+    }
+}
+
+        .btn-back-dashboard {
+    background: #2563eb;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.btn-back-dashboard:hover {
+    background: #1d4ed8;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+}
+
         .stat-estados .estado-item .label {
             font-size: 11px;
             color: #6b7280;
@@ -426,7 +636,7 @@
 <div class="dashboard-container">
     <aside class="sidebar">
         <div class="sidebar-logo">
-            <img src="../img/saninlogo.jpg" alt="Logo U.D.A." onerror="this.style.display='none'; this.parentElement.innerHTML='<h2>🏥 Clínica Auditiva</h2><span>Especialistas en Audición</span>'">
+            <img src="../img/saninlogo.jpg" alt="Logo U.D.A." onerror="this.style.display='none'; this.parentElement.innerHTML='<h2>S.U.D.A</h2><span>Sistema de Unidad Diagnostica Auditiva</span>'">
             <h2>Clínica Auditiva</h2>
             <span>Especialistas en Audición</span>
         </div>
@@ -436,23 +646,33 @@
     <main class="content">
         <div class="user-info">
             <div class="user-details">
-                <div class="user-avatar" id="userAvatar">👤</div>
+                <div class="user-avatar" id="userAvatar"></div>
                 <div>
                     <span id="userNombre" style="font-weight: 500;"></span>
                     <span class="rol" id="userRol"></span>
                 </div>
+
+
             </div>
+
+            <div style="display: flex; gap: 10px; align-items: center;">
+        <!-- ✅ BOTÓN VOLVER AL DASHBOARD -->
+        <button class="btn-back-dashboard" onclick="volverDashboard()">
+            ← Volver al Dashboard
+        </button>
+        
+    </div>
             <button class="logout-btn" onclick="cerrarSesion()">Cerrar Sesión</button>
         </div>
 
-        <h1>📊 Reportes de Citas</h1>
+        <h1>Reportes de Citas</h1>
         <p class="subtitle">Genera reportes mensuales de citas por entidad y estado</p>
 
         <div class="report-card">
             <h2>Selecciona el mes</h2>
             <div class="filter-group">
                 <div class="filter-row">
-                    <label for="mesSelector">📅 Mes:</label>
+                    <label for="mesSelector">Mes:</label>
                     <input type="month" id="mesSelector" value="">
                 </div>
             </div>
@@ -469,7 +689,7 @@
             </div>
 
             <div class="preview-container" id="previewContainer">
-                <h3>📈 Resumen del mes</h3>
+                <h3>Resumen del mes</h3>
                 <div class="preview-stats">
                     <div class="stat-total">
                         <div class="number" id="totalCitas">0</div>
@@ -483,7 +703,7 @@
                         <!-- Se llena dinámicamente -->
                     </div>
                     <div class="stat-estados" id="estadosList">
-                        <strong style="font-size: 13px; color: #374151;">📌 Por estado:</strong>
+                        <strong style="font-size: 13px; color: #374151;">Por estado:</strong>
                         <div class="estados-grid" id="estadosGrid">
                             <!-- Se llena dinámicamente -->
                         </div>
@@ -502,22 +722,22 @@
         administrador: [
             { nombre: 'Pacientes', archivo: 'pacientes.html' },
             { nombre: 'Citas', archivo: 'citas.html' },
-            { nombre: '🎧 Audiometrías', archivo: 'audiometria.html' },
-            { nombre: '🔊 Audiometría Tonal', archivo: 'AudiometríaTonalCompleta.html' },
-            { nombre: '🗣️ Logoaudiometría', archivo: 'Logoaudiometria.html' },
-            { nombre: '📊 Impedanciometría', archivo: 'Inpedanciometria.html' },
-            { nombre: '📄 Informes', archivo: 'informes.html' },
-            { nombre: '⚙️ Configuración', archivo: 'configuracion.html' }
+            { nombre: 'Audiometrías', archivo: 'audiometria.html' },
+            { nombre: 'Audiometría Tonal', archivo: 'AudiometríaTonalCompleta.html' },
+            { nombre: 'Logoaudiometría', archivo: 'Logoaudiometria.html' },
+            { nombre: 'Impedanciometría', archivo: 'Inpedanciometria.html' },
+            { nombre: 'Informes', archivo: 'informes.html' },
+            { nombre: 'Configuración', archivo: 'configuracion.html' }
         ],
         secretaria: [
-            { nombre: '👥 Pacientes', archivo: 'pacientes.html' },
-            { nombre: '📅 Citas', archivo: 'citas.html' },
-            { nombre: '📊 Reportes', archivo: 'reportes.html', active: true }
+            { nombre: 'Pacientes', archivo: 'pacientes.html' },
+            { nombre: 'Citas', archivo: 'citas.html' },
+            { nombre: 'Reportes', archivo: 'reportes.html', active: true }
         ],
         audiologo: [
-            { nombre: '📅 Citas Semana', archivo: 'citassemana.html' },
-            { nombre: '🔊 Audiometría Tonal', archivo: 'AudiometriaTonal.html' },
-            { nombre: '🗣️ Logoaudiometría', archivo: 'Logoaudiometria.html' },
+            { nombre: 'Citas Semana', archivo: 'citassemana.html' },
+            { nombre: 'Audiometría Tonal', archivo: 'AudiometriaTonal.html' },
+            { nombre: 'Logoaudiometría', archivo: 'Logoaudiometria.html' },
         ]
     };
 
@@ -807,6 +1027,14 @@ async function generarExcel() {
     // ============================================
     // INICIALIZACIÓN
     // ============================================
+
+    function volverDashboard() {
+    if (window.api && window.api.navegar) {
+        window.api.navegar('dashboard.html');
+    } else {
+        window.location.href = 'dashboard.html';
+    }
+}
 
     async function cargarUsuario() {
         try {

@@ -1,3 +1,22 @@
+0
+
+/*
+const { Pool } = require("pg");
+
+const pool = new Pool({
+  user: "postgres",
+  host: "DESKTOP-SANING", 
+  database: "consultorio_medico",
+  password: "audio55pro",  
+  port: 5432,
+  family: 4,
+
+});
+
+module.exports = pool;
+*/
+
+
 /*
 const { Pool } = require("pg");
 
@@ -28,21 +47,9 @@ module.exports = pool;
 
 
 
-/*
-const { Pool } = require("pg");
 
-const pool = new Pool({
-  user: "postgres",
-  host: "DESKTOP-SANING", 
-  database: "consultorio_medico",
-  password: "audio55pro",  
-  port: 5432,
-  family: 4,
 
-});
 
-module.exports = pool;
-*/
 
 
 
