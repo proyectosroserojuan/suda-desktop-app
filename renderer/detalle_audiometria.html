@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Detalle - Audiometría Tonal</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f0f7f2;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            padding: 30px;
+        }
+
+        /* 🟢 HEADER VERDE MENTA */
+        .header {
+            background: linear-gradient(135deg, #00695c, #00897b, #26a69a);
+            color: white;
+            padding: 20px 25px;
+            border-radius: 8px;
+            margin-bottom: 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .header h1 { font-size: 24px; }
+        .header .badge {
+            background: #4caf50;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+        }
+
+        .btn-volver {
+            background: #6c757d;
+            color: white;
+            border: none;
+            padding: 10px 25px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+            margin-bottom: 20px;
+        }
+        .btn-volver:hover { background: #5a6268; }
+
+        .section {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 1px solid #e9ecef;
+        }
+        .section-title {
+            color: #00695c;
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            border-bottom: 2px solid #00695c;
+            padding-bottom: 8px;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .info-item {
+            background: white;
+            padding: 12px 15px;
+            border-radius: 6px;
+            border: 1px solid #e9ecef;
+        }
+        .info-item .label {
+            font-size: 12px;
+            color: #6c757d;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .info-item .value {
+            font-size: 16px;
+            font-weight: 500;
+            color: #212529;
+            margin-top: 3px;
+        }
+
+        .grafica-container {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #e9ecef;
+            margin-top: 10px;
+        }
+        .grafica-container img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin: 0 auto;
+        }
+
+        .diagnostico-box {
+            background: #e0f2f1;
+            border-left: 4px solid #00695c;
+            padding: 15px;
+            border-radius: 4px;
+            margin-top: 10px;
+        }
+        .diagnostico-box .label {
+            font-weight: 600;
+            color: #00695c;
+        }
+
+        .observaciones-box {
+            background: #fff3e0;
+            border-left: 4px solid #ff9800;
+            padding: 15px;
+            border-radius: 4px;
+            margin-top: 10px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 50px;
+            color: #666;
+        }
+        .loading .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #00695c;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .error {
+            background: #ffebee;
+            color: #c62828;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .badge-estado {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        .badge-pendiente { background: #fff3e0; color: #e65100; }
+        .badge-atendida { background: #e8f5e9; color: #2e7d32; }
+        .badge-cancelada { background: #ffebee; color: #c62828; }
+
+        .grid-3 {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 15px;
+        }
+
+        @media (max-width: 768px) {
+            .grid-2 { grid-template-columns: 1fr; }
+            .grid-3 { grid-template-columns: 1fr; }
+            .header { flex-direction: column; text-align: center; gap: 10px; }
+        }
+    </style>
+</head>
+<body>
+    <button class="btn-volver" onclick="window.close()">← Volver</button>
+    
+    <div class="container" id="detalleContainer">
+        <div class="loading">
+            <div class="spinner"></div>
+            <p>Cargando detalles de Audiometría...</p>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('📄 detalle_audiometria: Esperando datos...');
+            
+            window.api.onCargarDetalles(function(datos) {
+                console.log('📥 Datos recibidos:', datos);
+                mostrarDetalles(datos);
+            });
+        });
+
+        // ============================================
+// GENERAR FILAS DE FRECUENCIAS PARA AUDIOMETRÍA
+// ============================================
+function generarFilasFrecuencias(valoresOD, valoresOI) {
+    // Frecuencias estándar en Audiometría Tonal
+    const frecuencias = ['250', '500', '750', '1000', '1500', '2000', '3000', '4000', '6000', '8000'];
+    
+    // Parsear los valores si son strings JSON
+    let od = valoresOD;
+    let oi = valoresOI;
+    
+    // Si son strings, intentar parsearlos
+    if (typeof od === 'string') {
+        try { od = JSON.parse(od); } catch(e) { od = {}; }
+    }
+    if (typeof oi === 'string') {
+        try { oi = JSON.parse(oi); } catch(e) { oi = {}; }
+    }
+    
+    // Si no hay valores, mostrar mensaje
+    if (!od || !oi || Object.keys(od).length === 0) {
+        return `
+            <tr>
+                <td colspan="5" style="padding: 15px; text-align: center; color: #999;">
+                    No hay datos de frecuencias disponibles
+                </td>
+            </tr>
+        `;
+    }
+    
+    // Generar filas para cada frecuencia
+    let filas = '';
+    frecuencias.forEach(freq => {
+        const valOD = od[freq] || '';
+        const valOI = oi[freq] || '';
+        
+        // Determinar si el valor es vía aérea o vía ósea (si hay diferencia)
+        // En la tabla audiometrias, valores_od y valores_oi almacenan todos los valores
+        // Podemos mostrar el valor principal (vía aérea) y si existe vía ósea, mostrarla en otra columna
+        
+        // Por ahora mostramos el valor guardado (que puede ser vía aérea o el que se guardó)
+        filas += `
+            <tr>
+                <td style="padding: 8px 10px; border: 1px solid #e0e0e0; text-align: center; font-weight: 600; background: #f5f5f5;">
+                    ${freq}
+                </td>
+                <td style="padding: 8px 10px; border: 1px solid #e0e0e0; text-align: center; background: #e8f5e9;">
+                    ${valOD || '-'}
+                </td>
+                <td style="padding: 8px 10px; border: 1px solid #e0e0e0; text-align: center; background: #e8f5e9; color: #666; font-size: 12px;">
+                    ${od[`${freq}_osea`] || '-'}
+                </td>
+                <td style="padding: 8px 10px; border: 1px solid #e0e0e0; text-align: center; background: #fff3e0;">
+                    ${valOI || '-'}
+                </td>
+                <td style="padding: 8px 10px; border: 1px solid #e0e0e0; text-align: center; background: #fff3e0; color: #666; font-size: 12px;">
+                    ${oi[`${freq}_osea`] || '-'}
+                </td>
+            </tr>
+        `;
+    });
+    
+    return filas;
+}
+
+        function mostrarDetalles(datos) {
+            const container = document.getElementById('detalleContainer');
+            
+            if (!datos || !datos.cita) {
+                container.innerHTML = `<div class="error">❌ No se encontraron datos del examen</div>`;
+                return;
+            }
+
+            const cita = datos.cita || {};
+            const audiometria = cita.examenes?.audiometria || null;
+
+            if (!audiometria) {
+                container.innerHTML = `<div class="error">❌ No se encontró Audiometría Tonal asociada a esta cita</div>`;
+                return;
+            }
+
+            let html = `
+                <!-- HEADER VERDE MENTA -->
+                <div class="header">
+                    <div>
+                        <h1>🎧 Audiometría Tonal</h1>
+                        <div style="margin-top: 5px; font-size: 14px; opacity: 0.9;">
+                            ${cita.paciente_nombre || 'Paciente'} | 
+                            ${cita.entidad_nombre || 'Sin entidad'}
+                        </div>
+                    </div>
+                    <div>
+                        <span class="badge-estado badge-${cita.estado || 'pendiente'}">
+                            ${cita.estado || 'pendiente'}
+                        </span>
+                    </div>
+                </div>
+
+                <!-- INFORMACIÓN DEL PACIENTE -->
+                <div class="section">
+                    <div class="section-title">Información del Paciente</div>
+                    <div class="grid-2">
+                        <div class="info-item">
+                            <div class="label">Nombre</div>
+                            <div class="value">${cita.paciente_nombre || 'N/A'}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="label">Documento</div>
+                            <div class="value">${cita.paciente_documento || 'N/A'}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="label">Teléfono</div>
+                            <div class="value">${cita.paciente_telefono || 'N/A'}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="label">Email</div>
+                            <div class="value">${cita.paciente_email || 'N/A'}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="label">Fecha de Nacimiento</div>
+                            <div class="value">${formatearFecha(cita.paciente_fecha_nacimiento) || 'N/A'}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="label">Entidad</div>
+                            <div class="value">${cita.entidad_nombre || 'N/A'}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- RESULTADOS AUDIOMETRÍA -->
+<!-- RESULTADOS AUDIOMETRÍA -->
+<div class="section">
+    <div class="section-title">Resultados - Audiometría Tonal</div>
+    
+    <!-- 📊 TABLA DE FRECUENCIAS -->
+    <div style="margin-bottom: 20px; overflow-x: auto;">
+        <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
+            <thead>
+                <tr style="background: #e0f2f1;">
+                    <th style="padding: 10px; border: 1px solid #b2dfdb; text-align: center;">Frecuencia (Hz)</th>
+                    <th style="padding: 10px; border: 1px solid #b2dfdb; text-align: center; background: #e8f5e9;">OD (Vía Aérea)</th>
+                    <th style="padding: 10px; border: 1px solid #b2dfdb; text-align: center; background: #e8f5e9;">OD (Vía Ósea)</th>
+                    <th style="padding: 10px; border: 1px solid #b2dfdb; text-align: center; background: #fff3e0;">OI (Vía Aérea)</th>
+                    <th style="padding: 10px; border: 1px solid #b2dfdb; text-align: center; background: #fff3e0;">OI (Vía Ósea)</th>
+                </tr>
+            </thead>
+            <tbody>
+                ${generarFilasFrecuencias(audiometria.valores_od, audiometria.valores_oi)}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="grid-2">
+        <div>
+            <h3 style="color: #00695c; margin-bottom: 10px;">Oído Derecho (OD)</h3>
+            <div class="info-item">
+                <div class="label">PTA Vía Aérea</div>
+                <div class="value">${audiometria.pta_via_aerea_od || 'N/A'}</div>
+            </div>
+            <div class="info-item" style="margin-top: 8px;">
+                <div class="label">PTA Vía Ósea</div>
+                <div class="value">${audiometria.pta_via_osea_od || 'N/A'}</div>
+            </div>
+            <div class="diagnostico-box" style="margin-top: 10px;">
+                <div class="label">Diagnóstico OD</div>
+                <div style="margin-top: 5px;">${audiometria.diagnostico_od || 'Sin diagnóstico'}</div>
+            </div>
+        </div>
+        <div>
+            <h3 style="color: #00695c; margin-bottom: 10px;">Oído Izquierdo (OI)</h3>
+            <div class="info-item">
+                <div class="label">PTA Vía Aérea</div>
+                <div class="value">${audiometria.pta_via_aerea_oi || 'N/A'}</div>
+            </div>
+            <div class="info-item" style="margin-top: 8px;">
+                <div class="label">PTA Vía Ósea</div>
+                <div class="value">${audiometria.pta_via_osea_oi || 'N/A'}</div>
+            </div>
+            <div class="diagnostico-box" style="margin-top: 10px;">
+                <div class="label">Diagnóstico OI</div>
+                <div style="margin-top: 5px;">${audiometria.diagnostico_oi || 'Sin diagnóstico'}</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+                <!-- GRÁFICA -->
+                ${audiometria.grafica_base64 ? `
+                    <div class="section">
+                        <div class="section-title">📊 Gráfica - Audiometría Tonal</div>
+                        <div class="grafica-container">
+                            <img src="${audiometria.grafica_base64}" alt="Gráfica Audiometría" style="max-width: 100%;">
+                        </div>
+                    </div>
+                ` : ''}
+
+                <!-- OTOSCOPIA -->
+                ${audiometria.otoscopia ? `
+                    <div class="section">
+                        <div class="section-title">🔍 Otoscopia</div>
+                        <div style="background: white; padding: 15px; border-radius: 6px; border: 1px solid #e9ecef;">
+                            ${audiometria.otoscopia}
+                        </div>
+                    </div>
+                ` : ''}
+
+                <!-- OBSERVACIONES -->
+                ${audiometria.observaciones ? `
+                    <div class="section">
+                        <div class="section-title">📝 Observaciones</div>
+                        <div class="observaciones-box">
+                            ${audiometria.observaciones}
+                        </div>
+                    </div>
+                ` : ''}
+            `;
+
+            container.innerHTML = html;
+        }
+
+        function formatearFecha(fecha) {
+            if (!fecha) return null;
+            try {
+                const date = new Date(fecha);
+                return date.toLocaleString('es-ES', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+            } catch {
+                return fecha;
+            }
+        }
+    </script>
+</body>
+</html>

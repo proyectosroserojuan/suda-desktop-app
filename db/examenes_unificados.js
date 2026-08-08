@@ -212,7 +212,7 @@ async function obtenerExamenesConDetallesCita() {
 
 /**
  * VERIFICAR SI UNA CITA TIENE EXAMEN ASOCIADO
- */
+
 async function existeExamenPorCitaId(citaId) {
     const result = await pool.query(`
         SELECT id, tipo_examen 
@@ -223,10 +223,68 @@ async function existeExamenPorCitaId(citaId) {
     
     return result.rows[0] || null;
 }
+     */
 
 /**
  * OBTENER EXÁMENES AGRUPADOS POR CITA
  */
+
+/**
+ * VERIFICAR SI UNA CITA TIENE EXAMEN ASOCIADO (TODAS LAS TABLAS)
+ */
+async function existeExamenPorCitaId(citaId) {
+    console.log(`🔍 existeExamenPorCitaId - Cita ID: ${citaId}`);
+    
+    try {
+        // 1. Verificar en tabla unificada
+        let result = await pool.query(`
+            SELECT id, tipo_examen 
+            FROM examenes_audiologicos 
+            WHERE cita_id = $1
+            LIMIT 1
+        `, [citaId]);
+        
+        if (result.rows.length > 0) {
+            console.log(`   ✅ Encontrado en examenes_audiologicos: ${result.rows[0].tipo_examen}`);
+            return result.rows[0];
+        }
+        
+        // 2. Verificar en audiometrias
+        result = await pool.query(`
+            SELECT id, 'audiometria' as tipo_examen
+            FROM audiometrias 
+            WHERE cita_id = $1
+            LIMIT 1
+        `, [citaId]);
+        
+        if (result.rows.length > 0) {
+            console.log(`   ✅ Encontrado en audiometrias`);
+            return result.rows[0];
+        }
+        
+        // 3. Verificar en logoaudiometrias
+        result = await pool.query(`
+            SELECT id, 'logoaudiometria' as tipo_examen
+            FROM logoaudiometrias 
+            WHERE cita_id = $1
+            LIMIT 1
+        `, [citaId]);
+        
+        if (result.rows.length > 0) {
+            console.log(`   ✅ Encontrado en logoaudiometrias`);
+            return result.rows[0];
+        }
+        
+        console.log(`   ❌ No se encontró examen en ninguna tabla`);
+        return null;
+        
+    } catch (error) {
+        console.error('❌ Error en existeExamenPorCitaId:', error);
+        throw error;
+    }
+}
+
+
 async function obtenerExamenesPorCitas(citaIds) {
     if (!citaIds || citaIds.length === 0) {
         return [];

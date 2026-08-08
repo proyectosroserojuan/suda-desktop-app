@@ -224,6 +224,8 @@ async function eliminarCita(id) {
   }
 }
 
+
+/*
 async function obtenerCitasConEstadoExamen() {
     const result = await db.query(`
         SELECT 
@@ -251,6 +253,98 @@ async function obtenerCitasConEstadoExamen() {
     return result.rows;
 }
 
+*/
+
+// ============================================
+// OBTENER CITAS CON ESTADO DE EXAMEN (VERIFICA TODAS LAS TABLAS)
+// ============================================
+async function obtenerCitasConEstadoExamen() {
+    console.log('\n🔍 [citas.js] obtenerCitasConEstadoExamen - Iniciando...');
+    
+    try {
+        // 1. Obtener todas las citas con datos básicos
+        const citasResult = await db.query(`
+            SELECT 
+                c.id,
+                c.paciente_id,
+                c.fecha_cita,
+                c.hora_cita,
+                c.motivo,
+                c.estado,
+                c.prioridad,
+                p.nombre as paciente_nombre,
+                p.documento as paciente_documento,
+                p.telefono as paciente_telefono,
+                p.email as paciente_email,
+                p.fecha_nacimiento as paciente_fecha_nacimiento,
+                e.nombre as entidad_nombre,
+                e.id as entidad_id
+            FROM citas c
+            JOIN pacientes p ON c.paciente_id = p.id
+            LEFT JOIN entidades e ON c.entidad_id = e.id
+            ORDER BY c.fecha_cita DESC, c.hora_cita DESC
+        `);
+        
+        const citas = citasResult.rows;
+        console.log(`📊 Total citas encontradas: ${citas.length}`);
+        
+        // 2. Para cada cita, verificar si tiene examen en CUALQUIER tabla
+        for (let cita of citas) {
+            let tieneExamen = false;
+            
+            // 🔥 PASO 1: Verificar en tabla unificada (examenes_audiologicos)
+            const unifiedResult = await db.query(
+                `SELECT id FROM examenes_audiologicos WHERE cita_id = $1 LIMIT 1`,
+                [cita.id]
+            );
+            if (unifiedResult.rows.length > 0) {
+                tieneExamen = true;
+                console.log(`   ✅ Cita ${cita.id} - Tiene examen en examenes_audiologicos`);
+            }
+            
+            // 🔥 PASO 2: Si no tiene en unificada, verificar en audiometrias
+            if (!tieneExamen) {
+                const audioResult = await db.query(
+                    `SELECT id FROM audiometrias WHERE cita_id = $1 LIMIT 1`,
+                    [cita.id]
+                );
+                if (audioResult.rows.length > 0) {
+                    tieneExamen = true;
+                    console.log(`   ✅ Cita ${cita.id} - Tiene examen en audiometrias`);
+                }
+            }
+            
+            // 🔥 PASO 3: Si no tiene, verificar en logoaudiometrias
+            if (!tieneExamen) {
+                const logoResult = await db.query(
+                    `SELECT id FROM logoaudiometrias WHERE cita_id = $1 LIMIT 1`,
+                    [cita.id]
+                );
+                if (logoResult.rows.length > 0) {
+                    tieneExamen = true;
+                    console.log(`   ✅ Cita ${cita.id} - Tiene examen en logoaudiometrias`);
+                }
+            }
+            
+            // Asignar el resultado
+            cita.tiene_examen = tieneExamen;
+            
+            if (!tieneExamen) {
+                console.log(`   ❌ Cita ${cita.id} - Sin examen`);
+            }
+        }
+        
+        console.log(`✅ [citas.js] Finalizado. ${citas.filter(c => c.tiene_examen).length} citas con examen`);
+        return citas;
+        
+    } catch (error) {
+        console.error('❌ Error en obtenerCitasConEstadoExamen:', error);
+        throw error;
+    }
+}
+
+
+/*
 async function obtenerCitaConExamen(citaId) {
     console.log('🔍 Buscando cita con exámenes para ID:', citaId);
     
@@ -328,6 +422,108 @@ async function obtenerCitaConExamen(citaId) {
         examen_data: examenes.audiometria || examenes.logoaudiometria || null
     };
 }
+*/
+
+// ============================================
+// OBTENER CITA CON TODOS SUS EXÁMENES (TODAS LAS TABLAS)
+// ============================================
+async function obtenerCitaConExamen(citaId) {
+    console.log(`\n🔍 [citas.js] obtenerCitaConExamen - Cita ID: ${citaId}`);
+    
+    try {
+        // 1. Obtener datos de la cita
+        const citaResult = await db.query(`
+            SELECT 
+                c.*,
+                p.nombre as paciente_nombre,
+                p.documento as paciente_documento,
+                p.telefono as paciente_telefono,
+                p.email as paciente_email,
+                p.fecha_nacimiento as paciente_fecha_nacimiento,
+                e.nombre as entidad_nombre
+            FROM citas c
+            JOIN pacientes p ON c.paciente_id = p.id
+            LEFT JOIN entidades e ON c.entidad_id = e.id
+            WHERE c.id = $1
+        `, [citaId]);
+        
+        if (citaResult.rows.length === 0) {
+            console.log(`❌ Cita ${citaId} no encontrada`);
+            return null;
+        }
+        
+        const cita = citaResult.rows[0];
+        console.log(`✅ Cita encontrada: ${cita.paciente_nombre}`);
+        
+        // 2. Buscar exámenes en TODAS las tablas
+        const examenes = {
+            audiometria: null,
+            logoaudiometria: null
+        };
+        
+        // 🔥 BUSCAR EN TABLA UNIFICADA (examenes_audiologicos)
+        const unifiedResult = await db.query(`
+            SELECT * FROM examenes_audiologicos 
+            WHERE cita_id = $1 
+            ORDER BY fecha_registro DESC 
+            LIMIT 1
+        `, [citaId]);
+        
+        if (unifiedResult.rows.length > 0) {
+            const examen = unifiedResult.rows[0];
+            if (examen.tipo_examen === 'audiometria') {
+                examenes.audiometria = examen;
+                console.log(`   ✅ Audiometría encontrada en examenes_audiologicos (ID: ${examen.id})`);
+            } else if (examen.tipo_examen === 'logoaudiometria') {
+                examenes.logoaudiometria = examen;
+                console.log(`   ✅ Logoaudiometría encontrada en examenes_audiologicos (ID: ${examen.id})`);
+            }
+        }
+        
+        // 🔥 BUSCAR EN TABLA audiometrias (si no se encontró en unificada)
+        if (!examenes.audiometria) {
+            const audioResult = await db.query(`
+                SELECT * FROM audiometrias 
+                WHERE cita_id = $1 
+                ORDER BY fecha_registro DESC 
+                LIMIT 1
+            `, [citaId]);
+            
+            if (audioResult.rows.length > 0) {
+                examenes.audiometria = audioResult.rows[0];
+                console.log(`   ✅ Audiometría encontrada en tabla audiometrias (ID: ${examenes.audiometria.id})`);
+            }
+        }
+        
+        // 🔥 BUSCAR EN TABLA logoaudiometrias (si no se encontró en unificada)
+        if (!examenes.logoaudiometria) {
+            const logoResult = await db.query(`
+                SELECT * FROM logoaudiometrias 
+                WHERE cita_id = $1 
+                ORDER BY fecha_registro DESC 
+                LIMIT 1
+            `, [citaId]);
+            
+            if (logoResult.rows.length > 0) {
+                examenes.logoaudiometria = logoResult.rows[0];
+                console.log(`   ✅ Logoaudiometría encontrada en tabla logoaudiometrias (ID: ${examenes.logoaudiometria.id})`);
+            }
+        }
+        
+        // 3. Asignar exámenes a la cita
+        cita.examenes = examenes;
+        cita.tiene_examen = !!(examenes.audiometria || examenes.logoaudiometria);
+        
+        console.log(`📊 Resumen: Audiometría=${!!examenes.audiometria}, Logoaudiometría=${!!examenes.logoaudiometria}`);
+        console.log(`✅ [citas.js] Finalizado.`);
+        
+        return cita;
+        
+    } catch (error) {
+        console.error('❌ Error en obtenerCitaConExamen:', error);
+        throw error;
+    }
+}
 
 
 // Exportar las nuevas funciones
@@ -340,6 +536,7 @@ module.exports = {
   obtenerTodasLasCitas,
   actualizarCitaCompleta,  // ← NUEVA
   eliminarCita,
-      obtenerCitasConEstadoExamen,  // NUEVO
-    obtenerCitaConExamen           // NUEVO        // ← NUEVA
+  obtenerCitasConEstadoExamen,  // NUEVO
+  obtenerCitaConExamen        // NUEVO        // ← NUEVA
+
 };

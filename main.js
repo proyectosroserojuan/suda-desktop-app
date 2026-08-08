@@ -75,6 +75,7 @@ ipcMain.on('cerrar-modal', (event) => {
 // Abrir ventana de detalles
 // Abrir ventana de detalles
 // En main.js, actualiza el handler
+/*
 ipcMain.on('abrir-ventana-detalles', (event, datosExamen) => {
     const ventanaDetalles = new BrowserWindow({
         width: 1100,
@@ -98,6 +99,61 @@ ipcMain.on('abrir-ventana-detalles', (event, datosExamen) => {
     ventanaDetalles.once('ready-to-show', () => {
         ventanaDetalles.show();
         // Enviar los datos al renderer
+        ventanaDetalles.webContents.send('cargar-detalles', datosExamen);
+    });
+});
+
+*/
+
+// Abrir ventana de detalles (Audiometría o Logoaudiometría según el tipo)
+ipcMain.on('abrir-ventana-detalles', (event, datosExamen) => {
+    // Determinar qué tipo de examen mostrar
+    let archivoDetalle = 'detalle_resultado.html'; // fallback
+    let tituloVentana = 'Detalle del Examen';
+    
+    const cita = datosExamen.cita || {};
+    const examenes = cita.examenes || {};
+    
+    // Priorizar: si solo hay un examen, abrir su detalle específico
+    if (examenes.audiometria && !examenes.logoaudiometria) {
+        archivoDetalle = 'detalle_audiometria.html';
+        tituloVentana = 'Audiometría Tonal';
+    } else if (examenes.logoaudiometria && !examenes.audiometria) {
+        archivoDetalle = 'detalle_logoaudiometria.html';
+        tituloVentana = 'Logoaudiometría';
+    } else if (examenes.audiometria && examenes.logoaudiometria) {
+        // Si tiene ambos, usar el combinado
+        archivoDetalle = 'detalle_resultado.html';
+        tituloVentana = 'Exámenes Combinados';
+    } else {
+        // Si no hay exámenes, usar el combinado pero mostrar error
+        archivoDetalle = 'detalle_resultado.html';
+        tituloVentana = 'Sin Exámenes';
+    }
+    
+    console.log(`📄 Abriendo ventana: ${archivoDetalle} - ${tituloVentana}`);
+    
+    const ventanaDetalles = new BrowserWindow({
+        width: 1100,
+        height: 850,
+        resizable: true,
+        maximizable: true,
+        minimizable: true,
+        parent: BrowserWindow.getFocusedWindow(),
+        modal: true,
+        show: false,
+        webPreferences: {
+            nodeIntegration: false,
+            contextIsolation: true,
+            preload: path.join(__dirname, 'preload.js')
+        }
+    });
+
+    ventanaDetalles.setTitle(tituloVentana);
+    ventanaDetalles.loadFile(`renderer/${archivoDetalle}`);
+    
+    ventanaDetalles.once('ready-to-show', () => {
+        ventanaDetalles.show();
         ventanaDetalles.webContents.send('cargar-detalles', datosExamen);
     });
 });
