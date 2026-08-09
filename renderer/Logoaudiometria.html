@@ -2611,6 +2611,22 @@ document.querySelectorAll('.btn-rehacer').forEach(btn => {
 // ============================================
 // COMUNICACIÓN CON AudioLogo.html - CORREGIDO
 // ============================================
+
+function obtenerDiscriminacionOD() {
+    const p = document.getElementById('discriminacion_od_porcentaje')?.value || '';
+    const d = document.getElementById('discriminacion_od_db')?.value || '';
+    if (!p && !d) return '';
+    return `Discriminación del ${p}% en dB ${d} O.D`;
+}
+
+function obtenerDiscriminacionOI() {
+    const p = document.getElementById('discriminacion_oi_porcentaje')?.value || '';
+    const d = document.getElementById('discriminacion_oi_db')?.value || '';
+    if (!p && !d) return '';
+    return `Discriminación del ${p}% en dB ${d} O.I`;
+}
+
+
 window.addEventListener('message', function(event) {
     if (event.data.accion === 'obtenerTodoLogoaudiometria') {
         const urv_od = document.getElementById('od_urv')?.value || null;
@@ -2656,8 +2672,8 @@ window.addEventListener('message', function(event) {
                         pmax_od: pmax_od,
                         pmax_oi: pmax_oi,
                         diagnostico: document.getElementById('diagnostico')?.value || '',
-                        diagnostico_od: document.getElementById('diagnostico_od')?.value || '',
-                        diagnostico_oi: document.getElementById('diagnostico_oi')?.value || '',
+                        diagnostico_od: obtenerDiscriminacionOD(),  // ← Llama a la función
+                        diagnostico_oi: obtenerDiscriminacionOI(),  // ← Llama a la función
                         grafica: grafica,
                         // ✅ AGREGAR LAS BANDERAS NR
                         nr_flags: nr_flags
