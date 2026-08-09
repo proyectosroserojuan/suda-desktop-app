@@ -282,16 +282,23 @@ ipcMain.handle('regenerar-pdf', async (event, citaId) => {
         });
         
 // 2. Determinar según el MOTIVO de la cita qué tipo(s) de examen corresponden
-        const motivoLower = (cita.motivo || '').toLowerCase();
-        const requiereAudiometria = motivoLower.includes('audiometria') || motivoLower.includes('audiometría');
-        const requiereLogoaudiometria = motivoLower.includes('logoaudiometria');
+// DESPUÉS — comparación exacta contra el campo dedicado, con respaldo temporal para citas viejas
+const tipo = (cita.tipo_atencion || cita.motivo || '').trim();
+
+const tiposConAudiometria = ['Audiometría', 'Audiometria Tonal y Logoadiometria', 'Prepagada Audiometria Tonal', 'Prepagada Audiometria Tonal y Logoadiometria'];
+const tiposConLogoaudiometria = ['Logoaudiometria', 'Audiometria Tonal y Logoadiometria', 'Prepagada Logoaudiometria', 'Prepagada Audiometria Tonal y Logoadiometria'];
+
+const requiereAudiometria = tiposConAudiometria.includes(tipo);
+const requiereLogoaudiometria = tiposConLogoaudiometria.includes(tipo);
+
+console.log('📋 tipo_atencion de la cita:', tipo);
+console.log('📋 Requiere Audiometría:', requiereAudiometria, '| Requiere Logoaudiometría:', requiereLogoaudiometria);
+
+if (!requiereAudiometria && !requiereLogoaudiometria) {
+    throw new Error('Tipo de atención no reconocido: ' + tipo);
+}
         
-        console.log('📋 Motivo de la cita:', cita.motivo);
-        console.log('📋 Requiere Audiometría:', requiereAudiometria, '| Requiere Logoaudiometría:', requiereLogoaudiometria);
-        
-        if (!requiereAudiometria && !requiereLogoaudiometria) {
-            throw new Error('El motivo de la cita no coincide con ningún tipo de examen conocido: ' + cita.motivo);
-        }
+   
         
         const examenesDB = require('./db/examenes_unificados');
         const { obtenerAudiometriaPorCitaId } = require('./db/audiometrias');

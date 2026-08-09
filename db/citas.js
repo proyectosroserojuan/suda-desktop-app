@@ -6,8 +6,8 @@ async function crearCita(data) {
     const result = await db.query(
       `
       INSERT INTO citas
-      (paciente_id, entidad_id, fecha_cita, hora_cita, motivo, estado, prioridad)
-      VALUES ($1, $2, $3, $4, $5, $6, $7)
+      (paciente_id, entidad_id, fecha_cita, hora_cita, motivo, tipo_atencion, estado, prioridad)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
       RETURNING id
       `,
       [
@@ -16,13 +16,12 @@ async function crearCita(data) {
         data.fecha_cita,
         data.hora_cita,
         data.motivo,
+        data.tipo_atencion || null,
         data.estado || 'pendiente',
         data.prioridad || false
       ]
     );
-
     return result.rows[0];
-
   } catch (error) {
     throw error;
   }
@@ -183,6 +182,10 @@ async function actualizarCitaCompleta(id, data) {
       updates.push(`motivo = $${paramIndex++}`);
       values.push(data.motivo);
     }
+    if (data.tipo_atencion !== undefined) {
+       updates.push(`tipo_atencion = $${paramIndex++}`);
+      values.push(data.tipo_atencion);
+    }    
     if (data.estado !== undefined) {
       updates.push(`estado = $${paramIndex++}`);
       values.push(data.estado);

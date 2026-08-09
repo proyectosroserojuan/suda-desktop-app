@@ -391,14 +391,9 @@
     }
   }
 
-  function obtenerTipoAtencion(motivo) {
-    if (!motivo) return 'No especificado';
-    const tipos = ['Audiometría', 'Logoaudiometria', 'Impedanciometria', 'Control'];
-    for (const tipo of tipos) {
-      if (motivo.includes(tipo)) return tipo;
-    }
-    return motivo.split(' - ')[0] || 'Consulta';
-  }
+function obtenerTipoAtencion(cita) {
+  return cita.tipo_atencion || 'No especificado';
+}
 
   async function cargarEntidades() {
     try {
@@ -554,7 +549,7 @@ function aplicarFiltros() {
   tbody.innerHTML = citasPagina.map(cita => {
     const fechaFormateada = formatearFecha(cita.fecha_cita);
     const horaFormateada = formatearHora(cita.hora_cita);
-    const tipoAtencion = obtenerTipoAtencion(cita.motivo);
+    const tipoAtencion = obtenerTipoAtencion(cita);
     
     // Escapar datos para evitar problemas con comillas
     const citaJSON = JSON.stringify(cita).replace(/'/g, "&#39;");
@@ -651,14 +646,18 @@ document.getElementById('btnBuscar')?.addEventListener('click', aplicarFiltros);
   }
 
   // Función para determinar el tipo de certificado
-function determinarTipoCertificado(motivo) {
-  if (!motivo) return 'audiometria';
-  if (motivo.includes('Logoaudiometria')) return 'logoaudiometria';
-  if (motivo.includes('Audiometría')) return 'audiometria';
-  if (motivo.includes('Audiometria')) return 'audiometria';
-  return 'audiometria';
+function determinarTipoCertificado(tipoAtencion) {
+  const mapa = {
+    'Audiometría': 'audiometria',
+    'Logoaudiometria': 'logoaudiometria',
+    'Audiometria Tonal y Logoadiometria': 'combinado',
+    'Prepagada Audiometria Tonal': 'audiometria',
+    'Prepagada Logoaudiometria': 'logoaudiometria',
+    'Prepagada Audiometria Tonal y Logoadiometria': 'combinado',
+    'Cuadro Clinico Auditivo': 'combinado'
+  };
+  return mapa[tipoAtencion] || 'audiometria';
 }
-
 // Función para generar PDF desde una cita realizada
 // Función para generar PDF desde una cita realizada
 async function generarPDFcita(cita) {
@@ -682,7 +681,7 @@ async function generarPDFcita(cita) {
       targetBtn.disabled = true;
     }
     
-    const tipoCertificado = determinarTipoCertificado(cita.motivo);
+    const tipoCertificado = determinarTipoCertificado(cita.tipo_atencion);
     console.log('Tipo certificado:', tipoCertificado);
     
     // Buscar examen por cita_id
@@ -896,7 +895,7 @@ async function generarQRcita(cita) {
       targetBtn.disabled = true;
     }
     
-    const tipoCertificado = determinarTipoCertificado(cita.motivo);
+    const tipoCertificado = determinarTipoCertificado(cita.tipo_atencion);
 
     
     

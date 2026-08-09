@@ -629,20 +629,21 @@
               <input type="time" id="horaCita" required>
             </div>
 
-            <div class="group">
-              <label>Tipo atención</label>
-              <select id="tipoAtencion">
-                <option value="Audiometría">Audiometría</option>
-                <option value="Logoaudiometria">Logoaudiometria</option>
-                <option value="Impedanciometria">Impedanciometria</option>
-                <option value="Control">Control</option>
-                <option value="Audiometria Tonal y Logoadiometria">Audiometria Tonal y Logoadiometria</option>
-                <option value="Prepagada">Prepagada Audiometría Tonal</option>
-                <option value="Prepagada">Prepagada Logoaudiometria</option>
-                <option value="Prepagada">Prepagada Audiometria Tonal y Logoadiometria</option>
-                <option value="Cuadro Clinico Auditivo">Cuadro Clinico Auditivo</option>
-              </select>
-            </div>
+<div class="group">
+  <label>Tipo atención</label>
+  <select id="tipoAtencion" required>
+    <option value="">-- Seleccione --</option>
+    <option value="Audiometría">Audiometría</option>
+    <option value="Logoaudiometria">Logoaudiometria</option>
+    <option value="Impedanciometria">Impedanciometria</option>
+    <option value="Control">Control</option>
+    <option value="Audiometria Tonal y Logoadiometria">Audiometria Tonal y Logoadiometria</option>
+    <option value="Prepagada Audiometria Tonal">Prepagada Audiometria Tonal</option>
+    <option value="Prepagada Logoaudiometria">Prepagada Logoaudiometria</option>
+    <option value="Prepagada Audiometria Tonal y Logoadiometria">Prepagada Audiometria Tonal y Logoadiometria</option>
+    <option value="Cuadro Clinico Auditivo">Cuadro Clinico Auditivo</option>
+  </select>
+</div>
 
             <div class="group">
               <label>Estado</label>
@@ -1031,12 +1032,17 @@ function renderizarTabla() {
         document.getElementById('entidadSelect').value = cita.entidad_id || '';
         document.getElementById('fechaCita').value = cita.fecha_cita;
         document.getElementById('horaCita').value = cita.hora_cita;
-        document.getElementById('tipoAtencion').value = cita.motivo?.split(' - ')[0] || 'Audiometría';
+
+
+        //document.getElementById('tipoAtencion').value = cita.motivo?.split(' - ')[0] || 'Audiometría';
+
+
+
         document.getElementById('estado').value = cita.estado || 'pendiente';
         document.getElementById('prioridad').checked = cita.prioridad || false;
         
-        const motivoPartes = cita.motivo?.split(' - ');
-        document.getElementById('motivo').value = motivoPartes?.slice(1).join(' - ') || '';
+        document.getElementById('tipoAtencion').value = cita.tipo_atencion || '';
+        document.getElementById('motivo').value = cita.motivo || '';  
         
         // Guardar ID para actualizar en lugar de crear nueva
         formCita.dataset.editandoId = id;
@@ -1181,21 +1187,27 @@ window.cancelarCita = async function(id) {
       return;
     }
 
+
     const tipo = document.getElementById('tipoAtencion').value;
-    const motivoTexto = document.getElementById('motivo').value;
-    const motivo = tipo + (motivoTexto ? ' - ' + motivoTexto : '');
+const motivoTexto = document.getElementById('motivo').value;
+
+if (!tipo) {
+  mostrarMensaje('Seleccione el tipo de atención', 'error');
+  return;
+}
     const estado = document.getElementById('estado').value || 'pendiente';
     const prioridad = document.getElementById('prioridad').checked;
 
-    const citaData = {
-      paciente_id: parseInt(pacienteId),
-      fecha_cita: fechaCita,
-      entidad_id: parseInt(entidadId),
-      hora_cita: horaCita,
-      motivo: motivo,
-      estado: estado,
-      prioridad: prioridad
-    };
+const citaData = {
+  paciente_id: parseInt(pacienteId),
+  fecha_cita: fechaCita,
+  entidad_id: parseInt(entidadId),
+  hora_cita: horaCita,
+  tipo_atencion: tipo,      // valor exacto, controlado
+  motivo: motivoTexto,      // solo texto libre de la secretaria
+  estado: estado,
+  prioridad: prioridad
+};
 
     const editandoId = formCita.dataset.editandoId;
     

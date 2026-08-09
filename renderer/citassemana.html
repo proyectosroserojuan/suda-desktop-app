@@ -708,27 +708,31 @@ tr:hover {
     return `${startStr} - ${endStr}`;
   }
 
-function obtenerTipoAtencion(motivo) {
-    if (!motivo) return 'No especificado';
+function obtenerTipoAtencion(cita) {
+    // 🔥 USAR EL CAMPO DEDICADO TIPO_ATENCION, no el motivo
+    const tipo = cita.tipo_atencion || '';
     
-    // 🔥 Verificar primero el tipo combinado (más específico)
-    if (motivo.includes("Audiometria Tonal y Logoadiometria")) {
+    if (!tipo) return 'No especificado';
+    
+    // Verificar primero el tipo combinado (más específico)
+    if (tipo.includes("Audiometria Tonal y Logoadiometria") || 
+        tipo.includes("Cuadro Clinico Auditivo")) {
         return "Audiometria Tonal y Logoadiometria";
     }
-    if (motivo.includes("Logoaudiometria")) {
+    if (tipo.includes("Logoaudiometria")) {
         return "Logoaudiometria";
     }
-    if (motivo.includes("Audiometría")) {
+    if (tipo.includes("Audiometría") || tipo.includes("Audiometria Tonal")) {
         return "Audiometría";
     }
-    if (motivo.includes("Impedanciometria")) {
+    if (tipo.includes("Impedanciometria")) {
         return "Impedanciometria";
     }
-    if (motivo.includes("Control")) {
+    if (tipo.includes("Control")) {
         return "Control";
     }
     
-    return motivo.split(' - ')[0] || 'Consulta';
+    return tipo || 'Consulta';
 }
 
   async function cargarCitas() {
@@ -800,7 +804,7 @@ function obtenerTipoAtencion(motivo) {
     // CORREGIDO: El orden de las columnas debe coincidir con el <thead>
     tbody.innerHTML = citasFiltradas.map(cita => {
       const fecha = new Date(cita.fecha_cita);
-      const tipoAtencion = obtenerTipoAtencion(cita.motivo);
+      const tipoAtencion = obtenerTipoAtencion(cita);
       const tipoClass = `tipo-${tipoAtencion.replace(/[^a-zA-Z]/g, '')}`;
       const estado = cita.estado || 'pendiente';
       const esPrioritaria = cita.prioridad === true;
@@ -857,8 +861,8 @@ function obtenerTipoAtencion(motivo) {
     mostrarMensaje('Búsqueda limpiada', 'exito');
   }
 
-  function realizarAtencion(cita) {
-    const tipoAtencion = obtenerTipoAtencion(cita.motivo);
+// DESPUÉS
+function realizarAtencion(cita) {
     const pacienteCompleto = {
         id: cita.paciente_id,
         nombre: cita.paciente_nombre || "",
@@ -874,29 +878,29 @@ function obtenerTipoAtencion(motivo) {
         entidad_id: cita.entidad_id,
         entidad_nombre: cita.entidad_nombre,
         motivo: cita.motivo || "",
+        tipo_atencion: cita.tipo_atencion || "",
         paciente_id: cita.paciente_id,
         estado: cita.estado || "pendiente",
         prioridad: cita.prioridad || false
     };
     localStorage.setItem("pacienteActual", JSON.stringify(pacienteCompleto));
     localStorage.setItem("citaActual", JSON.stringify(citaCompleta));
-    
-    // 🆕 Si es el tipo combinado, ir a AudioLogo.html
-    if (tipoAtencion.includes("Audiometria Tonal y Logoadiometria") || 
-        (cita.motivo && cita.motivo.includes("Audiometria Tonal y Logoadiometria"))) {
-        window.location.href = "AudioLogo.html";
-    } 
-    else if (tipoAtencion.includes("Logoaudiometria")) {
-        window.location.href = "logoaudiometria.html";
-    } 
-    else if (tipoAtencion.includes("Cuadro Clinico Auditivo")) {
-        window.location.href = "AudioLogo.html";
-    } 
-    else if (tipoAtencion.includes("Audiometría")) {
-        window.location.href = "AudiometriaTonal.html";
-    } 
-    else {
-        alert("Este tipo de atención aún no tiene panel asignado.");
+
+    const rutas = {
+        'Audiometria Tonal y Logoadiometria': 'AudioLogo.html',
+        'Prepagada Audiometria Tonal y Logoadiometria': 'AudioLogo.html',
+        'Cuadro Clinico Auditivo': 'AudioLogo.html',
+        'Logoaudiometria': 'logoaudiometria.html',
+        'Prepagada Logoaudiometria': 'logoaudiometria.html',
+        'Audiometría': 'AudiometriaTonal.html',
+        'Prepagada Audiometria Tonal': 'AudiometriaTonal.html'
+    };
+
+    const ruta = rutas[cita.tipo_atencion];
+    if (ruta) {
+        window.location.href = ruta;
+    } else {
+        alert("Este tipo de atención aún no tiene panel asignado: " + (cita.tipo_atencion || 'sin definir'));
     }
 }
 
