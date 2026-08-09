@@ -271,13 +271,13 @@ const fontBold = font;
 
 page.drawText('PROMEDIO TONAL', { 
     x: 380,              // ← Ajusta la X para centrar el texto
-    y: fromTop(315), 
+    y: fromTop(250), 
     size: 10, 
     font: fontBold 
 });
 
     const pta = datosAudiometria.pta || {};
-    const tablaPTAY = 320;
+    const tablaPTAY = 260;
     const ptaTableX = 320;
     const ptaTableY = tablaPTAY + 20;
     const ptaRowHeight = 22;
@@ -311,11 +311,11 @@ page.drawText('PROMEDIO TONAL', {
 
     // DIAGNÓSTICOS
 // DIAGNÓSTICOS - MOVIDO MÁS A LA IZQUIERDA Y MÁS ABAJO
-const diagY = 640;        // ← CAMBIADO: 540 → 600 (más abajo)
-const diagX = 35;         // ← CAMBIADO: 290 → 50 (más a la izquierda)
+const diagY = 350;        // ← CAMBIADO: 540 → 600 (más abajo)
+const diagX = 320;    // ← CAMBIADO: 290 → 50 (más a la izquierda)
 
 // Título principal
-page.drawText('DIAGNÓSTICO', { 
+page.drawText('DIAGNÓSTICO AUDIOMETRIA TONAL', { 
     x: diagX, 
     y: fromTop(diagY), 
     size: 9, 
@@ -323,7 +323,7 @@ page.drawText('DIAGNÓSTICO', {
 });
 
 // O.D.
-page.drawText('Oido Derecho::', { 
+page.drawText('', { 
     x: diagX, 
     y: fromTop(diagY + 18), 
     size: 8, 
@@ -336,33 +336,81 @@ page.drawText((datosAudiometria.diagnostico_od || '').substring(0, 55), {
     font 
 });
 
-// O.I.
-page.drawText('Oido Izquierda:', { 
-    x: diagX, 
-    y: fromTop(diagY + 36), 
+
+//claveeeee
+// ============================================================
+// DIAGNÓSTICOS DE LOGOAUDIOMETRÍA
+// ============================================================
+const diagLogoY = 650;  // ← COORDENADA FIJA (desde arriba)
+const diagLogoX = 40;  // ← COORDENADA FIJA (desde la izquierda)
+
+// Título "DIAGNÓSTICO LOGOAUDIOMETRÍA"
+page.drawText('DIAGNÓSTICO LOGOAUDIOMETRÍA', { 
+    x: diagLogoX,        // ← CAMBIADO: diagX → diagLogoX
+    y: fromTop(diagLogoY), 
+    size: 9, 
+    font: fontBold 
+});
+
+// O.D. (Logoaudiometría)
+page.drawText('O.D', { 
+    x: diagLogoX,        // ← CAMBIADO: diagX → diagLogoX
+    y: fromTop(diagLogoY + 18), 
     size: 8, 
     font: fontBold 
 });
-page.drawText((datosAudiometria.diagnostico_oi || '').substring(0, 55), { 
-    x: diagX + 35, 
-    y: fromTop(diagY + 36), 
+page.drawText((datosLogoaudiometria.diagnostico_od || '').substring(0, 55), { 
+    x: diagLogoX + 35,   // ← CAMBIADO: diagX → diagLogoX
+    y: fromTop(diagLogoY + 18), 
     size: 8, 
     font 
 });
 
-// OBSERVACIONES
-page.drawText('OBSERVACIONES', { 
-    x: diagX, 
-    y: fromTop(diagY + 60), 
-    size: 9, 
+// O.I. (Logoaudiometría)
+page.drawText('O.I:', { 
+    x: diagLogoX,        // ← CAMBIADO: diagX → diagLogoX
+    y: fromTop(diagLogoY + 36), 
+    size: 8, 
     font: fontBold 
 });
-page.drawText((datosAudiometria.observaciones || '').substring(0, 70), { 
-    x: diagX, 
-    y: fromTop(diagY + 78), 
+page.drawText((datosLogoaudiometria.diagnostico_oi || '').substring(0, 55), { 
+    x: diagLogoX + 35,   // ← CAMBIADO: diagX → diagLogoX
+    y: fromTop(diagLogoY + 36), 
     size: 8, 
     font 
 });
+
+
+
+
+
+// O.I.
+//page.drawText('Oido Izquierda:', { 
+   // x: diagX, 
+ //   y: fromTop(diagY + 36), 
+  //  size: 8, 
+ //   font: fontBold 
+//});
+//page.drawText((datosAudiometria.diagnostico_oi || '').substring(0, 55), { 
+ //   x: diagX + 35, 
+ //   y: fromTop(diagY + 36), 
+ //   size: 8, 
+ //   font 
+//});
+
+// OBSERVACIONES
+//page.drawText('OBSERVACIONES', { 
+ //   x: diagX, 
+ //   y: fromTop(diagY + 60), 
+  //  size: 9, 
+  //  font: fontBold 
+//});
+//page.drawText((datosAudiometria.observaciones || '').substring(0, 70), { 
+  //  x: diagX, 
+ //   y: fromTop(diagY + 78), 
+ //   size: 8, 
+ //   font 
+//});
 
 
 

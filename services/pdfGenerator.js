@@ -532,9 +532,9 @@ generarLogoaudiometriaHTML(datos, entidad, imagenes) {
         
         <div class="datos-paciente">
           <div class="info-paciente">
-            <p><strong>Nombre:</strong> ${datos.paciente?.nombre || '_________________________'}</p>
-            <p><strong>C.C.:</strong> ${datos.paciente?.documento || '_________________________'}</p>
-            <p><strong>Entidad:</strong> ${entidad || '_________________________'}</p>
+            <p><strong>Nombre:</strong> ${datos.paciente?.nombre || ''}</p>
+            <p><strong>C.C.:</strong> ${datos.paciente?.documento || ''}</p>
+            <p><strong>Entidad:</strong> ${entidad || ''}</p>
           </div>
           <div class="oido-imagen">
             ${oidoLogoHTML}
@@ -555,15 +555,20 @@ generarLogoaudiometriaHTML(datos, entidad, imagenes) {
             <div class="diagnostico-box">
               <div class="diagnostico-titulo">DIAGNÓSTICO AUDITIVO</div>
               <div class="diagnostico-subtitulo">O.D.</div>
-              <div class="diagnostico-texto">${diagnostico_od || '_________________________'}</div>
+              <div class="diagnostico-texto">${diagnostico_od || ''}</div>
               <div class="diagnostico-subtitulo">O.I.</div>
-              <div class="diagnostico-texto">${diagnostico_oi || '_________________________'}</div>
+              <div class="diagnostico-texto">${diagnostico_oi || ''}</div>
             </div>
             
+
+            <!--
             <div class="observaciones">
               <div class="diagnostico-titulo">OBSERVACIONES</div>
-              <div class="diagnostico-texto">${diagnostico || '_________________________'}</div>
+              <div class="diagnostico-texto">${diagnostico || ''}</div>
             </div>
+            -->
+
+
           </div>
 
           <div class="columna-derecha">
@@ -864,8 +869,8 @@ if (imagenes.selloBase64) {
                     text-align: center; 
                     margin: 5px 0 15px 0; 
                     width: 100%; 
-                       position: relative;
-    left: -25px; /* mueve 20px a la izquierda */
+                    position: relative;
+                    left: -30px; /* mueve 20px a la izquierda */
                 }
                 .grafica-container img { 
                     width: 100%; 
@@ -952,9 +957,9 @@ if (imagenes.selloBase64) {
             
             <div class="datos-paciente">
                 <div class="info-paciente">
-                    <p><strong>Nombre:</strong> ${datos.paciente?.nombre || '_________________________'}</p>
-                    <p><strong>C.C.:</strong> ${datos.paciente?.documento || '_________________________'}</p>
-                    <p><strong>Entidad:</strong> ${entidad || '_________________________'}</p>
+                    <p><strong>Nombre:</strong> ${datos.paciente?.nombre || ''}</p>
+                    <p><strong>C.C.:</strong> ${datos.paciente?.documento || ''}</p>
+                    <p><strong>Entidad:</strong> ${entidad || ''}</p>
                 </div>
                 <div class="oido-imagen">
               
@@ -977,14 +982,17 @@ if (imagenes.selloBase64) {
                     <div class="diagnostico-box">
                         <div class="diagnostico-titulo">DIAGNÓSTICO AUDITIVO</div>
                         <div class="diagnostico-subtitulo">O.D.</div>
-                        <div class="diagnostico-texto">${datos.diagnostico_od || '_________________________'}</div>
+                        <div class="diagnostico-texto">${datos.diagnostico_od || ''}</div>
                         <div class="diagnostico-subtitulo">O.I.</div>
-                        <div class="diagnostico-texto">${datos.diagnostico_oi || '_________________________'}</div>
+                        <div class="diagnostico-texto">${datos.diagnostico_oi || ''}</div>
                     </div>
+
+                    <!--
                     <div class="diagnostico-box">
                         <div class="diagnostico-titulo">OBSERVACIONES</div>
-                        <div class="diagnostico-texto">${datos.observaciones || '_________________________'}</div>
+                        <div class="diagnostico-texto">${datos.observaciones || ''}</div>
                     </div>
+                    -->
                     
                     <!-- TABLA PTA SIMPLE - EXACTAMENTE COMO LA FOTO -->
                     <table class="pta-simple">
