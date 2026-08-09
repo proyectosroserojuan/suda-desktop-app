@@ -81,6 +81,126 @@ class PDFGenerator {
     }
   }
 
+async generarPDF(datos, entidad, tipo = 'logoaudiometria') {
+    try {
+        console.log(`\n========== generarPDF ==========`);
+        console.log(`Entidad: ${entidad}`);
+        console.log(`Tipo: ${tipo}`);
+        console.log(`Datos recibidos - PTA:`, JSON.stringify(datos.pta, null, 2));
+        console.log(`Datos recibidos - valores_od:`, datos.valores_od);
+        console.log(`Datos recibidos - valores_oi:`, datos.valores_oi);
+        
+        let headerBase64 = null;
+        let footerBase64 = null;
+        let oidoLogoBase64 = null;
+
+        let qrBase64 = null;
+        const testQR = this.probarImagen('qr.jpeg') || this.probarImagen('qr.png');
+        if (this.configuracionQR.habilitado && testQR) {
+            const qrImageName = fs.existsSync(path.join(this.imagesPath, 'qr.jpeg')) ? 'qr.jpeg' : 'qr.png';
+            qrBase64 = this.imageToBase64(qrImageName);
+        }
+
+        let selloBase64 = null;
+        const testSello = this.probarImagen('sello.png') || this.probarImagen('sello.jpeg') || this.probarImagen('sello.jpg');
+        if (testSello) {
+            const selloImageName = fs.existsSync(path.join(this.imagesPath, 'sello.png')) ? 'sello.png' : fs.existsSync(path.join(this.imagesPath, 'sello.jpeg')) ? 'sello.jpeg' : 'sello.jpg';
+            selloBase64 = this.imageToBase64(selloImageName);
+        }
+
+        // Obtener imágenes
+        const testHeader = this.probarImagen('header_uda.jpeg');
+        const testFooter = this.probarImagen('footer_uda.jpeg');
+        const testOidoLogo = this.probarImagen('oido_logo.jpeg');
+        
+        if (testHeader) headerBase64 = this.imageToBase64('header_uda.jpeg');
+        if (testFooter) footerBase64 = this.imageToBase64('footer_uda.jpeg');
+        if (testOidoLogo) oidoLogoBase64 = this.imageToBase64('oido_logo.jpeg');
+        
+        console.log('Estado de imágenes:', {
+            header: !!headerBase64,
+            footer: !!footerBase64,
+            oidoLogo: !!oidoLogoBase64
+        });
+        
+        // ✅ GENERAR EL HTML CORRECTO SEGÚN EL TIPO
+        let html;
+        if (tipo === 'audiometria') {
+            html = this.generarAudiometriaHTML(datos, entidad, {
+                headerBase64,
+                footerBase64,
+                oidoLogoBase64,
+                qrBase64,
+                selloBase64,
+                qrHabilitado: this.configuracionQR.habilitado
+            });
+        } else {
+            html = this.generarLogoaudiometriaHTML(datos, entidad, {
+                headerBase64,
+                footerBase64,
+                oidoLogoBase64,
+                qrBase64,
+                selloBase64,
+                qrHabilitado: this.configuracionQR.habilitado
+            });
+        }
+        
+        // Guardar HTML para debug (solo si es logoaudiometria para no confundir)
+        if (tipo !== 'audiometria') {
+            const debugPath = path.join(this.getDownloadsPath(), 'debug_logoaudiometria.html');
+            fs.writeFileSync(debugPath, html);
+            console.log(`💾 HTML guardado en: ${debugPath}`);
+        }
+        
+        // Crear ventana y generar PDF
+        const win = new BrowserWindow({
+            width: 1200,
+            height: 900,
+            show: false,
+            webPreferences: {
+                nodeIntegration: true,
+                contextIsolation: false
+            }
+        });
+        
+        await win.loadURL(`data:text/html;charset=utf-8,${encodeURIComponent(html)}`);
+        await new Promise(resolve => setTimeout(resolve, 1500));
+        
+        const downloadsPath = this.getDownloadsPath();
+        const fecha = new Date();
+        const fechaStr = `${fecha.getFullYear()}-${fecha.getMonth()+1}-${fecha.getDate()}_${fecha.getHours()}-${fecha.getMinutes()}-${fecha.getSeconds()}`;
+        
+        // ✅ NOMBRE CORRECTO SEGÚN EL TIPO
+        const nombreArchivo = tipo === 'audiometria' ? 'Audiometria' : 'Logoaudiometria';
+        const pdfPath = path.join(downloadsPath, `${datos.paciente.nombre || 'paciente'}_${nombreArchivo}_${fechaStr}.pdf`);
+        
+        const pdfData = await win.webContents.printToPDF({
+            pageSize: 'A4',
+            printBackground: true,
+            landscape: false,
+            margins: {
+                top: 0.1,
+                bottom: 0.1,
+                left: 0.1,
+                right: 0.1
+            },
+            scale: 1.0,
+            displayHeaderFooter: false
+        });
+        
+        fs.writeFileSync(pdfPath, pdfData);
+        win.close();
+        
+        console.log(`\n✅ PDF generado: ${pdfPath}`);
+        return pdfPath;
+    } catch (error) {
+        console.error('❌ Error en generarPDF:', error);
+        throw error;
+    }
+}
+
+
+  /*
   async generarPDF(datos, entidad, tipo = 'logoaudiometria') {
     try {
       console.log(`\n========== generarPDF ==========`);
@@ -176,7 +296,7 @@ const html = this.generarLogoaudiometriaHTML(datos, entidad, {
         printBackground: true,
         landscape: false
       }); 
-      */
+     --
        const pdfData = await win.webContents.printToPDF({
     pageSize: 'A4',
     printBackground: true,
@@ -201,6 +321,8 @@ const html = this.generarLogoaudiometriaHTML(datos, entidad, {
       throw error;
     }
   }
+
+  */
 
 generarLogoaudiometriaHTML(datos, entidad, imagenes) {
     console.log('\n========== generarLogoaudiometriaHTML ==========');
@@ -912,7 +1034,7 @@ if (imagenes.selloBase64) {
     height: 500px;
     opacity: 1;
 }           .header { text-align: center; margin-bottom: 20px; width: 100%; }
-                .header img { width: 100%; max-height: 100px; object-fit: contain; }
+                .header img { width: 100%; max-height: 140px; object-fit: contain; }
                 .fecha { text-align: left; font-size: 11px; margin-bottom: 20px; }
                 .datos-paciente {
                     display: flex;

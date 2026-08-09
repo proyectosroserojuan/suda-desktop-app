@@ -274,12 +274,16 @@ ipcMain.handle('regenerar-pdf', async (event, citaId) => {
         if (!cita) {
             throw new Error('No se encontró la cita');
         }
+
+        
         
         console.log('📋 Datos de la cita obtenidos:', {
             id: cita.id,
             paciente: cita.paciente_nombre,
             entidad: cita.entidad_nombre
         });
+
+        
         
 // 2. Determinar según el MOTIVO de la cita qué tipo(s) de examen corresponden
 // DESPUÉS — comparación exacta contra el campo dedicado, con respaldo temporal para citas viejas
