@@ -465,15 +465,16 @@ generarLogoaudiometriaHTML(datos, entidad, imagenes) {
           
           .info-paciente p {
             margin: 5px 0;
-            font-size: 12px;
+            font-size: 16px;
             line-height: 1.5;
             font-family: Arial, sans-serif;
           }
           
           .info-paciente strong {
             font-weight: bold;
-            min-width: 70px;
+            min-width: 80px;
             display: inline-block;
+            font-size: 16px;  
           }
           
           .oido-imagen {
@@ -1017,7 +1018,7 @@ if (imagenes.selloBase64) {
                 * { margin: 0; padding: 0; box-sizing: border-box; }
                 body {
                     font-family: Arial, Helvetica, sans-serif;
-                    padding: 20px 30px;
+                     padding: 20px 50px 20px 100px; 
                     font-size: 12px;
                     background: white;
                 }
@@ -1057,8 +1058,8 @@ if (imagenes.selloBase64) {
 }
 
                 .info-paciente { flex: 2; }
-                .info-paciente p { margin: 5px 0; font-size: 12px; }
-                .info-paciente strong { min-width: 70px; display: inline-block; }
+                .info-paciente p { margin: 5px 0; font-size: 16px; }
+                .info-paciente strong { min-width: 80px; display: inline-block;  font-size: 16px;  }
                 .oido-imagen { flex: 1; text-align: right; }
                 .oido-img { max-width: 120px; max-height: 120px; object-fit: contain; }
                 .otoscopia-texto { margin-top: 10px; font-size: 9px; color: #555; text-align: left; max-width: 200px; }
@@ -1080,11 +1081,11 @@ if (imagenes.selloBase64) {
 
                 /* GRAFICA MAS ANCHA - OCUPA TODO EL ANCHO */
                 .grafica-container { 
-                    text-align: center; 
-                    margin: 5px 0 15px 0; 
-                    width: 100%; 
-                    position: relative;
-                    left: -30px; /* mueve 20px a la izquierda */
+    text-align: center; 
+    margin: 5px auto 15px auto;  /* ← auto centra el contenedor */
+ 
+    max-width: 800px;
+                  
                 }
                 .grafica-container img { 
                     width: 100%; 
@@ -1099,23 +1100,40 @@ if (imagenes.selloBase64) {
                 .columna-izquierda { flex: 1; }
                 
                 .tabla-valores {
-                    width: 100%;
+                    width: 90%;
                     border-collapse: collapse;
-                    font-size: 9px;
-                   position: relative;
-    top: -360px;
+                    font-size: 7.5px;  
+             <!--  position: relative; -->
+                    margin: 0 auto; 
+                   transform: translateY(-340px) translateX(30px);   /* ← SUBE 60px */
+                  
+                
                 }
-                .tabla-valores th,
-                .tabla-valores td {
-                    border: 1px solid #5a5a5a;
-                    padding: 4px 3px;
-                    text-align: center;
-                }
-                .tabla-valores th { background: white; font-weight: bold; }
-                .tabla-valores td:first-child { text-align: left; font-weight: bold; }
+
+
+.tabla-valores th, 
+.tabla-valores td {
+    border: 1px solid #bababa;
+    padding: 3px 4px;        /* ← REDUCIR padding de 6px a 3px */
+    text-align: center;
+    font-size: 7.5px;        /* ← IGUALAR tamaño */
+}
+
+
+                .tabla-valores th {
+    background-color: white;
+    font-weight: bold;
+    font-size: 7.5px;        /* ← IGUALAR tamaño */
+}
+            .tabla-valores td:first-child {
+    text-align: left;
+    font-weight: bold;
+    font-size: 7.5px;        /* ← IGUALAR tamaño */
+}
+
                 .valor-od { color: #e74c3c; font-weight: bold; }
                 .valor-oi { color: #3498db; font-weight: bold; }
-                .unidad { font-size: 9px; color: #555; font-weight: normal; }
+                .unidad { font-size: 7px; color: #555; font-weight: normal; }
                 
                 .diagnostico-box { margin-bottom: 20px; }
                 .diagnostico-titulo { font-weight: bold; font-size: 12px; margin-bottom: 10px; }
@@ -1123,29 +1141,66 @@ if (imagenes.selloBase64) {
                 .diagnostico-texto { font-size: 11px; line-height: 1.5; white-space: pre-wrap; }
                 
                 /* TABLA PTA SIMPLE - SIN BORDES INNECESARIOS, SIN COLORES */
-            .pta-simple {
+
+/* ============================================================
+   TABLA PTA - CORREGIDA
+   ============================================================ */
+.pta-container {
+    display: inline-block;
+    background: white;
+    border: 1px solid #fffefe;
+    border-radius: 4px;
+    padding: 0;
     margin-top: 15px;
-    margin-bottom: -40px;  /* NEGATIVO: HACE QUE LA TABLA "BAJE" Y SE SUPONGA */
-    border-collapse: collapse;
-    font-size: 10px;
-    width: auto;
-    position: relative;
-    z-index: 10;  /* PARA QUE ESTÉ POR ENCIMA */
-    background: white;  /* FONDO BLANCO PARA TAPAR */
+    margin-bottom: 10px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.1);
 }
-                .pta-simple td, .pta-simple th {
-                    border: 1px solid #999;
-                    padding: 4px 8px;
-                    text-align: center;
-                }
-                .pta-simple th {
-                    background-color: #f9f9f9;
-                    font-weight: bold;
-                }
-                .pta-simple td:first-child {
-                    font-weight: bold;
-                    background-color: #f9f9f9;
-                }
+
+.pta-titulo {
+    font-weight: bold;
+    font-size: 13px;
+    text-align: center;
+    padding: 6px 10px;
+    background: #ffffff;
+    border-bottom: 1px solid #ffffff;
+    color: #333;
+    letter-spacing: 1px;
+}
+
+.pta-simple {
+    border-collapse: collapse;
+    font-size: 14px;
+    width: 100%;
+    background: white;
+}
+
+.pta-simple td, .pta-simple th {
+    border: 1px solid #999;
+    padding: 8px 14px;
+    text-align: center;
+}
+
+.pta-simple th {
+    background-color: white;   /* ← FONDO BLANCO */
+    font-weight: bold;
+    font-size: 14px;
+}
+
+.pta-simple td:first-child {
+    font-weight: bold;
+    background-color: white;   /* ← FONDO BLANCO */
+    font-size: 14px;
+}
+
+.pta-valor-od {
+    color: #e74c3c !important;   /* ROJO para OD */
+    font-weight: bold;
+}
+
+.pta-valor-oi {
+    color: #3498db !important;   /* AZUL para OI */
+    font-weight: bold;
+}
                 
                 .footer {
                     position: fixed;
@@ -1194,11 +1249,11 @@ if (imagenes.selloBase64) {
             <div class="two-columns">
                 <div class="columna-izquierda">
                     <div class="diagnostico-box">
-                        <div class="diagnostico-titulo">DIAGNÓSTICO AUDITIVO</div>
-                        <div class="diagnostico-subtitulo">O.D.</div>
+                        <div class="diagnostico-titulo">DIAGNÓSTICO</div>
+                        <div class="diagnostico-subtitulo"></div>
                         <div class="diagnostico-texto">${datos.diagnostico_od || ''}</div>
-                        <div class="diagnostico-subtitulo">O.I.</div>
-                        <div class="diagnostico-texto">${datos.diagnostico_oi || ''}</div>
+                   <!--     <div class="diagnostico-subtitulo">O.I.</div>  -->
+                   <!--        <div class="diagnostico-texto">${datos.diagnostico_oi || ''}</div> -->
                     </div>
 
                     <!--
@@ -1208,28 +1263,34 @@ if (imagenes.selloBase64) {
                     </div>
                     -->
                     
-                    <!-- TABLA PTA SIMPLE - EXACTAMENTE COMO LA FOTO -->
-                    <table class="pta-simple">
-                        <thead>
-                            <tr>
-                                <th></th>
-                                <th>V.A</th>
-                                <th>V.O</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td>O.D.</td>
-                                <td>${(pta.od_air !== undefined && pta.od_air !== null) ? pta.od_air + ' dB' : '--'}</td>
-                                <td>${(pta.od_bone !== undefined && pta.od_bone !== null) ? pta.od_bone + ' dB' : '--'}</td>
-                            </tr>
-                            <tr>
-                                <td>O.I.</td>
-                                <td>${(pta.oi_air !== undefined && pta.oi_air !== null) ? pta.oi_air + ' dB' : '--'}</td>
-                                <td>${(pta.oi_bone !== undefined && pta.oi_bone !== null) ? pta.oi_bone + ' dB' : '--'}</td>
-                            </tr>
-                        </tbody>
-                    </table>
+
+                    <div class="pta-container">
+    <div class="pta-titulo">PROMEDIO TONAL</div>
+    <table class="pta-simple">
+        <thead>
+            <tr>
+                <th></th>
+                <th>V.A</th>
+                <th>V.O</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>O.D.</td>
+                <td class="pta-valor-od">${(pta.od_air !== undefined && pta.od_air !== null) ? pta.od_air + ' dB' : '--'}</td>
+                <td class="pta-valor-od">${(pta.od_bone !== undefined && pta.od_bone !== null) ? pta.od_bone + ' dB' : '--'}</td>
+            </tr>
+            <tr>
+                <td>O.I.</td>
+                <td class="pta-valor-oi">${(pta.oi_air !== undefined && pta.oi_air !== null) ? pta.oi_air + ' dB' : '--'}</td>
+                <td class="pta-valor-oi">${(pta.oi_bone !== undefined && pta.oi_bone !== null) ? pta.oi_bone + ' dB' : '--'}</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+
+
                 </div>
                 <div class="columna-derecha">
                     <table class="tabla-valores">
