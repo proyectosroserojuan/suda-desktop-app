@@ -525,6 +525,21 @@ bone-row {
     margin-bottom: calc(20px * var(--escala));
 }
 
+/* Estilo para inputs de 750 y 1500 Hz (visualmente inhabilitados) */
+.input-field input[id$="_750"],
+.input-field input[id$="_1500"] {
+    background-color: #e9ecef !important;
+    color: #6c757d !important;
+    border-color: #ced4da !important;
+    /* cursor: not-allowed !important;  ← ELIMINA ESTA LÍNEA */
+}
+
+/* También aplicar el estilo gris a la etiqueta correspondiente */
+.input-field label:has(+ input[id$="_750"]),
+.input-field label:has(+ input[id$="_1500"]) {
+    color: #adb5bd !important;
+}
+
 .diagnostico-section {
     background: #ffffff;
     border-radius: calc(12px * var(--escala));
@@ -1932,19 +1947,47 @@ function createInputs(containerId, prefix, tipo = 'air') {
             if (typeof redrawAll === 'function') redrawAll();
         });
 
-        input.addEventListener("keydown", (e) => {
+         input.addEventListener("keydown", (e) => {
             const index = parseInt(input.dataset.index);
             const prefix = input.dataset.prefix;
+            const currentId = input.id; // Ej: "od_500" o "od-bone_500"
 
-            const next = document.querySelector(
-                `input[data-prefix="${prefix}"][data-index="${index + 1}"]`
-            );
+            // Obtener la frecuencia actual desde el ID del input
+            const currentFreq = currentId.split('_').pop();
 
-            const prev = document.querySelector(
-                `input[data-prefix="${prefix}"][data-index="${index - 1}"]`
-            );
+            // Definir los saltos de frecuencia para navegación
+            const saltos = {
+                '500': '1000',
+                '1000': '2000'
+            };
+            const saltosAtras = {
+                '1000': '500',
+                '2000': '1000'
+            };
+
+            // Función para obtener el siguiente input basado en la frecuencia deseada
+            const getTargetInput = (targetFreq) => {
+                // El prefijo es todo antes del último guion bajo
+                const prefixForId = currentId.substring(0, currentId.lastIndexOf('_'));
+                const targetId = `${prefixForId}_${targetFreq}`;
+                return document.getElementById(targetId);
+            };
 
             if (e.key === "ArrowRight" || e.key === "ArrowDown") {
+                // Si la frecuencia actual está en el mapa de saltos, buscamos el input de destino
+                if (saltos[currentFreq]) {
+                    const targetInput = getTargetInput(saltos[currentFreq]);
+                    if (targetInput) {
+                        targetInput.focus();
+                        e.preventDefault();
+                        return; // Salimos para no ejecutar la lógica de índice normal
+                    }
+                }
+
+                // Comportamiento normal: siguiente por índice
+                const next = document.querySelector(
+                    `input[data-prefix="${prefix}"][data-index="${index + 1}"]`
+                );
                 if (next) {
                     next.focus();
                     e.preventDefault();
@@ -1952,6 +1995,20 @@ function createInputs(containerId, prefix, tipo = 'air') {
             }
 
             if (e.key === "ArrowLeft" || e.key === "ArrowUp") {
+                // Si la frecuencia actual está en el mapa de saltos hacia atrás, buscamos el input de destino
+                if (saltosAtras[currentFreq]) {
+                    const targetInput = getTargetInput(saltosAtras[currentFreq]);
+                    if (targetInput) {
+                        targetInput.focus();
+                        e.preventDefault();
+                        return; // Salimos para no ejecutar la lógica de índice normal
+                    }
+                }
+
+                // Comportamiento normal: anterior por índice
+                const prev = document.querySelector(
+                    `input[data-prefix="${prefix}"][data-index="${index - 1}"]`
+                );
                 if (prev) {
                     prev.focus();
                     e.preventDefault();
