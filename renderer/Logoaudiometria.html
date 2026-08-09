@@ -133,6 +133,36 @@ body {
     color: #475569;
 }
 
+/* Botón Borrar Datos */
+.btn-borrar {
+    transition: all 0.3s ease !important;
+    font-weight: bold !important;
+}
+
+.btn-borrar:hover {
+    background: #c0392b !important;
+    transform: translateY(-1px) !important;
+}
+
+/* Botón Rehacer (Restaurar) */
+.btn-rehacer {
+    transition: all 0.3s ease !important;
+    font-weight: bold !important;
+}
+
+.btn-rehacer:hover {
+    background: #e67e22 !important;
+    transform: translateY(-1px) !important;
+}
+
+.btn-rehacer.tiene-backup {
+    background: #27ae60 !important;
+}
+
+.btn-rehacer.tiene-backup:hover {
+    background: #219a52 !important;
+}
+
 .btn-back-floating {
     background: #1e3a8a;
     color: white;
@@ -580,12 +610,15 @@ button.reset-btn:hover {
     <small style="color: #666; font-size: 10px;">Punto entre U. Palabra y % Discriminación</small>
 </div>
 
-  <!-- Dentro de OÍDO DERECHO, después del input-grid -->
-  <div style="display: flex; justify-content: flex-end; margin-top: 10px;">
-      <button type="button" class="btn-rehacer" data-ear="od" style="background: #8b8b8b; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 12px; margin: 0;">
-          🔄 Rehacer OD
-      </button>
-  </div>
+<!-- Dentro de OÍDO DERECHO, después del input-grid -->
+<div style="display: flex; justify-content: flex-end; gap: 6px; margin-top: 10px;">
+    <button type="button" class="btn-borrar" data-ear="od" style="background: #e74c3c; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 12px; margin: 0;">
+        Borrar Datos
+    </button>
+    <button type="button" class="btn-rehacer" data-ear="od" style="background: #f39c12; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 12px; margin: 0;">
+         Rehacer
+    </button>
+</div>
           </div>
         </div>
         
@@ -669,11 +702,18 @@ button.reset-btn:hover {
     <small style="color: #666; font-size: 10px;">Punto entre U. Palabra y % Discriminación</small>
 </div>
 
-  <div style="display: flex; justify-content: flex-end; margin-top: 10px;">
-      <button type="button" class="btn-rehacer" data-ear="oi" style="background: #727272; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 12px; margin: 0;">
-          🔄 Rehacer OI
-      </button>
-  </div>
+<!-- Dentro de OÍDO IZQUIERDO, después del input-grid -->
+<div style="display: flex; justify-content: flex-end; gap: 6px; margin-top: 10px;">
+    <button type="button" class="btn-borrar" data-ear="oi" style="background: #e74c3c; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 12px; margin: 0;">
+        Borrar Datos
+    </button>
+    <button type="button" class="btn-rehacer" data-ear="oi" style="background: #f39c12; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 12px; margin: 0;">
+        Rehacer
+    </button>
+</div>
+
+
+
           </div>
         </div>
         
@@ -837,6 +877,8 @@ document.addEventListener('DOMContentLoaded', function() {
     
 
 function earTieneDatos(ear) {
+
+    
 
     const tieneValores = [
         document.getElementById(`${ear}_urv`).value,
@@ -2080,7 +2122,54 @@ document.getElementById("speechChart")
 // FUNCIÓN PARA REHACER UN OÍDO ESPECÍFICO
 // ============================================
 
-function rehacerOido(ear) {
+// ============================================
+// 📦 SISTEMA DE BACKUP PARA REHACER
+// ============================================
+
+// Estructura para guardar los valores anteriores
+let valoresBackup = {
+    od: {
+        urv: '',
+        upalabra: '',
+        udisc: '',
+        pmax: '',
+        porcentaje_real: '',
+        punto_intermedio: '',
+        nr_flags: {}
+    },
+    oi: {
+        urv: '',
+        upalabra: '',
+        udisc: '',
+        pmax: '',
+        porcentaje_real: '',
+        punto_intermedio: '',
+        nr_flags: {}
+    }
+};
+
+// Guardar los valores actuales como backup
+function guardarBackup(ear) {
+    valoresBackup[ear] = {
+        urv: document.getElementById(`${ear}_urv`).value || '',
+        upalabra: document.getElementById(`${ear}_upalabra`).value || '',
+        udisc: document.getElementById(`${ear}_udisc`).value || '',
+        pmax: document.getElementById(`${ear}_pmax`).value || '',
+        porcentaje_real: document.getElementById(`${ear}_porcentaje_real`)?.value || '',
+        punto_intermedio: document.getElementById(`${ear}_punto_intermedio`)?.value || '',
+        nr_flags: { ...noResponseFlags[ear] }
+    };
+    console.log(`💾 Backup guardado para ${ear}:`, valoresBackup[ear]);
+}
+
+// ============================================
+// 🗑️ FUNCIÓN BORRAR DATOS (Limpia todo)
+// ============================================
+
+function borrarDatos(ear) {
+    // Guardar backup ANTES de borrar (por si el usuario quiere rehacer después)
+    guardarBackup(ear);
+    
     // Limpiar inputs principales
     document.getElementById(`${ear}_urv`).value = "";
     document.getElementById(`${ear}_upalabra`).value = "";
@@ -2093,7 +2182,7 @@ function rehacerOido(ear) {
         porcentajeRealInput.value = "";
     }
 
-        const puntoIntermedioInput = document.getElementById(`${ear}_punto_intermedio`); // 🔥 NUEVO
+    const puntoIntermedioInput = document.getElementById(`${ear}_punto_intermedio`);
     if (puntoIntermedioInput) {
         puntoIntermedioInput.value = "";
     }
@@ -2105,7 +2194,7 @@ function rehacerOido(ear) {
         udisc: false,
         pmax: false,
         porcentaje_real: false,
-        punto_intermedio: false  // 🔥 NUEVO
+        punto_intermedio: false
     };
     
     // Limpiar estilo activo de los botones NR de este oído
@@ -2121,23 +2210,199 @@ function rehacerOido(ear) {
     // Actualizar la gráfica
     updateChart();
     
-    // Mostrar mensaje de confirmación
-    const earNombre = ear === 'od' ? 'Oído Derecho' : 'Oído Izquierdo';
-    console.log(`✅ ${earNombre} rehaceado correctamente`);
+    // Feedback visual
+    const btnBorrar = document.querySelector(`.btn-borrar[data-ear="${ear}"]`);
+    if (btnBorrar) {
+        const textoOriginal = btnBorrar.innerHTML;
+        btnBorrar.innerHTML = '✅ ¡Borrado!';
+        btnBorrar.style.background = '#27ae60';
+        setTimeout(() => {
+            btnBorrar.innerHTML = textoOriginal;
+            btnBorrar.style.background = '#e74c3c';
+        }, 1500);
+    }
     
-    // Pequeño feedback visual (opcional)
+    // Actualizar indicador de backup
+    actualizarIndicadorBackup(ear);
+}
+
+// ============================================
+// ↩️ FUNCIÓN REHACER (Restaura valores anteriores)
+// ============================================
+
+function rehacerOido(ear) {
+    const backup = valoresBackup[ear];
+    
+    // Verificar si hay backup
+    const tieneBackup = backup && (
+        backup.urv || backup.upalabra || backup.udisc || backup.pmax ||
+        backup.porcentaje_real || backup.punto_intermedio ||
+        Object.values(backup.nr_flags || {}).some(v => v === true)
+    );
+    
+    if (!tieneBackup) {
+        console.warn(`⚠️ No hay backup para ${ear}`);
+        
+        // Feedback visual
+        const btnRehacer = document.querySelector(`.btn-rehacer[data-ear="${ear}"]`);
+        if (btnRehacer) {
+            const textoOriginal = btnRehacer.innerHTML;
+            btnRehacer.innerHTML = '❌ Sin backup';
+            btnRehacer.style.background = '#e74c3c';
+            setTimeout(() => {
+                btnRehacer.innerHTML = textoOriginal;
+                btnRehacer.style.background = '#f39c12';
+            }, 1500);
+        }
+        return;
+    }
+    
+    // Restaurar valores
+    document.getElementById(`${ear}_urv`).value = backup.urv || '';
+    document.getElementById(`${ear}_upalabra`).value = backup.upalabra || '';
+    document.getElementById(`${ear}_udisc`).value = backup.udisc || '';
+    document.getElementById(`${ear}_pmax`).value = backup.pmax || '';
+    
+    const porcentajeRealInput = document.getElementById(`${ear}_porcentaje_real`);
+    if (porcentajeRealInput) {
+        porcentajeRealInput.value = backup.porcentaje_real || '';
+    }
+    
+    const puntoIntermedioInput = document.getElementById(`${ear}_punto_intermedio`);
+    if (puntoIntermedioInput) {
+        puntoIntermedioInput.value = backup.punto_intermedio || '';
+    }
+    
+    // Restaurar flags NR
+    if (backup.nr_flags) {
+        noResponseFlags[ear] = { ...backup.nr_flags };
+        // Actualizar visual de los botones NR
+        document.querySelectorAll(`.nr-btn[data-ear="${ear}"]`).forEach(btn => {
+            const field = btn.dataset.field;
+            if (noResponseFlags[ear][field]) {
+                btn.classList.add('active');
+            } else {
+                btn.classList.remove('active');
+            }
+        });
+    }
+    
+    // Actualizar la gráfica
+    updateChart();
+    
+    // Feedback visual
     const btnRehacer = document.querySelector(`.btn-rehacer[data-ear="${ear}"]`);
     if (btnRehacer) {
         const textoOriginal = btnRehacer.innerHTML;
-        btnRehacer.innerHTML = '✓ ¡Rehaceado!';
+        btnRehacer.innerHTML = '✅ ¡Restaurado!';
         btnRehacer.style.background = '#27ae60';
         setTimeout(() => {
             btnRehacer.innerHTML = textoOriginal;
             btnRehacer.style.background = '#f39c12';
         }, 1500);
     }
+    
+    console.log(`🔄 Backup restaurado para ${ear}:`, backup);
 }
 
+// ============================================
+// 💡 INDICADOR DE BACKUP DISPONIBLE
+// ============================================
+
+function actualizarIndicadorBackup(ear) {
+    const btnRehacer = document.querySelector(`.btn-rehacer[data-ear="${ear}"]`);
+    if (!btnRehacer) return;
+    
+    const backup = valoresBackup[ear];
+    const tieneBackup = backup && (
+        backup.urv || backup.upalabra || backup.udisc || backup.pmax ||
+        backup.porcentaje_real || backup.punto_intermedio ||
+        Object.values(backup.nr_flags || {}).some(v => v === true)
+    );
+    
+    if (tieneBackup) {
+        btnRehacer.classList.add('tiene-backup');
+        btnRehacer.style.background = '#27ae60';
+        btnRehacer.title = 'Restaurar valores anteriores';
+    } else {
+        btnRehacer.classList.remove('tiene-backup');
+        btnRehacer.style.background = '#95a5a6';
+        btnRehacer.title = 'No hay backup disponible';
+    }
+}
+
+// ============================================
+// 📝 GUARDAR BACKUP AUTOMÁTICAMENTE
+// ============================================
+
+function setupAutoBackup() {
+    const campos = [
+        'urv', 'upalabra', 'udisc', 'pmax', 
+        'porcentaje_real', 'punto_intermedio'
+    ];
+    
+    ['od', 'oi'].forEach(ear => {
+        campos.forEach(campo => {
+            const input = document.getElementById(`${ear}_${campo}`);
+            if (input) {
+                input.addEventListener('input', function() {
+                    guardarBackup(ear);
+                    actualizarIndicadorBackup(ear);
+                });
+                input.addEventListener('blur', function() {
+                    guardarBackup(ear);
+                    actualizarIndicadorBackup(ear);
+                });
+            }
+        });
+    });
+    
+    // Guardar backup cuando se activan/desactivan botones NR
+    document.querySelectorAll('.nr-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const ear = this.dataset.ear;
+            guardarBackup(ear);
+            actualizarIndicadorBackup(ear);
+        });
+    });
+}
+
+// ============================================
+// 🎯 EVENT LISTENERS PARA LOS BOTONES
+// ============================================
+
+// Botón "Borrar Datos"
+document.querySelectorAll('.btn-borrar').forEach(btn => {
+    btn.addEventListener('click', function() {
+        const ear = this.dataset.ear;
+        borrarDatos(ear);
+    });
+});
+
+// Botón "Rehacer"
+document.querySelectorAll('.btn-rehacer').forEach(btn => {
+    btn.addEventListener('click', function() {
+        const ear = this.dataset.ear;
+        rehacerOido(ear);
+    });
+});
+
+// ============================================
+// 🚀 INICIALIZAR EL SISTEMA
+// ============================================
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Configurar backup automático
+    setupAutoBackup();
+    
+    // Guardar backup inicial
+    setTimeout(() => {
+        ['od', 'oi'].forEach(ear => {
+            guardarBackup(ear);
+            actualizarIndicadorBackup(ear);
+        });
+    }, 500);
+});
 
 // ============================================
 // AJUSTE DINÁMICO DEL SCALE DEL CHART
