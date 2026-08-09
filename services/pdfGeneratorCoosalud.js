@@ -23,6 +23,202 @@ class PDFGeneratorCoosalud {
     return null;
   }
 
+  async generarPDF(datos, entidad, tipo = 'logoaudiometria') {
+    try {
+        console.log(`=== generarPDF (COOSALUD) con soporte NR ===`);
+        console.log(`Tipo recibido: ${tipo}`);
+        
+        // ✅ SI ES AUDIOMETRIA, USAR EL GENERADOR ESPECÍFICO
+        if (tipo === 'audiometria') {
+            console.log('🔄 Redirigiendo a generarPDFAudiometria');
+            return await this.generarPDFAudiometria(datos, entidad);
+        }
+        
+        // ✅ SI ES LOGOAUDIOMETRIA, CONTINUAR CON EL CÓDIGO NORMAL
+        console.log('📄 Generando Logoaudiometría (COOSALUD)');
+        
+        const plantillaPath = path.join(this.imagesPath, 'formatocoosalud.pdf');
+        const pdfDoc = await PDFDocument.load(fs.readFileSync(plantillaPath));
+        
+        // 🔥 REGISTRAR FONTKIT
+        pdfDoc.registerFontkit(fontkit);
+        
+        const page = pdfDoc.getPages()[0];
+        const { width, height } = page.getSize();
+        const fromTop = (y) => height - y;
+
+        // 🔥 USAR ARIAL EN LUGAR DE TIMES ROMAN
+        const fontPath = 'C:/Windows/Fonts/arial.ttf';
+        const fontBytes = fs.readFileSync(fontPath);
+        const font = await pdfDoc.embedFont(fontBytes);
+        const fontBold = font;
+
+        const od = datos.valores_od || {};
+        const oi = datos.valores_oi || {};
+
+        // 🔥 OBTENER FLAGS NR
+        const nrFlags = datos.nr_flags || { od: {}, oi: {} };
+
+        function getValorConNR(ear, campo, valor) {
+            if (nrFlags[ear] && nrFlags[ear][campo] === true) {
+                return '↓';
+            }
+            return valor || '—';
+        }
+
+        function getUnidad(ear, campo, unidad) {
+            if (nrFlags[ear] && nrFlags[ear][campo] === true) {
+                return '';
+            }
+            return unidad;
+        }
+
+        function esNR(ear, campo) {
+            return nrFlags[ear] && nrFlags[ear][campo] === true;
+        }
+
+        const nombre = datos.paciente?.nombre || '';
+        const doc = datos.paciente?.documento || '';
+
+        // FECHA Y CIUDAD
+        const meses = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+        const fechaActual = new Date();
+        const fechaTexto = `Cúcuta, ${meses[fechaActual.getMonth()]} ${fechaActual.getFullYear()}`;
+
+        page.drawText(fechaTexto, { x: 50, y: fromTop(120), size: 10, font });
+
+        // DATOS PACIENTE
+        page.drawText(`Nombre: ${nombre}`, { x: 50, y: fromTop(150), size: 11, font });
+        page.drawText(`C.C.: ${doc}`, { x: 50, y: fromTop(170), size: 11, font });
+        page.drawText(`Entidad: ${entidad}`, { x: 50, y: fromTop(190), size: 11, font });
+
+        // IMAGEN OIDO
+        const oido = await this.imageToBytes('oido_logo.jpeg');
+        if (oido) {
+            const img = await pdfDoc.embedJpg(oido);
+            page.drawImage(img, { x: width - 200, y: fromTop(210), width: 110, height: 110 });
+        }
+
+        // TITULO
+        const tituloY = 230;
+        page.drawText('LOGOAUDIOMETRÍA', { x: 150, y: fromTop(tituloY), size: 16, font: fontBold });
+
+        // GRAFICA
+        const graficaY = tituloY + 30;
+        if (datos.grafica_base64) {
+            const base64 = datos.grafica_base64.split(',')[1];
+            const buffer = Buffer.from(base64, 'base64');
+            const img = datos.grafica_base64.includes('png')
+                ? await pdfDoc.embedPng(buffer)
+                : await pdfDoc.embedJpg(buffer);
+            page.drawImage(img, { x: (width - 420) / 2, y: fromTop(graficaY + 200), width: 420, height: 200 });
+        }
+
+        // BLOQUE INFERIOR
+        const bloqueY = graficaY + 240;
+
+        // DIAGNOSTICO
+        page.drawText('DIAGNÓSTICO AUDITIVO', { x: 50, y: fromTop(bloqueY), size: 11, font: fontBold });
+        page.drawText('O.D.', { x: 50, y: fromTop(bloqueY + 20), size: 10, font: fontBold });
+        page.drawText(datos.diagnostico_od || '________', { x: 80, y: fromTop(bloqueY + 35), size: 10, font });
+        page.drawText('O.I.', { x: 50, y: fromTop(bloqueY + 60), size: 10, font: fontBold });
+        page.drawText(datos.diagnostico_oi || '________', { x: 80, y: fromTop(bloqueY + 75), size: 10, font });
+        page.drawText('OBSERVACIONES', { x: 50, y: fromTop(bloqueY + 105), size: 11, font: fontBold });
+        page.drawText(datos.diagnostico || '________', { x: 50, y: fromTop(bloqueY + 120), size: 10, font });
+
+        // TABLA CON SOPORTE NR
+        const tableX = 260;
+        const rowHeight = 25;
+
+        function cell(x, y, w, h) {
+            page.drawRectangle({ x, y, width: w, height: h, borderWidth: 0.5, borderColor: rgb(0, 0, 0) });
+        }
+
+        function drawCenteredText(text, x, y, cellWidth, cellHeight, fontSize, font, color = rgb(0, 0, 0)) {
+            if (!text || text === '') return;
+            const textWidth = font.widthOfTextAtSize(text, fontSize);
+            const centerX = x + (cellWidth / 2) - (textWidth / 2);
+            const centerY = y + (cellHeight / 2) - (fontSize / 2.5);
+            page.drawText(text, { x: centerX, y: centerY, size: fontSize, font, color });
+        }
+
+        const headerY = bloqueY;
+        cell(tableX, fromTop(headerY), 120, rowHeight);
+        cell(tableX + 120, fromTop(headerY), 80, rowHeight);
+        cell(tableX + 200, fromTop(headerY), 80, rowHeight);
+
+        drawCenteredText('Parámetro', tableX, fromTop(headerY), 120, rowHeight, 10, fontBold);
+        drawCenteredText('OD', tableX + 120, fromTop(headerY), 80, rowHeight, 10, fontBold);
+        drawCenteredText('OI', tableX + 200, fromTop(headerY), 80, rowHeight, 10, fontBold);
+
+        const rows = [
+            { label: "U. Voz", campo: 'urv', od: od.urv, oi: oi.urv },
+            { label: "U. Palabras", campo: 'upalabra', od: od.upalabra, oi: oi.upalabra },
+            { label: "U. Discriminación", campo: 'udisc', od: od.udisc, oi: oi.udisc },
+            { label: "% Discriminación", campo: 'pmax', od: od.pmax, oi: oi.pmax }
+        ];
+
+        rows.forEach((r, i) => {
+            const y = bloqueY + i * rowHeight + rowHeight;
+
+            cell(tableX, fromTop(y), 120, rowHeight);
+            cell(tableX + 120, fromTop(y), 80, rowHeight);
+            cell(tableX + 200, fromTop(y), 80, rowHeight);
+
+            const labelWidth = font.widthOfTextAtSize(r.label, 9);
+            const labelCenterX = tableX + (120 / 2) - (labelWidth / 2);
+            const labelCenterY = fromTop(y) + (rowHeight / 2) - (9 / 2.5);
+            page.drawText(r.label, { x: labelCenterX, y: labelCenterY, size: 9, font });
+
+            const valorOD = getValorConNR('od', r.campo, r.od);
+            const esNROD = esNR('od', r.campo);
+            
+            if (esNROD || valorOD === '↓') {
+                const arrowSize = 18;
+                const arrowWidth = font.widthOfTextAtSize('↓', arrowSize);
+                const arrowX = (tableX + 120) + (80 / 2) - (arrowWidth / 2);
+                const arrowY = fromTop(y) + (rowHeight / 2) - (arrowSize / 2.5);
+                page.drawText('↓', { x: arrowX, y: arrowY, size: arrowSize, font: fontBold, color: rgb(0.9, 0.2, 0.2) });
+            } else {
+                const textoOD = `${valorOD} dB`;
+                const textWidth = font.widthOfTextAtSize(textoOD, 9);
+                const textX = (tableX + 120) + (80 / 2) - (textWidth / 2);
+                const textY = fromTop(y) + (rowHeight / 2) - (9 / 2.5);
+                page.drawText(textoOD, { x: textX, y: textY, size: 9, font, color: rgb(0.9, 0.2, 0.2) });
+            }
+
+            const valorOI = getValorConNR('oi', r.campo, r.oi);
+            const esNROI = esNR('oi', r.campo);
+            
+            if (esNROI || valorOI === '↓') {
+                const arrowSize = 18;
+                const arrowWidth = font.widthOfTextAtSize('↓', arrowSize);
+                const arrowX = (tableX + 200) + (80 / 2) - (arrowWidth / 2);
+                const arrowY = fromTop(y) + (rowHeight / 2) - (arrowSize / 2.5);
+                page.drawText('↓', { x: arrowX, y: arrowY, size: arrowSize, font: fontBold, color: rgb(0.2, 0.5, 0.9) });
+            } else {
+                const textoOI = `${valorOI} dB`;
+                const textWidth = font.widthOfTextAtSize(textoOI, 9);
+                const textX = (tableX + 200) + (80 / 2) - (textWidth / 2);
+                const textY = fromTop(y) + (rowHeight / 2) - (9 / 2.5);
+                page.drawText(textoOI, { x: textX, y: textY, size: 9, font, color: rgb(0.2, 0.5, 0.9) });
+            }
+        });
+
+        const pdfBytes = await pdfDoc.save();
+        const filePath = path.join(this.getDownloadsPath(), `${nombre || 'paciente'}_coosalud_${Date.now()}.pdf`);
+
+        fs.writeFileSync(filePath, pdfBytes);
+        console.log(`✅ PDF generado: ${filePath}`);
+        return filePath;
+
+    } catch (error) {
+        console.error('❌ Error en generarPDF:', error);
+        throw error;
+    }
+}
+
+  /*
 async generarPDF(datos, entidad) {
     try {
         console.log('=== generarPDF (COOSALUD) con soporte NR ===');
@@ -353,6 +549,8 @@ rows.forEach((r, i) => {
         throw error;
     }
 }
+
+*/
   // Agregar a PDFGeneratorCoosalud class
 async generarPDFAudiometria(datos, entidad) {
     try {
