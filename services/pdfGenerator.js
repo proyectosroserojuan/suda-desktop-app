@@ -170,11 +170,26 @@ const html = this.generarLogoaudiometriaHTML(datos, entidad, {
       const fechaStr = `${fecha.getFullYear()}-${fecha.getMonth()+1}-${fecha.getDate()}_${fecha.getHours()}-${fecha.getMinutes()}-${fecha.getSeconds()}`;
       const pdfPath = path.join(downloadsPath, `${datos.paciente.nombre || 'paciente'}_Logoaudiometria_${fechaStr}.pdf`);
       
+      /*
       const pdfData = await win.webContents.printToPDF({
         pageSize: 'A4',
         printBackground: true,
         landscape: false
       }); 
+      */
+       const pdfData = await win.webContents.printToPDF({
+    pageSize: 'A4',
+    printBackground: true,
+    landscape: false,
+    margins: {
+      top: 0.1,
+      bottom: 0.1,
+      left: 0.1,
+      right: 0.1
+    },
+    scale: 1.0,
+    displayHeaderFooter: false
+  });
       
       fs.writeFileSync(pdfPath, pdfData);
       win.close();
@@ -303,7 +318,7 @@ generarLogoaudiometriaHTML(datos, entidad, imagenes) {
 
           .header img {
             width: 100%;
-            max-height: 100px;
+            max-height: 140px;
             object-fit: contain;
           }
           
@@ -490,6 +505,61 @@ generarLogoaudiometriaHTML(datos, entidad, imagenes) {
             z-index: 99999;
           }
 
+/* ============================================================
+   DIAGNÓSTICO - ESTILO SOBRIO Y PROFESIONAL
+   ============================================================ */
+.diagnostico-container {
+    margin: 20px 0 15px 0;
+    padding: 12px 10px;
+    border: 1px solid #d0d0d0;
+    border-radius: 4px;
+    background: #fcfcfc;
+}
+
+.diagnostico-titulo {
+    font-weight: 600;
+    font-size: 12px;
+    margin-bottom: 10px;
+    color: #333333;
+    font-family: Arial, sans-serif;
+    text-align: center;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+}
+
+.tabla-diagnostico {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 0 auto;
+}
+
+.tabla-diagnostico td {
+    padding: 6px 8px;
+    text-align: left;
+    font-size: 10.5px;
+    font-family: Arial, sans-serif;
+    border-bottom: 1px solid #e8e8e8;
+}
+
+.tabla-diagnostico tr:last-child td {
+    border-bottom: none;
+}
+
+.label-diagnostico {
+    font-weight: 600;
+    width: 30%;
+    color: #444444;
+    padding-right: 12px;
+}
+
+.valor-diagnostico {
+    width: 70%;
+    color: #222222;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    padding-left: 4px;
+}
+
           .sello-central img {
             width: 400px;
             height: 500px;
@@ -506,7 +576,7 @@ generarLogoaudiometriaHTML(datos, entidad, imagenes) {
           }
           .footer img {
             width: 100%;
-            max-height: 100px;
+            max-height: 140px;
             object-fit: contain;
           }
           
@@ -552,14 +622,20 @@ generarLogoaudiometriaHTML(datos, entidad, imagenes) {
         
         <div class="two-columns">
           <div class="columna-izquierda">
-            <div class="diagnostico-box">
-              <div class="diagnostico-titulo">DIAGNÓSTICO AUDITIVO</div>
-              <div class="diagnostico-subtitulo">O.D.</div>
-              <div class="diagnostico-texto">${diagnostico_od || ''}</div>
-              <div class="diagnostico-subtitulo">O.I.</div>
-              <div class="diagnostico-texto">${diagnostico_oi || ''}</div>
-            </div>
-            
+
+<div class="diagnostico-container">
+  <div class="diagnostico-titulo">DIAGNÓSTICO</div>
+  <table class="tabla-diagnostico">
+    <tr>
+      <td class="label-diagnostico">Oído Derecho:</td>
+      <td class="valor-diagnostico">${diagnostico_od || ''}</td>
+    </tr>
+    <tr>
+      <td class="label-diagnostico">Oído Izquierdo:</td>
+      <td class="valor-diagnostico">${diagnostico_oi || ''}</td>
+    </tr>
+  </table>
+</div>
 
             <!--
             <div class="observaciones">
@@ -716,11 +792,27 @@ if (this.configuracionQR.habilitado && testQR) {
         const fechaStr = `${fecha.getFullYear()}-${fecha.getMonth()+1}-${fecha.getDate()}_${fecha.getHours()}-${fecha.getMinutes()}-${fecha.getSeconds()}`;
         const pdfPath = path.join(downloadsPath, `${datos.paciente.nombre || 'paciente'}_Audiometria_${fechaStr}.pdf`);
         
+        
+        /*
         const pdfData = await win.webContents.printToPDF({
             pageSize: 'A4',
             printBackground: true,
             landscape: false
         });
+        */
+         const pdfData = await win.webContents.printToPDF({
+    pageSize: 'A4',
+    printBackground: true,
+    landscape: false,
+    margins: {
+      top: 0.1,
+      bottom: 0.1,
+      left: 0.1,
+      right: 0.1
+    },
+    scale: 1.0,
+    displayHeaderFooter: false
+  });
         
         fs.writeFileSync(pdfPath, pdfData);
         win.close();
@@ -941,7 +1033,7 @@ if (imagenes.selloBase64) {
                     text-align: center;
                     width: 100%;
                 }
-                .footer img { width: 100%; max-height: 100px; object-fit: contain; }
+                .footer img { width: 100%; max-height: 140px; object-fit: contain; }
                 @media print {
                     body { padding: 0; margin: 0; }
                     .footer { position: fixed; bottom: 0; }

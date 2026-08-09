@@ -896,7 +896,7 @@ freqsConDatos.forEach(f => {
             background: white;
           }
           .header { text-align: center; margin-bottom: 10px; width: 100%; }
-          .header img { width: 100%; max-height: 160px; object-fit: contain; }
+          .header img { width: 100%; max-height: 140px; object-fit: contain; }
           .fecha { text-align: left; font-size: 11px; margin-bottom: 20px; }
 
 
@@ -961,7 +961,7 @@ freqsConDatos.forEach(f => {
             text-align: center;
             width: 100%;
           }
-          .footer img { width: 100%; max-height: 100px; object-fit: contain; }
+          .footer img { width: 100%; max-height: 140px; object-fit: contain; }
           @media print {
             body { padding: 0; margin: 0; }
             .footer { position: fixed; bottom: 0; }
@@ -1174,7 +1174,7 @@ freqsConDatos.forEach(f => {
             text-align: center;
             width: 100%;
           }
-          .footer img { width: 100%; max-height: 100px; object-fit: contain; }
+          .footer img { width: 100%; max-height: 140px; object-fit: contain; }
           @media print {
             body { padding: 0; margin: 0; }
             .footer { position: fixed; bottom: 0; }
