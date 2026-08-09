@@ -361,7 +361,7 @@ const pta = datosAudiometria.pta || {};
 
 // Tabla PTA CON BORDES NEGROS (exactamente como en la foto)
 const tablaPTA = `
-<div style="position: fixed; right: 30px; top: 38%; margin: 0; z-index: 1000; width: 320px; height: auto; background: white; padding: 12px; border-radius: 6px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+<div style="position: fixed; right: 50px; top: 33%; margin: 0; z-index: 1000; width: 320px; height: auto; background: white; padding: 12px; border-radius: 6px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
   <div style="font-weight: bold; font-size: 13px; margin-bottom: 6px;">PROMEDIO TONAL (PTA)</div>
   <table style="border-collapse: collapse; font-size: 11px; width: 100%;">  <!-- CAMBIADO: width: 100% -->
     <thead>
@@ -384,6 +384,18 @@ const tablaPTA = `
       </tr>
     </tbody>
   </table>
+
+        <!-- DIAGNÓSTICOS: UNO AL LADO DEL OTRO -->
+      <div class="diagnosticos-container">
+        <div class="diagnostico-columna">
+          <div class="diagnostico-titulo-sec">DIAGNÓSTICO AUDIOMETRIA TONAL</div>
+        <!--  <div class="diagnostico-subtitulo">Oido Derecho:</div> -->
+          <div class="diagnostico-texto">${datosAudiometria.diagnostico_od || ''}</div>
+      <!--    <div class="diagnostico-subtitulo">Oido Izquiero:</div> --->
+       <!--   <div class="diagnostico-texto">${datosAudiometria.diagnostico_oi || ''}</div> -->
+       <!--   <div class="diagnostico-titulo-sec" style="margin-top:8px;">OBSERVACIONES</div> -->
+    <!--      <div class="diagnostico-texto">${datosAudiometria.observaciones || ''}</div> -->
+               </div>
 </div>`;
 
   /* Tabla de AUDIOMETRÍA (compacta)
@@ -633,11 +645,11 @@ const tablaLogoaudiometriaRows = `
 .sello-central {
     position: fixed;
    bottom: -30px; 
-    left: 50%;
+    left: 45%;
     z-index: 100;
 }
 .sello-central img {
-    width: 460px;
+    width: 400px;
     height: auto;
     opacity: 0.9;
     object-fit: contain;
@@ -761,18 +773,20 @@ ${imagenes.qrBase64 ? `<div class="qr-central"><img src="${imagenes.qrBase64}" a
 </div>
 
       
-      <!-- DIAGNÓSTICOS: UNO AL LADO DEL OTRO -->
-      <div class="diagnosticos-container">
+  
         <div class="diagnostico-columna">
-          <div class="diagnostico-titulo-sec">DIAGNÓSTICO</div>
-          <div class="diagnostico-subtitulo">Oido Derecho:</div>
-          <div class="diagnostico-texto">${datosAudiometria.diagnostico_od || ''}</div>
-          <div class="diagnostico-subtitulo">Oido Izquiero:</div>
-          <div class="diagnostico-texto">${datosAudiometria.diagnostico_oi || ''}</div>
-          <div class="diagnostico-titulo-sec" style="margin-top:8px;">OBSERVACIONES</div>
-          <div class="diagnostico-texto">${datosAudiometria.observaciones || ''}</div>
-           ${tablaPTA}
+          <div class="diagnostico-titulo-sec">DIAGNÓSTICO LOGOAUDIOMETRÍA</div>
+          <div class="diagnostico-subtitulo">Oido Derecho.</div>
+          <div class="diagnostico-texto">${datosLogoaudiometria.diagnostico_od || ''}</div>
+          <div class="diagnostico-subtitulo">Oido Izquierdo</div>
+          <div class="diagnostico-texto">${datosLogoaudiometria.diagnostico_oi || ''}</div>
+        <!--  <div class="diagnostico-titulo-sec" style="margin-top:8px;">OBSERVACIONES</div> -->
+          <div class="diagnostico-texto">${datosLogoaudiometria.diagnostico || ''}</div>
         </div>
+
+     
+           ${tablaPTA}
+   
 
 
         <!--
