@@ -23,6 +23,46 @@ body {
     color: #1e293b;
 }
 
+
+/* Botón Sin Respuesta - Toggle */
+.btn-sin-respuesta {
+    transition: all 0.3s ease;
+    font-weight: bold;
+    border: 2px solid transparent !important;
+}
+
+.btn-sin-respuesta:hover {
+    transform: scale(1.05);
+    opacity: 0.9;
+}
+
+.btn-sin-respuesta:active {
+    transform: scale(0.95);
+}
+
+.btn-sin-respuesta.active {
+    border: 2px solid #27ae60 !important;
+    box-shadow: 0 0 15px rgba(39, 174, 96, 0.4);
+    background: #27ae60 !important;
+    color: white !important;
+}
+
+.btn-sin-respuesta.active:hover {
+    background: #219a52 !important;
+}
+
+/* Para OD cuando está activo */
+.btn-sin-respuesta[data-ear="od"].active {
+    background: #27ae60 !important;
+    border-color: #1e8449 !important;
+}
+
+/* Para OI cuando está activo */
+.btn-sin-respuesta[data-ear="oi"].active {
+    background: #27ae60 !important;
+    border-color: #1e8449 !important;
+}
+
 .logo-empresa-top {
     display: flex;
     justify-content: space-between;
@@ -354,6 +394,8 @@ button.reset-btn:hover {
     resize: vertical;
 }
 
+
+
 .nr-btn {
     width: 40px;
     min-width: 40px;
@@ -455,7 +497,12 @@ button.reset-btn:hover {
         
         <!-- OÍDO DERECHO -->
         <div class="ear-section od">
-         <div class="ear-title od">🔴 OÍDO DERECHO (OD)</div>
+         <div class="ear-title od">🔴 OÍDO DERECHO </div>
+
+
+             <button type="button" class="btn-sin-respuesta" data-ear="od" style="background: #c0392b; color: white; border: none; padding: 4px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; margin-bottom: 10px;">
+        Sin Respuesta Oido Derecho
+    </button>
           <div class="input-grid">
             <div class="input-field">
               <label>U. Voz <small></small></label>
@@ -545,6 +592,9 @@ button.reset-btn:hover {
         <!-- OÍDO IZQUIERDO -->
         <div class="ear-section oi">
          <div class="ear-title oi">🔵 OÍDO IZQUIERDO (OI)</div>
+             <button type="button" class="btn-sin-respuesta" data-ear="oi" style="background: #2980b9; color: white; border: none; padding: 4px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; margin-bottom: 10px;">
+        Sin Respuesta Oido Izquierdo
+    </button>
           <div class="input-grid">
             <div class="input-field">
               <label>U. Voz <small></small></label>
@@ -614,7 +664,7 @@ button.reset-btn:hover {
     <label>% Punto Intermedio <small></small></label>
     <div style="display:flex; gap:6px;">
         <input type="number" id="oi_punto_intermedio" min="0" max="100" step="5" placeholder="Ej: 30, 40, 50">
-        <button type="button" class="nr-btn" data-ear="oi" data-field="punto_intermedio">↓</button>
+        
     </div>
     <small style="color: #666; font-size: 10px;">Punto entre U. Palabra y % Discriminación</small>
 </div>
@@ -2124,6 +2174,102 @@ function ajustarScaleChart() {
         }, 50);
     }
 }
+
+// ============================================
+// 🚫 BOTÓN SIN RESPUESTA - ACTIVA TODAS LAS FLECHAS
+// ============================================
+
+// ============================================
+// 🚫 BOTÓN SIN RESPUESTA - TOGGLE (ACTIVAR/DESACTIVAR)
+// ============================================
+
+document.querySelectorAll('.btn-sin-respuesta').forEach(btn => {
+    btn.addEventListener('click', function() {
+        const ear = this.dataset.ear;
+        
+        // Verificar si el botón ya está activo
+        const estaActivo = this.classList.contains('active');
+        
+        if (estaActivo) {
+            // ==========================================
+            // 🔴 DESACTIVAR - Quitar todas las flechas
+            // ==========================================
+            
+            // Desactivar TODOS los botones NR para este oído
+            const nrButtons = document.querySelectorAll(`.nr-btn[data-ear="${ear}"]`);
+            nrButtons.forEach(nrBtn => {
+                nrBtn.classList.remove('active');
+                const field = nrBtn.dataset.field;
+                noResponseFlags[ear][field] = false;
+            });
+            
+            // Cambiar visual del botón
+            this.classList.remove('active');
+            this.innerHTML = '🚫 Sin Respuesta';
+            this.style.background = ear === 'od' ? '#c0392b' : '#2980b9';
+            
+            // Feedback
+            this.textContent = '✅ ¡Desactivado!';
+            setTimeout(() => {
+                this.innerHTML = '🚫 Sin Respuesta';
+            }, 1000);
+            
+        } else {
+            // ==========================================
+            // 🟢 ACTIVAR - Poner todas las flechas
+            // ==========================================
+            
+            // Activar TODOS los botones NR para este oído
+            const nrButtons = document.querySelectorAll(`.nr-btn[data-ear="${ear}"]`);
+            nrButtons.forEach(nrBtn => {
+                nrBtn.classList.add('active');
+                const field = nrBtn.dataset.field;
+                noResponseFlags[ear][field] = true;
+            });
+            
+            // Cambiar visual del botón
+            this.classList.add('active');
+            this.innerHTML = '✅ Sin Respuesta Activado';
+            this.style.background = '#27ae60';
+        }
+        
+        // Actualizar la gráfica
+        updateChart();
+    });
+});
+
+
+
+// También puedes agregar un botón para desactivar todas las flechas
+// Agregar en el HTML después del botón Sin Respuesta:
+// <button type="button" class="btn-quitar-sin-respuesta" data-ear="od" style="background: #95a5a6; color: white; border: none; padding: 4px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; margin-left: 8px;">
+//     🔄 Quitar Sin Respuesta
+// </button>
+
+document.querySelectorAll('.btn-quitar-sin-respuesta').forEach(btn => {
+    btn.addEventListener('click', function() {
+        const ear = this.dataset.ear;
+        
+        // Desactivar TODOS los botones NR para este oído
+        const nrButtons = document.querySelectorAll(`.nr-btn[data-ear="${ear}"]`);
+        nrButtons.forEach(nrBtn => {
+            nrBtn.classList.remove('active');
+            const field = nrBtn.dataset.field;
+            noResponseFlags[ear][field] = false;
+        });
+        
+        updateChart();
+        
+        const textoOriginal = this.innerHTML;
+        this.innerHTML = '✅ ¡Reactivado!';
+        this.style.background = '#27ae60';
+        
+        setTimeout(() => {
+            this.innerHTML = textoOriginal;
+            this.style.background = '#95a5a6';
+        }, 1500);
+    });
+});
 
 // ============================================
 // EVENTOS PARA EJECUTAR EL AJUSTE
