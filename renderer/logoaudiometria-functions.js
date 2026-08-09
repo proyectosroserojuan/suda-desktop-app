@@ -19,6 +19,20 @@ async function capturarGraficaComoImagen() {
     });
 }
 
+function obtenerDiscriminacionOD() {
+    const porcentaje = document.getElementById('discriminacion_od_porcentaje')?.value || '';
+    const db = document.getElementById('discriminacion_od_db')?.value || '';
+    if (!porcentaje && !db) return '';
+    return `Discriminación del ${porcentaje}% en dB ${db} O.D`;
+}
+
+function obtenerDiscriminacionOI() {
+    const porcentaje = document.getElementById('discriminacion_oi_porcentaje')?.value || '';
+    const db = document.getElementById('discriminacion_oi_db')?.value || '';
+    if (!porcentaje && !db) return '';
+    return `Discriminación del ${porcentaje}% en dB ${db} O.I`;
+}
+
 function obtenerValoresFormulario() {
     return {
         od: {
@@ -196,8 +210,8 @@ async function onGrabarClick() {
         
         // Obtener valores de diagnóstico
         const diagnostico = obtenerDiagnostico();
-        const diagnostico_od = obtenerDiagnosticoOd();
-        const diagnostico_oi = obtenerDiagnosticoOi();
+const diagnostico_od = obtenerDiscriminacionOD();
+const diagnostico_oi = obtenerDiscriminacionOI();
         const otoscopia = document.getElementById('otoscopia_logoaudiometria')?.value || '';  // ✅ AGREGAR
         
         console.log('Diagnósticos:', { diagnostico, diagnostico_od, diagnostico_oi });
@@ -285,6 +299,8 @@ window.logoaudiometriaFunctions = {
     obtenerDiagnostico,
     obtenerDiagnosticoOd,
     obtenerDiagnosticoOi,
+    obtenerDiscriminacionOD,   // ← NUEVA
+    obtenerDiscriminacionOI,   // ← NUEVA
     generarPDF,
     guardarEnBaseDeDatos
 };
