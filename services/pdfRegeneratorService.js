@@ -7,6 +7,9 @@ const os = require('os');
 // Importar los generadores de PDF
 const pdfGeneratorUnified = require('./pdfGeneratorUnified');
 const pdfGeneratorCoosaludUnified = require('./pdfGeneratorCoosaludUnified');
+const pdfGeneratorCoosalud = require('./pdfGeneratorCoosalud');
+const pdfGenerator = require('./pdfGenerator');
+
 
 // Importar módulos de base de datos
 const examenesDB = require('../db/examenes_unificados');
@@ -22,54 +25,25 @@ class PDFRegeneratorService {
         }
     }
 
-    /**
-     * REGENERAR PDF COMPLETO DESDE DATOS DE BASE DE DATOS
-     */
-    async regenerarPDF(cita, examenData) {
+async regenerarPDF(cita, examenAudiometria, examenLogoaudiometria) {
         console.log('\n========== REGENERANDO PDF DESDE BD ==========');
         console.log('Cita ID:', cita.id);
         console.log('Paciente:', cita.paciente_nombre);
         console.log('Entidad:', cita.entidad_nombre);
-        console.log('Tipo examen:', examenData.tipo_examen);
+        console.log('Tiene Audiometría:', !!examenAudiometria);
+        console.log('Tiene Logoaudiometría:', !!examenLogoaudiometria);
         
         try {
-            if (!examenData) {
-                throw new Error('No hay datos del examen en la base de datos');
+            if (!examenAudiometria && !examenLogoaudiometria) {
+                throw new Error('No hay datos de examen para generar el PDF');
             }
 
             const entidad = cita.entidad_nombre || 'UDA';
             const esCoosalud = entidad.toLowerCase().includes('coosalud') || 
                               entidad.toLowerCase().includes('progresando');
             
-            // Buscar ambos tipos de examen
-            let datosAudiometria = null;
-            let datosLogoaudiometria = null;
-            
-            if (examenData.tipo_examen === 'audiometria') {
-                datosAudiometria = this.prepararDatosParaPDF(cita, examenData);
-                try {
-                    const logoaudioResult = await examenesDB.obtenerExamenesPorCitaYtipo(cita.id, 'logoaudiometria');
-                    if (logoaudioResult) {
-                        datosLogoaudiometria = this.prepararDatosParaPDF(cita, logoaudioResult);
-                        console.log('✅ Logoaudiometría encontrada para combinar');
-                    }
-                } catch(e) {
-                    console.log('⚠️ No se encontró logoaudiometría para combinar');
-                }
-            } else if (examenData.tipo_examen === 'logoaudiometria') {
-                datosLogoaudiometria = this.prepararDatosParaPDF(cita, examenData);
-                try {
-                    const audioResult = await examenesDB.obtenerExamenesPorCitaYtipo(cita.id, 'audiometria');
-                    if (audioResult) {
-                        datosAudiometria = this.prepararDatosParaPDF(cita, audioResult);
-                        console.log('✅ Audiometría encontrada para combinar');
-                    }
-                } catch(e) {
-                    console.log('⚠️ No se encontró audiometría para combinar');
-                }
-            } else {
-                datosAudiometria = this.prepararDatosParaPDF(cita, examenData);
-            }
+            const datosAudiometria = examenAudiometria ? this.prepararDatosParaPDF(cita, examenAudiometria) : null;
+            const datosLogoaudiometria = examenLogoaudiometria ? this.prepararDatosParaPDF(cita, examenLogoaudiometria) : null;
             
             let pdfPath = null;
             
@@ -89,18 +63,18 @@ class PDFRegeneratorService {
                     );
                 }
             } else if (datosAudiometria) {
-                console.log('📄 Generando PDF de AUDIOMETRÍA');
+                console.log('📄 Generando PDF INDIVIDUAL de AUDIOMETRÍA');
                 if (esCoosalud) {
-                    pdfPath = await pdfGeneratorCoosaludUnified.generarPDFAudiometria(datosAudiometria, entidad);
+                    pdfPath = await pdfGeneratorCoosalud.generarPDF(datosAudiometria, entidad, 'audiometria');
                 } else {
-                    pdfPath = await pdfGeneratorUnified.generarPDFAudiometria(datosAudiometria, entidad);
+                    pdfPath = await pdfGenerator.generarPDF(datosAudiometria, entidad, 'audiometria');
                 }
             } else if (datosLogoaudiometria) {
-                console.log('📄 Generando PDF de LOGOAUDIOMETRÍA');
+                console.log('📄 Generando PDF INDIVIDUAL de LOGOAUDIOMETRÍA');
                 if (esCoosalud) {
-                    pdfPath = await pdfGeneratorCoosaludUnified.generarPDFLogoaudiometria(datosLogoaudiometria, entidad);
+                    pdfPath = await pdfGeneratorCoosalud.generarPDF(datosLogoaudiometria, entidad, 'logoaudiometria');
                 } else {
-                    pdfPath = await pdfGeneratorUnified.generarPDFLogoaudiometria(datosLogoaudiometria, entidad);
+                    pdfPath = await pdfGenerator.generarPDF(datosLogoaudiometria, entidad, 'logoaudiometria');
                 }
             } else {
                 throw new Error('No se encontraron datos válidos para generar el PDF');

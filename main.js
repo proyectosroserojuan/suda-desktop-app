@@ -281,26 +281,58 @@ ipcMain.handle('regenerar-pdf', async (event, citaId) => {
             entidad: cita.entidad_nombre
         });
         
-        // 2. Obtener datos del examen
-        const examenesDB = require('./db/examenes_unificados');
-        const examenData = await examenesDB.obtenerExamenPorCitaId(citaId);
+// 2. Determinar según el MOTIVO de la cita qué tipo(s) de examen corresponden
+        const motivoLower = (cita.motivo || '').toLowerCase();
+        const requiereAudiometria = motivoLower.includes('audiometria') || motivoLower.includes('audiometría');
+        const requiereLogoaudiometria = motivoLower.includes('logoaudiometria');
         
-        if (!examenData) {
-            throw new Error('No se encontró el examen en la base de datos');
+        console.log('📋 Motivo de la cita:', cita.motivo);
+        console.log('📋 Requiere Audiometría:', requiereAudiometria, '| Requiere Logoaudiometría:', requiereLogoaudiometria);
+        
+        if (!requiereAudiometria && !requiereLogoaudiometria) {
+            throw new Error('El motivo de la cita no coincide con ningún tipo de examen conocido: ' + cita.motivo);
         }
         
-        console.log('📊 Datos del examen obtenidos:', {
-            id: examenData.id,
-            tipo: examenData.tipo_examen,
-            tiene_grafica: !!examenData.grafica_base64,
-            tiene_valores_od: !!examenData.valores_od
-        });
+        const examenesDB = require('./db/examenes_unificados');
+        const { obtenerAudiometriaPorCitaId } = require('./db/audiometrias');
+        const { obtenerLogoaudiometriaPorCitaId } = require('./db/logoaudiometrias');
         
-        // 3. IMPORTAR Y USAR EL SERVICIO
+        // 3. Buscar SOLO lo que corresponde al tipo declarado en la cita, filtrado por cita_id exacto
+        let examenAudiometria = null;
+        let examenLogoaudiometria = null;
+        
+        if (requiereAudiometria) {
+            examenAudiometria = await examenesDB.obtenerExamenesPorCitaYtipo(citaId, 'audiometria');
+            if (!examenAudiometria) {
+                examenAudiometria = await obtenerAudiometriaPorCitaId(citaId);
+            }
+            if (!examenAudiometria) {
+                console.log('⚠️ La cita requiere Audiometría pero no se encontró el examen guardado');
+            }
+        }
+        
+        if (requiereLogoaudiometria) {
+            examenLogoaudiometria = await examenesDB.obtenerExamenesPorCitaYtipo(citaId, 'logoaudiometria');
+            if (!examenLogoaudiometria) {
+                examenLogoaudiometria = await obtenerLogoaudiometriaPorCitaId(citaId);
+            }
+            if (!examenLogoaudiometria) {
+                console.log('⚠️ La cita requiere Logoaudiometría pero no se encontró el examen guardado');
+            }
+        }
+        
+        if (!examenAudiometria && !examenLogoaudiometria) {
+            throw new Error('No se encontró ningún examen guardado que coincida con el tipo de atención de esta cita');
+        }
+        
+        console.log('📊 Examen Audiometría encontrado:', !!examenAudiometria);
+        console.log('📊 Examen Logoaudiometría encontrado:', !!examenLogoaudiometria);
+        
+        // 4. IMPORTAR Y USAR EL SERVICIO
         const pdfRegeneratorService = require('./services/pdfRegeneratorService');
         
-        // 4. REGENERAR PDF
-        const pdfPath = await pdfRegeneratorService.regenerarPDF(cita, examenData);
+        // 5. REGENERAR PDF (ya no adivina nada, recibe exactamente lo que corresponde)
+        const pdfPath = await pdfRegeneratorService.regenerarPDF(cita, examenAudiometria, examenLogoaudiometria);
         
         console.log('✅ PDF regenerado exitosamente:', pdfPath);
         return { ok: true, pdfPath };
