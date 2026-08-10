@@ -118,13 +118,13 @@ class PDFGeneratorCoosalud {
         const bloqueY = graficaY + 240;
 
         // DIAGNOSTICO
-        page.drawText('DIAGNÓSTICO AUDITIVO', { x: 50, y: fromTop(bloqueY), size: 11, font: fontBold });
+        page.drawText('DIAGNÓSTICO', { x: 50, y: fromTop(bloqueY), size: 11, font: fontBold });
         page.drawText('O.D.', { x: 50, y: fromTop(bloqueY + 20), size: 10, font: fontBold });
-        page.drawText(datos.diagnostico_od || '________', { x: 80, y: fromTop(bloqueY + 35), size: 10, font });
+        page.drawText(datos.diagnostico_od || '', { x: 80, y: fromTop(bloqueY + 35), size: 10, font });
         page.drawText('O.I.', { x: 50, y: fromTop(bloqueY + 60), size: 10, font: fontBold });
-        page.drawText(datos.diagnostico_oi || '________', { x: 80, y: fromTop(bloqueY + 75), size: 10, font });
-        page.drawText('OBSERVACIONES', { x: 50, y: fromTop(bloqueY + 105), size: 11, font: fontBold });
-        page.drawText(datos.diagnostico || '________', { x: 50, y: fromTop(bloqueY + 120), size: 10, font });
+        page.drawText(datos.diagnostico_oi || '', { x: 80, y: fromTop(bloqueY + 75), size: 10, font });
+     //   page.drawText('OBSERVACIONES', { x: 50, y: fromTop(bloqueY + 105), size: 11, font: fontBold });
+     //   page.drawText(datos.diagnostico || '________', { x: 50, y: fromTop(bloqueY + 120), size: 10, font });
 
         // TABLA CON SOPORTE NR
         const tableX = 260;
@@ -558,32 +558,30 @@ async generarPDFAudiometria(datos, entidad) {
         
         const plantillaPath = path.join(this.imagesPath, 'formatocoosalud.pdf');
         const pdfDoc = await PDFDocument.load(fs.readFileSync(plantillaPath));
+        
+        // 🔥 REGISTRAR FONTKIT PARA ARIAL
+        pdfDoc.registerFontkit(fontkit);
+        
         const page = pdfDoc.getPages()[0];
+        const { width, height } = page.getSize();
+        const fromTop = (y) => height - y;
 
-const { width, height } = page.getSize();
+        // 🔥 USAR ARIAL
+        const fontPath = 'C:/Windows/Fonts/arial.ttf';
+        const fontBytes = fs.readFileSync(fontPath);
+        const font = await pdfDoc.embedFont(fontBytes);
+        const fontBold = font;
 
-const fromTop = (y) => height - y;
-
-// CENTRAR TEXTO VERTICALMENTE
-const centerText = (topY, rowH, fontSize = 8) => {
-    return fromTop(topY + (rowH / 2) + (fontSize / 2.8));
-};
-const font = await pdfDoc.embedFont(StandardFonts.TimesRoman);
-const fontBold = await pdfDoc.embedFont(StandardFonts.TimesRomanBold);
+        // CENTRAR TEXTO VERTICALMENTE
+        const centerText = (topY, rowH, fontSize = 8) => {
+            return fromTop(topY + (rowH / 2) + (fontSize / 2.8));
+        };
 
         const od = datos.valores_od || {};
         const oi = datos.valores_oi || {};
-       const freqs = (datos.freqs || [
-    '250',
-    '500',
-    '1000',
-    '1500',
-    '2000',
-    '3000',
-    '4000',
-    '6000',
-    '8000'
-]).filter(f => f !== '125');
+        const freqs = (datos.freqs || [
+            '250', '500', '1000', '1500', '2000', '3000', '4000', '6000', '8000'
+        ]).filter(f => f !== '125');
 
         const nombre = datos.paciente?.nombre || '';
         const doc = datos.paciente?.documento || '';
@@ -599,32 +597,31 @@ const fontBold = await pdfDoc.embedFont(StandardFonts.TimesRomanBold);
         page.drawText(`Nombre: ${nombre}`, { x: 50, y: fromTop(150), size: 11, font });
         page.drawText(`C.C.: ${doc}`, { x: 50, y: fromTop(170), size: 11, font });
         page.drawText(`Entidad: ${entidad}`, { x: 50, y: fromTop(190), size: 11, font });
+
+        // OTOSCOPIA
         const otoscopiaTexto = datos.otoscopia || '________';
+        const palabras = otoscopiaTexto.split(' ');
+        const lineas = [];
+        for (let i = 0; i < palabras.length; i += 10) {
+            lineas.push(palabras.slice(i, i + 20).join(' '));
+        }
 
-// salto cada 10 palabras
-const palabras = otoscopiaTexto.split(' ');
-const lineas = [];
+        page.drawText('Otoscopia:', {
+            x: 50,
+            y: fromTop(210),
+            size: 10,
+            font: fontBold
+        });
 
-for (let i = 0; i < palabras.length; i += 10) {
-    lineas.push(palabras.slice(i, i + 20).join(' '));
-}
-
-page.drawText('Otoscopia:', {
-    x: 50,
-    y: fromTop(210),
-    size: 10,
-    font: fontBold
-});
-
-lineas.forEach((linea, index) => {
-    page.drawText(linea, {
-        x: 50,
-        y: fromTop(225 + (index * 12)),
-        size: 9,
-        font,
-        color: rgb(0.3, 0.3, 0.3)
-    });
-});
+        lineas.forEach((linea, index) => {
+            page.drawText(linea, {
+                x: 50,
+                y: fromTop(225 + (index * 12)),
+                size: 9,
+                font,
+                color: rgb(0.3, 0.3, 0.3)
+            });
+        });
 
         // IMAGEN OIDO
         const oido = await this.imageToBytes('oido_logo.jpeg');
@@ -634,238 +631,254 @@ lineas.forEach((linea, index) => {
         }
 
         // TITULO
-        const tituloY = 210;
-        page.drawText('AUDIOMETRÍA TONAL', { x: 145, y: fromTop(tituloY), size: 12, font: fontBold });
-
-        // OTOSCOPIA
-
+        const tituloY = 250;
+        page.drawText('AUDIOMETRÍA TONAL', { 
+            x: 145, 
+            y: fromTop(tituloY), 
+            size: 14, 
+            font: fontBold 
+        });
 
         // GRAFICA
-        const graficaY = tituloY + 30;
-        if (datos.grafica_base64) {
+const graficaY = 240;  // ← Valor fijo, no cambia al mover el título
+if (datos.grafica_base64) {
             const base64 = datos.grafica_base64.split(',')[1];
             const buffer = Buffer.from(base64, 'base64');
             const img = datos.grafica_base64.includes('png')
                 ? await pdfDoc.embedPng(buffer)
                 : await pdfDoc.embedJpg(buffer);
-            page.drawImage(img, { x: (width - 420) / 2, y: fromTop(graficaY + 200), width: 420, height: 200 });
+            page.drawImage(img, { 
+                x: (width - 420) / 2 - 75, 
+                y: fromTop(graficaY + 300), 
+                width: 520, 
+                height: 280 
+            });
         }
 
-        // BLOQUE INFERIOR
-        const bloqueY = graficaY + 240;
+        // =========================
+        // DIAGNÓSTICO
+        // =========================
+        const diagY = 560;
+        const diagX = 50;
 
-        // DIAGNOSTICO
-        page.drawText('DIAGNÓSTICO AUDITIVO', { x: 50, y: fromTop(bloqueY), size: 11, font: fontBold });
-        page.drawText('O.D.', { x: 50, y: fromTop(bloqueY + 20), size: 10, font: fontBold });
-        page.drawText(datos.diagnostico_od || '________', { x: 80, y: fromTop(bloqueY + 35), size: 10, font });
-        page.drawText('O.I.', { x: 50, y: fromTop(bloqueY + 60), size: 10, font: fontBold });
-        page.drawText(datos.diagnostico_oi || '________', { x: 80, y: fromTop(bloqueY + 75), size: 10, font });
-        page.drawText('OBSERVACIONES', { x: 50, y: fromTop(bloqueY + 105), size: 11, font: fontBold });
-        page.drawText(datos.observaciones || '________', { x: 50, y: fromTop(bloqueY + 120), size: 10, font });
+        page.drawText('DIAGNÓSTICO', { 
+            x: diagX, 
+            y: fromTop(diagY), 
+            size: 11, 
+            font: fontBold 
+        });
+        page.drawText(datos.diagnostico_od || '', { 
+            x: diagX + 30, 
+            y: fromTop(diagY + 35), 
+            size: 10, 
+            font 
+        });
 
+        // =========================
+        // TABLA PTA CON TÍTULO
+        // =========================
+        const pta = datos.pta || {};
 
-// =========================
-// TABLA PTA SIMPLE
-// =========================
+        const ptaX = 55;
+        const ptaY = 650;
 
-const pta = datos.pta || {};
+        const ptaCol1 = 45;
+        const ptaCol2 = 55;
+        const ptaCol3 = 55;
+        const ptaRow = 20;
 
-const ptaX = 55;
-const ptaY = bloqueY + 155;
+        // 🔥 TÍTULO "PTA" ENCIMA DE LA TABLA
+        page.drawText('PTA', {
+            x: ptaX + 10,
+            y: fromTop(ptaY - 5),
+            size: 10,
+            font: fontBold
+        });
 
-const ptaCol1 = 45;
-const ptaCol2 = 55;
-const ptaCol3 = 55;
-const ptaRow = 20;
+        function ptaCell(x, topY, w, h) {
+            page.drawRectangle({
+                x,
+                y: fromTop(topY + h),
+                width: w,
+                height: h,
+                borderWidth: 0.5,
+                borderColor: rgb(0.6, 0.6, 0.6)
+            });
+        }
 
-function ptaCell(x, topY, w, h) {
-    page.drawRectangle({
-        x,
-        y: fromTop(topY + h),
-        width: w,
-        height: h,
-        borderWidth: 0.5,
-        borderColor: rgb(0.6, 0.6, 0.6)
-    });
-}
+        // HEADER
+        ptaCell(ptaX, ptaY, ptaCol1, ptaRow);
+        ptaCell(ptaX + ptaCol1, ptaY, ptaCol2, ptaRow);
+        ptaCell(ptaX + ptaCol1 + ptaCol2, ptaY, ptaCol3, ptaRow);
 
-// ================= HEADER =================
+        page.drawText('V.A', {
+            x: ptaX + ptaCol1 + 18,
+            y: centerText(ptaY, ptaRow, 9),
+            size: 9,
+            font: fontBold
+        });
 
-ptaCell(ptaX, ptaY, ptaCol1, ptaRow);
-ptaCell(ptaX + ptaCol1, ptaY, ptaCol2, ptaRow);
-ptaCell(ptaX + ptaCol1 + ptaCol2, ptaY, ptaCol3, ptaRow);
+        page.drawText('V.O', {
+            x: ptaX + ptaCol1 + ptaCol2 + 18,
+            y: centerText(ptaY, ptaRow, 9),
+            size: 9,
+            font: fontBold
+        });
 
-page.drawText('V.A', {
-    x: ptaX + ptaCol1 + 18,
-    y: centerText(ptaY, ptaRow, 9),
-    size: 9,
-    font: fontBold
-});
+        // FILA OD
+        const odY = ptaY + ptaRow;
 
-page.drawText('V.O', {
-    x: ptaX + ptaCol1 + ptaCol2 + 18,
-    y: centerText(ptaY, ptaRow, 9),
-    size: 9,
-    font: fontBold
-});
+        ptaCell(ptaX, odY, ptaCol1, ptaRow);
+        ptaCell(ptaX + ptaCol1, odY, ptaCol2, ptaRow);
+        ptaCell(ptaX + ptaCol1 + ptaCol2, odY, ptaCol3, ptaRow);
 
-// ================= FILA OD =================
+        page.drawText('O.D.', {
+            x: ptaX + 8,
+            y: centerText(odY, ptaRow, 9),
+            size: 9,
+            font,
+            color: rgb(0.9, 0.2, 0.2)
+        });
 
-const odY = ptaY + ptaRow;
+        page.drawText(
+            pta.od_air != null ? `${pta.od_air} dB` : '--',
+            {
+                x: ptaX + ptaCol1 + 10,
+                y: centerText(odY, ptaRow, 9),
+                size: 9,
+                font,
+                color: rgb(0.9, 0.2, 0.2)
+            }
+        );
 
-ptaCell(ptaX, odY, ptaCol1, ptaRow);
-ptaCell(ptaX + ptaCol1, odY, ptaCol2, ptaRow);
-ptaCell(ptaX + ptaCol1 + ptaCol2, odY, ptaCol3, ptaRow);
+        page.drawText(
+            pta.od_bone != null ? `${pta.od_bone} dB` : '--',
+            {
+                x: ptaX + ptaCol1 + ptaCol2 + 10,
+                y: centerText(odY, ptaRow, 9),
+                size: 9,
+                font,
+                color: rgb(0.9, 0.2, 0.2)
+            }
+        );
 
-page.drawText('O.D.', {
-    x: ptaX + 8,
-    y: centerText(odY, ptaRow, 9),
-    size: 9,
-    font,
-    color: rgb(0.9, 0.2, 0.2)
-});
+        // FILA OI
+        const oiY = odY + ptaRow;
 
-page.drawText(
-    pta.od_air != null ? `${pta.od_air} dB` : '--',
-    {
-        x: ptaX + ptaCol1 + 10,
-        y: centerText(odY, ptaRow, 9),
-        size: 9,
-        font,
-        color: rgb(0.9, 0.2, 0.2)
-    }
-);
+        ptaCell(ptaX, oiY, ptaCol1, ptaRow);
+        ptaCell(ptaX + ptaCol1, oiY, ptaCol2, ptaRow);
+        ptaCell(ptaX + ptaCol1 + ptaCol2, oiY, ptaCol3, ptaRow);
 
-page.drawText(
-    pta.od_bone != null ? `${pta.od_bone} dB` : '--',
-    {
-        x: ptaX + ptaCol1 + ptaCol2 + 10,
-        y: centerText(odY, ptaRow, 9),
-        size: 9,
-        font,
-        color: rgb(0.9, 0.2, 0.2)
-    }
-);
+        page.drawText('O.I.', {
+            x: ptaX + 8,
+            y: centerText(oiY, ptaRow, 9),
+            size: 9,
+            font,
+            color: rgb(0.2, 0.5, 0.9)
+        });
 
-// ================= FILA OI =================
+        page.drawText(
+            pta.oi_air != null ? `${pta.oi_air} dB` : '--',
+            {
+                x: ptaX + ptaCol1 + 10,
+                y: centerText(oiY, ptaRow, 9),
+                size: 9,
+                font,
+                color: rgb(0.2, 0.5, 0.9)
+            }
+        );
 
-const oiY = odY + ptaRow;
+        page.drawText(
+            pta.oi_bone != null ? `${pta.oi_bone} dB` : '--',
+            {
+                x: ptaX + ptaCol1 + ptaCol2 + 10,
+                y: centerText(oiY, ptaRow, 9),
+                size: 9,
+                font,
+                color: rgb(0.2, 0.5, 0.9)
+            }
+        );
 
-ptaCell(ptaX, oiY, ptaCol1, ptaRow);
-ptaCell(ptaX + ptaCol1, oiY, ptaCol2, ptaRow);
-ptaCell(ptaX + ptaCol1 + ptaCol2, oiY, ptaCol3, ptaRow);
-
-page.drawText('O.I.', {
-    x: ptaX + 8,
-    y: centerText(oiY, ptaRow, 9),
-    size: 9,
-    font,
-    color: rgb(0.2, 0.5, 0.9)
-});
-
-page.drawText(
-    pta.oi_air != null ? `${pta.oi_air} dB` : '--',
-    {
-        x: ptaX + ptaCol1 + 10,
-        y: centerText(oiY, ptaRow, 9),
-        size: 9,
-        font,
-        color: rgb(0.2, 0.5, 0.9)
-    }
-);
-
-page.drawText(
-    pta.oi_bone != null ? `${pta.oi_bone} dB` : '--',
-    {
-        x: ptaX + ptaCol1 + ptaCol2 + 10,
-        y: centerText(oiY, ptaRow, 9),
-        size: 9,
-        font,
-        color: rgb(0.2, 0.5, 0.9)
-    }
-);
-
-        // TABLA
-    const tableX = 340
-const rowHeight = 18;
-
-
+        // =========================
+        // TABLA DE FRECUENCIAS
+        // =========================
+        const tablaX = 340;
+        const tablaY = 320;
+        const rowHeight = 18;
 
         function cell(x, y, w, h) {
-            page.drawRectangle({ x, y, width: w, height: h, borderWidth: 0.5, borderColor: rgb(0, 0, 0) });
+            page.drawRectangle({ 
+                x, 
+                y, 
+                width: w, 
+                height: h, 
+                borderWidth: 0.5, 
+                borderColor: rgb(0, 0, 0) 
+            });
         }
 
-// HEADER
-// ================= HEADER =================
- const tableY = bloqueY - 230; // sube 50 puntos toda la tabla
-const headerY = tableY;
+        // HEADER
+        cell(tablaX, fromTop(tablaY + rowHeight), 90, rowHeight);
+        cell(tablaX + 90, fromTop(tablaY + rowHeight), 55, rowHeight);
+        cell(tablaX + 145, fromTop(tablaY + rowHeight), 55, rowHeight);
 
-cell(tableX, fromTop(headerY + rowHeight), 90, rowHeight);
-cell(tableX + 90, fromTop(headerY + rowHeight), 55, rowHeight);
-cell(tableX + 145, fromTop(headerY + rowHeight), 55, rowHeight);
+        page.drawText('Frecuencia', { 
+            x: tablaX + 10, 
+            y: centerText(tablaY, rowHeight, 8), 
+            size: 8, 
+            font: fontBold 
+        });
+        page.drawText('OD', { 
+            x: tablaX + 105, 
+            y: centerText(tablaY, rowHeight, 8), 
+            size: 8, 
+            font: fontBold 
+        });
+        page.drawText('OI', { 
+            x: tablaX + 160, 
+            y: centerText(tablaY, rowHeight, 8), 
+            size: 8, 
+            font: fontBold 
+        });
 
-page.drawText('Frecuencia', {
-    x: tableX + 10,
-    y: centerText(headerY, rowHeight, 8),
-    size: 8,
-    font: fontBold
-});
-
-page.drawText('OD', {
-    x: tableX + 105,
-    y: centerText(headerY, rowHeight, 8),
-    size: 8,
-    font: fontBold
-});
-
-page.drawText('OI', {
-    x: tableX + 160,
-    y: centerText(headerY, rowHeight, 8),
-    size: 8,
-    font: fontBold
-});
-
-// FILAS
-freqs.forEach((f, i) => {
-
-   const rowY = tableY + rowHeight + (i * rowHeight);
-
-    // CELDAS
-    cell(tableX, fromTop(rowY + rowHeight), 90, rowHeight);
-    cell(tableX + 90, fromTop(rowY + rowHeight), 55, rowHeight);
-    cell(tableX + 145, fromTop(rowY + rowHeight), 55, rowHeight);
-
-    // FRECUENCIA
-    page.drawText(`${f} Hz`, {
-        x: tableX + 8,
-        y: centerText(rowY, rowHeight, 8),
-        size: 8,
-        font
-    });
-
-    // OD
-    page.drawText(`${od[f] || '—'} dB`, {
-        x: tableX + 96,
-        y: centerText(rowY, rowHeight, 8),
-        size: 8,
-        font,
-        color: rgb(0.9, 0.2, 0.2)
-    });
-
-    // OI
-    page.drawText(`${oi[f] || '—'} dB`, {
-        x: tableX + 151,
-        y: centerText(rowY, rowHeight, 8),
-        size: 8,
-        font,
-        color: rgb(0.2, 0.5, 0.9)
-    });
-
-});
+        // FILAS
+        freqs.forEach((f, i) => {
+            const rowY = tablaY + rowHeight + (i * rowHeight);
+            
+            cell(tablaX, fromTop(rowY + rowHeight), 90, rowHeight);
+            cell(tablaX + 90, fromTop(rowY + rowHeight), 55, rowHeight);
+            cell(tablaX + 145, fromTop(rowY + rowHeight), 55, rowHeight);
+            
+            page.drawText(`${f} Hz`, { 
+                x: tablaX + 8, 
+                y: centerText(rowY, rowHeight, 8), 
+                size: 8, 
+                font 
+            });
+            
+            page.drawText(`${od[f] || '—'} dB`, { 
+                x: tablaX + 96, 
+                y: centerText(rowY, rowHeight, 8), 
+                size: 8, 
+                font, 
+                color: rgb(0.9, 0.2, 0.2) 
+            });
+            
+            page.drawText(`${oi[f] || '—'} dB`, { 
+                x: tablaX + 151, 
+                y: centerText(rowY, rowHeight, 8), 
+                size: 8, 
+                font, 
+                color: rgb(0.2, 0.5, 0.9) 
+            });
+        });
 
         // GUARDAR
         const pdfBytes = await pdfDoc.save();
-        const filePath = path.join(this.getDownloadsPath(), `${nombre || 'paciente'}_Audiometria_${Date.now()}.pdf`);
+        const filePath = path.join(
+            this.getDownloadsPath(), 
+            `${nombre || 'paciente'}_Audiometria_${Date.now()}.pdf`
+        );
         fs.writeFileSync(filePath, pdfBytes);
 
         console.log(`✅ PDF Audiometría COOSALUD generado: ${filePath}`);
@@ -876,7 +889,6 @@ freqs.forEach((f, i) => {
         throw error;
     }
 }
-
 // services/pdfGeneratorCoosalud.js
 // Agregar después del método generarPDFAudiometria
 
