@@ -1146,6 +1146,7 @@ if (imagenes.selloBase64) {
    TABLA PTA - CORREGIDA
    ============================================================ */
 .pta-container {
+ position: fixed;   
     display: inline-block;
     background: white;
     border: 1px solid #fffefe;
@@ -1154,6 +1155,7 @@ if (imagenes.selloBase64) {
     margin-top: 15px;
     margin-bottom: 10px;
     box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+     z-index: 999999;   
 }
 
 .pta-titulo {
@@ -1185,6 +1187,17 @@ if (imagenes.selloBase64) {
     font-weight: bold;
     font-size: 14px;
 }
+
+
+
+.otoscopia-container {
+    margin: 5px 0 5px 18px;    /* ← CAMBIAR: 18px de margen izquierdo */
+    padding: 4px 15px;
+    font-size: 9px;
+    background: #ffffff;       /* ← CAMBIAR: fondo gris claro */
+    border-left: 3px solid #1e3a8a;
+}
+
 
 .pta-simple td:first-child {
     font-weight: bold;
@@ -1234,9 +1247,14 @@ if (imagenes.selloBase64) {
               
                     ${oidoLogoHTML}
             
-                    ${otoscopia ? `<div class="otoscopia-texto"><strong>OTOSCOPIA:</strong><br>${otoscopia}</div>` : ''}
+
                 </div>
             </div>
+
+                             ${otoscopia && otoscopia.trim() !== '' 
+    ? `<div class="otoscopia-container"><strong>OTOSCOPIA:</strong> ${otoscopia}</div>`
+    : `<div class="otoscopia-container"><strong>OTOSCOPIA:</strong></div>`
+}
             
             <div class="titulo-principal">
                 <h2>AUDIOMETRÍA TONAL</h2>

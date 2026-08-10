@@ -684,6 +684,7 @@ const tablaLogoaudiometriaRows = `
   border-radius: 3px;
   margin-bottom: 4px;
   color: #1a1a1a;
+  
 }
 
 ."diagnostico-titulo-sec{

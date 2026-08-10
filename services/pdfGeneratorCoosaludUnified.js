@@ -24,6 +24,56 @@ class PDFGeneratorCoosaludUnified {
     console.log('===============================================================\n');
   }
 
+    drawWrappedTextInArea(page, text, x, y, width, height, fontSize, font, color = rgb(0, 0, 0), fromTop) {
+    if (!text || text === '') return;
+    
+    const lineHeight = fontSize * 1.3;
+    const padding = 4;
+    const maxLines = Math.floor((height - (padding * 2)) / lineHeight);
+    
+    // Separar por saltos de línea
+    const paragraphs = text.split('\n');
+    const lines = [];
+    
+    for (const paragraph of paragraphs) {
+      const words = paragraph.split(' ');
+      let currentLine = '';
+      
+      for (const word of words) {
+        const testLine = currentLine + (currentLine ? ' ' : '') + word;
+        const testWidth = font.widthOfTextAtSize(testLine, fontSize);
+        
+        if (testWidth > width - (padding * 2) && currentLine !== '') {
+          lines.push(currentLine);
+          currentLine = word;
+        } else {
+          currentLine = testLine;
+        }
+      }
+      if (currentLine) {
+        lines.push(currentLine);
+      }
+    }
+    
+    // Truncar si es necesario
+    const finalLines = lines.slice(0, maxLines);
+    let currentY = y + padding + fontSize;
+    
+    for (const line of finalLines) {
+      page.drawText(line, {
+        x: x + padding,
+        y: fromTop(currentY),
+        size: fontSize,
+        font,
+        color
+      });
+      currentY += lineHeight;
+    }
+  }
+
+
+
+
   getDownloadsPath() {
     return path.join(os.homedir(), 'Downloads');
   }
@@ -311,10 +361,19 @@ page.drawText('PROMEDIO TONAL', {
 
     // DIAGNÓSTICOS
 // DIAGNÓSTICOS - MOVIDO MÁS A LA IZQUIERDA Y MÁS ABAJO
-const diagY = 350;        // ← CAMBIADO: 540 → 600 (más abajo)
-const diagX = 320;    // ← CAMBIADO: 290 → 50 (más a la izquierda)
+// ============================================================
+// DIAGNÓSTICO AUDIOMETRÍA TONAL - CON WRAPPING (DIV)
+// ============================================================
+const diagY = 350;        // Posición Y desde arriba
+const diagX = 320;        // Posición X desde la izquierda
 
-// Título principal
+// Definir el área del "div" para el diagnóstico
+const boxWidth = 210;      // Ancho fijo del div
+const boxHeight = 80;      // Alto fijo del div
+const boxX = diagX;
+const boxY = diagY + 18;   // Posición Y del div (desde arriba)
+
+// Título principal (fuera del div)
 page.drawText('DIAGNÓSTICO AUDIOMETRIA TONAL', { 
     x: diagX, 
     y: fromTop(diagY), 
@@ -322,20 +381,35 @@ page.drawText('DIAGNÓSTICO AUDIOMETRIA TONAL', {
     font: fontBold 
 });
 
-// O.D.
-page.drawText('', { 
-    x: diagX, 
-    y: fromTop(diagY + 18), 
-    size: 8, 
-    font: fontBold 
-});
-page.drawText((datosAudiometria.diagnostico_od || '').substring(0, 55), { 
-    x: diagX + 35,        // Mantén el offset de 35 para el texto
-    y: fromTop(diagY + 18), 
-    size: 8, 
-    font 
+// Dibujar el fondo y borde del div
+page.drawRectangle({
+    x: boxX,
+    y: fromTop(boxY + boxHeight), // Ajuste para que coincida con fromTop
+    width: boxWidth,
+    height: boxHeight,
+    color: rgb(1, 1, 1), // Fondo blanco
+    borderWidth: 0.5,
+    borderColor: rgb(0.5, 0.5, 0.5)
 });
 
+// Construir el texto completo del diagnóstico
+const diagnosticoOD = datosAudiometria.diagnostico_od || '';
+const diagnosticoOI = datosAudiometria.diagnostico_oi || '';
+const diagnosticoTexto = `: ${diagnosticoOD}\n: ${diagnosticoOI}`;
+
+// Dibujar el diagnóstico con wrapping dentro del div
+this.drawWrappedTextInArea(
+    page,
+    diagnosticoTexto,
+    boxX,
+    boxY,
+    boxWidth,
+    boxHeight,
+    8,          // Tamaño de fuente
+    font,       // Fuente
+    rgb(0, 0, 0), // ✅ Negro válido
+    fromTop     // Función fromTop
+);
 
 //claveeeee
 // ============================================================
