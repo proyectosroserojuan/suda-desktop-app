@@ -261,6 +261,9 @@ async function obtenerCitasConEstadoExamen() {
 // ============================================
 // OBTENER CITAS CON ESTADO DE EXAMEN (VERIFICA TODAS LAS TABLAS)
 // ============================================
+// ============================================
+// OBTENER CITAS CON ESTADO DE EXAMEN (VERIFICA TODAS LAS TABLAS)
+// ============================================
 async function obtenerCitasConEstadoExamen() {
     console.log('\n🔍 [citas.js] obtenerCitasConEstadoExamen - Iniciando...');
     
@@ -275,6 +278,7 @@ async function obtenerCitasConEstadoExamen() {
                 c.motivo,
                 c.estado,
                 c.prioridad,
+                c.tipo_atencion,   
                 p.nombre as paciente_nombre,
                 p.documento as paciente_documento,
                 p.telefono as paciente_telefono,

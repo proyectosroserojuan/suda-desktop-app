@@ -1187,9 +1187,9 @@ freqsConDatos.forEach(f => {
         
         <div class="datos-paciente">
           <div class="info-paciente">
-            <p><strong>Nombre:</strong> ${datos.paciente?.nombre || '_________________________'}</p>
-            <p><strong>C.C.:</strong> ${datos.paciente?.documento || '_________________________'}</p>
-            <p><strong>Entidad:</strong> ${entidad || '_________________________'}</p>
+            <p><strong>Nombre:</strong> ${datos.paciente?.nombre || ''}</p>
+            <p><strong>C.C.:</strong> ${datos.paciente?.documento || ''}</p>
+            <p><strong>Entidad:</strong> ${entidad || ''}</p>
           </div>
           <div class="oido-imagen">${oidoLogoHTML}</div>
         </div>

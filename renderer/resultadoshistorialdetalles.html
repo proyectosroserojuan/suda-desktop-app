@@ -888,6 +888,7 @@ tr:hover {
                         <th>Paciente</th>
                         <th>Fecha</th>
                         <th>Hora</th>
+                        <th>Tipo Atención</th>  <!-- NUEVA COLUMNA -->
                         <th>Estado</th>
                         <th>Examen</th>
                         <th>Prioridad</th>
@@ -1011,62 +1012,61 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
 
-        function renderizarCitas(citas) {
-            const tbody = document.getElementById('citasBody');
-            
-            if (!citas || citas.length === 0) {
-                tbody.innerHTML = `
-                    <tr>
-                        <td colspan="7" class="empty-state">
-                            <i class="fas fa-calendar-times"></i>
-                            <h3>No hay citas registradas</h3>
-                            <p>Comience creando una nueva cita en el sistema</p>
-                        </td>
-                    </tr>
-                `;
-                return;
-            }
+function renderizarCitas(citas) {
+    const tbody = document.getElementById('citasBody');
+    
+    if (!citas || citas.length === 0) {
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="8" class="empty-state">  <!-- Cambia el colspan a 8 -->
+                    <i class="fas fa-calendar-times"></i>
+                    <h3>No hay citas registradas</h3>
+                    <p>Comience creando una nueva cita en el sistema</p>
+                </td>
+            </tr>
+        `;
+        return;
+    }
 
-            tbody.innerHTML = citas.map(cita => {
-                const prioridad = cita.prioridad || 'normal';
-                const esPrioritaria = prioridad === 'alta';
-                
-                return `
-                    <tr class="${esPrioritaria ? 'cita-prioritaria' : ''}">
-                        <td>
-                            <strong>${cita.paciente_nombre || 'Paciente'}</strong>
-                        </td>
-                        <td>${formatearFecha(cita.fecha_cita)}</td>
-                        <td>${cita.hora_cita || '--:--'}</td>
-                        <td>
-                            <span class="badge ${getEstadoBadge(cita.estado)}">
-                                ${cita.estado || 'pendiente'}
-                            </span>
-                        </td>
-                        <td>
-                            <span class="${cita.tiene_examen ? 'badge-examen' : 'badge-sin-examen'}">
-                                ${cita.tiene_examen ? 'Con examen' : 'Sin examen'}
-                            </span>
-                        </td>
-                        <td>
-                            <span class="badge-prioridad ${prioridad === 'alta' ? 'alta' : 'normal'}">
-                                ${prioridad === 'alta' ? 'Alta' : 'Normal'}
-                            </span>
-                        </td>
-                        <td>
-                            <button 
-                                class="btn-accion" 
-                                onclick="verExamen(${cita.id}, this)"
-                                ${!cita.tiene_examen ? 'disabled' : ''}
-                            >
-                                ${cita.tiene_examen ? 'Ver resultados' : 'Sin examen'}
-                            </button>
-                        </td>
-                    </tr>
-                `;
-            }).join('');
-        }
-
+    tbody.innerHTML = citas.map(cita => {
+        const prioridad = cita.prioridad || 'normal';
+        const esPrioritaria = prioridad === 'alta';
+        const tipoAtencion = cita.tipo_atencion || 'No especificado';
+        
+        return `
+            <tr class="${esPrioritaria ? 'cita-prioritaria' : ''}">
+                <td><strong>${cita.paciente_nombre || 'Paciente'}</strong></td>
+                <td>${formatearFecha(cita.fecha_cita)}</td>
+                <td>${cita.hora_cita || '--:--'}</td>
+                <td><span style="font-weight:500;font-size:0.75rem;">${tipoAtencion}</span></td>  <!-- NUEVA COLUMNA -->
+                <td>
+                    <span class="badge ${getEstadoBadge(cita.estado)}">
+                        ${cita.estado || 'pendiente'}
+                    </span>
+                </td>
+                <td>
+                    <span class="${cita.tiene_examen ? 'badge-examen' : 'badge-sin-examen'}">
+                        ${cita.tiene_examen ? 'Con examen' : 'Sin examen'}
+                    </span>
+                </td>
+                <td>
+                    <span class="badge-prioridad ${prioridad === 'alta' ? 'alta' : 'normal'}">
+                        ${prioridad === 'alta' ? 'Alta' : 'Normal'}
+                    </span>
+                </td>
+                <td>
+                    <button 
+                        class="btn-accion" 
+                        onclick="verExamen(${cita.id}, this)"
+                        ${!cita.tiene_examen ? 'disabled' : ''}
+                    >
+                        ${cita.tiene_examen ? 'Ver resultados' : 'Sin examen'}
+                    </button>
+                </td>
+            </tr>
+        `;
+    }).join('');
+}
 function aplicarFiltros() {
     const estadoFiltro = document.getElementById('filtroEstado').value;
     const examenFiltro = document.getElementById('filtroExamen').value;

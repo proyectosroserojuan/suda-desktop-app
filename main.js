@@ -105,34 +105,49 @@ ipcMain.on('abrir-ventana-detalles', (event, datosExamen) => {
 
 */
 
-// Abrir ventana de detalles (Audiometría o Logoaudiometría según el tipo)
 ipcMain.on('abrir-ventana-detalles', (event, datosExamen) => {
-    // Determinar qué tipo de examen mostrar
-    let archivoDetalle = 'detalle_resultado.html'; // fallback
-    let tituloVentana = 'Detalle del Examen';
-    
     const cita = datosExamen.cita || {};
-    const examenes = cita.examenes || {};
-    
-    // Priorizar: si solo hay un examen, abrir su detalle específico
-    if (examenes.audiometria && !examenes.logoaudiometria) {
-        archivoDetalle = 'detalle_audiometria.html';
-        tituloVentana = 'Audiometría Tonal';
-    } else if (examenes.logoaudiometria && !examenes.audiometria) {
-        archivoDetalle = 'detalle_logoaudiometria.html';
-        tituloVentana = 'Logoaudiometría';
-    } else if (examenes.audiometria && examenes.logoaudiometria) {
-        // Si tiene ambos, usar el combinado
-        archivoDetalle = 'detalle_resultado.html';
-        tituloVentana = 'Exámenes Combinados';
-    } else {
-        // Si no hay exámenes, usar el combinado pero mostrar error
-        archivoDetalle = 'detalle_resultado.html';
-        tituloVentana = 'Sin Exámenes';
+
+    // Normaliza: sin tildes, minúsculas, sin espacios extra
+    function normalizar(str) {
+        return (str || '')
+            .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+            .replace(/\s+/g, ' ')
+            .trim()
+            .toLowerCase();
     }
-    
-    console.log(`📄 Abriendo ventana: ${archivoDetalle} - ${tituloVentana}`);
-    
+
+    // ✅ Mapa ÚNICO, plano, todo en minúsculas garantizado por código (no a mano)
+    const PANELES = {
+        'audiometria': { archivo: 'detalle_audiometria.html', titulo: 'Audiometría Tonal' },
+        'audiometria tonal': { archivo: 'detalle_audiometria.html', titulo: 'Audiometría Tonal' },
+        'prepagada audiometria tonal': { archivo: 'detalle_audiometria.html', titulo: 'Audiometría Tonal' },
+
+        'logoaudiometria': { archivo: 'detalle_logoaudiometria.html', titulo: 'Logoaudiometría' },
+        'prepagada logoaudiometria': { archivo: 'detalle_logoaudiometria.html', titulo: 'Logoaudiometría' },
+
+        'audiometria tonal y logoadiometria': { archivo: 'detalle_resultado.html', titulo: 'Exámenes Combinados' },
+        'prepagada audiometria tonal y logoadiometria': { archivo: 'detalle_resultado.html', titulo: 'Exámenes Combinados' },
+    };
+
+    const tipoOriginal = cita.tipo_atencion || '';
+    const tipoNormalizado = normalizar(tipoOriginal);
+    const destino = PANELES[tipoNormalizado];
+
+    let archivoDetalle, tituloVentana;
+
+    if (destino) {
+        archivoDetalle = destino.archivo;
+        tituloVentana = destino.titulo;
+    } else {
+        console.error(`⚠️ tipo_atencion NO MAPEADO: "${tipoOriginal}" (normalizado: "${tipoNormalizado}")`);
+        console.error('   Claves válidas:', Object.keys(PANELES));
+        archivoDetalle = 'detalle_resultado.html';
+        tituloVentana = '⚠️ Tipo no reconocido — revisar';
+    }
+
+    console.log(`📄 [ROUTING] tipo_atencion="${tipoOriginal}" → ${archivoDetalle}`);
+
     const ventanaDetalles = new BrowserWindow({
         width: 1100,
         height: 850,
@@ -151,13 +166,12 @@ ipcMain.on('abrir-ventana-detalles', (event, datosExamen) => {
 
     ventanaDetalles.setTitle(tituloVentana);
     ventanaDetalles.loadFile(`renderer/${archivoDetalle}`);
-    
+
     ventanaDetalles.once('ready-to-show', () => {
         ventanaDetalles.show();
         ventanaDetalles.webContents.send('cargar-detalles', datosExamen);
     });
 });
-
 // Handler para verificar el estado de PostgreSQL
 ipcMain.handle('verificar-postgres', async () => {
   return new Promise((resolve) => {
@@ -260,7 +274,7 @@ ipcMain.handle('obtener-citas-con-estado-examen', async () => {
 });
 
 // ============================================================
-// 🟢 HANDLER PARA REGENERAR PDF DESDE BASE DE DATOS
+// HANDLER PARA REGENERAR PDF DESDE BASE DE DATOS
 // ============================================================
 
 // En main.js - Asegurar que el handler usa el servicio correctamente
