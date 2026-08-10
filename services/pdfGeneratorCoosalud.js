@@ -111,7 +111,7 @@ class PDFGeneratorCoosalud {
             const img = datos.grafica_base64.includes('png')
                 ? await pdfDoc.embedPng(buffer)
                 : await pdfDoc.embedJpg(buffer);
-            page.drawImage(img, { x: (width - 420) / 2, y: fromTop(graficaY + 200), width: 420, height: 200 });
+            page.drawImage(img, { x: (width - 420) / 2 - 80, y: fromTop(graficaY + 200), width: 520, height: 180 });
         }
 
         // BLOQUE INFERIOR
