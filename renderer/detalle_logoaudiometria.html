@@ -223,7 +223,7 @@
                 <!-- HEADER AZUL CLARO -->
                 <div class="header">
                     <div>
-                        <h1>🗣️ Logoaudiometría</h1>
+                        <h1>Logoaudiometría</h1>
                         <div style="margin-top: 5px; font-size: 14px; opacity: 0.9;">
                             ${cita.paciente_nombre || 'Paciente'} | 
                             ${cita.entidad_nombre || 'Sin entidad'}
@@ -274,38 +274,38 @@
                         <div>
                             <h3 style="color: #0d47a1; margin-bottom: 10px;">Oído Derecho (OD)</h3>
                             <div class="info-item">
-                                <div class="label">URV</div>
+                                <div class="label">Umbral de Voz</div>
                                 <div class="value">${logoaudiometria.urv_od || 'N/A'}</div>
                             </div>
                             <div class="info-item" style="margin-top: 8px;">
-                                <div class="label">Upalabra</div>
+                                <div class="label">Umbral de Palabra</div>
                                 <div class="value">${logoaudiometria.upalabra_od || 'N/A'}</div>
                             </div>
                             <div class="info-item" style="margin-top: 8px;">
-                                <div class="label">Udisc</div>
+                                <div class="label">Umbral de Discriminación</div>
                                 <div class="value">${logoaudiometria.udisc_od || 'N/A'}</div>
                             </div>
                             <div class="info-item" style="margin-top: 8px;">
-                                <div class="label">Pmax</div>
+                                <div class="label">% de Discriminación</div>
                                 <div class="value">${logoaudiometria.pmax_od || 'N/A'}</div>
                             </div>
                         </div>
                         <div>
                             <h3 style="color: #0d47a1; margin-bottom: 10px;">Oído Izquierdo (OI)</h3>
                             <div class="info-item">
-                                <div class="label">URV</div>
+                                <div class="label">Umbral de Voz</div>
                                 <div class="value">${logoaudiometria.urv_oi || 'N/A'}</div>
                             </div>
                             <div class="info-item" style="margin-top: 8px;">
-                                <div class="label">Upalabra</div>
+                                <div class="label">Umbral de Palabra</div>
                                 <div class="value">${logoaudiometria.upalabra_oi || 'N/A'}</div>
                             </div>
                             <div class="info-item" style="margin-top: 8px;">
-                                <div class="label">Udisc</div>
+                                <div class="label">Umbral de Discriminación</div>
                                 <div class="value">${logoaudiometria.udisc_oi || 'N/A'}</div>
                             </div>
                             <div class="info-item" style="margin-top: 8px;">
-                                <div class="label">Pmax</div>
+                                <div class="label">% de Discriminación</div>
                                 <div class="value">${logoaudiometria.pmax_oi || 'N/A'}</div>
                             </div>
                         </div>
@@ -319,7 +319,7 @@
                 <!-- GRÁFICA -->
                 ${logoaudiometria.grafica_base64 ? `
                     <div class="section">
-                        <div class="section-title">📊 Gráfica - Logoaudiometría</div>
+                        <div class="section-title">Gráfica - Logoaudiometría</div>
                         <div class="grafica-container">
                             <img src="${logoaudiometria.grafica_base64}" alt="Gráfica Logoaudiometría" style="max-width: 100%;">
                         </div>
@@ -329,7 +329,7 @@
                 <!-- OTOSCOPIA -->
                 ${logoaudiometria.otoscopia ? `
                     <div class="section">
-                        <div class="section-title">🔍 Otoscopia</div>
+                        <div class="section-title">Otoscopia</div>
                         <div style="background: white; padding: 15px; border-radius: 6px; border: 1px solid #e9ecef;">
                             ${logoaudiometria.otoscopia}
                         </div>
@@ -339,7 +339,7 @@
                 <!-- OBSERVACIONES -->
                 ${logoaudiometria.observaciones ? `
                     <div class="section">
-                        <div class="section-title">📝 Observaciones</div>
+                        <div class="section-title">Observaciones</div>
                         <div class="observaciones-box">
                             ${logoaudiometria.observaciones}
                         </div>
