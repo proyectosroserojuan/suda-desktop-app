@@ -629,20 +629,14 @@
               <input type="time" id="horaCita" required>
             </div>
 
+
+            <!-- En citas.html - Actualizar el select -->
 <div class="group">
-  <label>Tipo atención</label>
-  <select id="tipoAtencion" required>
-    <option value="">-- Seleccione --</option>
-    <option value="Audiometría">Audiometría</option>
-    <option value="Logoaudiometria">Logoaudiometria</option>
-    <option value="Impedanciometria">Impedanciometria</option>
-    <option value="Control">Control</option>
-    <option value="Audiometria Tonal y Logoadiometria">Audiometria Tonal y Logoadiometria</option>
-    <option value="Prepagada Audiometria Tonal">Prepagada Audiometria Tonal</option>
-    <option value="Prepagada Logoaudiometria">Prepagada Logoaudiometria</option>
-    <option value="Prepagada Audiometria Tonal y Logoadiometria">Prepagada Audiometria Tonal y Logoadiometria</option>
-    <option value="Cuadro Clinico Auditivo">Cuadro Clinico Auditivo</option>
-  </select>
+    <label>Tipo atención</label>
+    <select id="tipoAtencion" required>
+        <option value="">-- Seleccione --</option>
+        <!-- Los valores se cargarán dinámicamente -->
+    </select>
 </div>
 
             <div class="group">
@@ -1015,47 +1009,43 @@ function renderizarTabla() {
     renderizarPaginador();
   };
 
-  // Editar cita (cargar datos en el formulario)
-  window.editarCita = async function(id) {
+// En citas.js - MODIFICAR editarCita
+
+window.editarCita = async function(id) {
     try {
-      const result = await window.api.obtenerCitaPorId(id);
-      if (result && result.ok && result.cita) {
-        const cita = result.cita;
-        // Buscar y seleccionar el paciente
-        const paciente = pacientesLista.find(p => p.id === cita.paciente_id);
-        if (paciente) {
-          pacientesSelect.value = paciente.id;
-          document.getElementById('documento').value = paciente.documento;
-          document.getElementById('telefono').value = paciente.telefono;
-          buscarPaciente.value = `${paciente.nombre} - ${paciente.documento}`;
+        const result = await window.api.obtenerCitaPorId(id);
+        if (result && result.ok && result.cita) {
+            const cita = result.cita;
+
+            const paciente = pacientesLista.find(p => p.id === cita.paciente_id);
+            if (paciente) {
+                pacientesSelect.value = paciente.id;
+                document.getElementById('documento').value = paciente.documento;
+                document.getElementById('telefono').value = paciente.telefono;
+                buscarPaciente.value = `${paciente.nombre} - ${paciente.documento}`;
+            }
+
+            document.getElementById('entidadSelect').value = cita.entidad_id || '';
+            document.getElementById('fechaCita').value = cita.fecha_cita;
+            document.getElementById('horaCita').value = cita.hora_cita;
+            
+            // ✅ Cargar el tipo de atención por ID
+            document.getElementById('tipoAtencion').value = cita.tipo_atencion_id || '';
+
+            document.getElementById('estado').value = cita.estado || 'pendiente';
+            document.getElementById('prioridad').checked = cita.prioridad || false;
+            document.getElementById('motivo').value = cita.motivo || '';
+
+            formCita.dataset.editandoId = id;
+            document.querySelector('.form-header h2').innerHTML = '✏️ Editando Cita';
+            document.querySelector('.btn-save').innerHTML = '✏️ Actualizar Cita';
+
+            document.querySelector('.form-sidebar').scrollIntoView({ behavior: 'smooth' });
         }
-        document.getElementById('entidadSelect').value = cita.entidad_id || '';
-        document.getElementById('fechaCita').value = cita.fecha_cita;
-        document.getElementById('horaCita').value = cita.hora_cita;
-
-
-        //document.getElementById('tipoAtencion').value = cita.motivo?.split(' - ')[0] || 'Audiometría';
-
-
-
-        document.getElementById('estado').value = cita.estado || 'pendiente';
-        document.getElementById('prioridad').checked = cita.prioridad || false;
-        
-        document.getElementById('tipoAtencion').value = cita.tipo_atencion || '';
-        document.getElementById('motivo').value = cita.motivo || '';  
-        
-        // Guardar ID para actualizar en lugar de crear nueva
-        formCita.dataset.editandoId = id;
-        document.querySelector('.form-header h2').innerHTML = '✏️ Editando Cita';
-        document.querySelector('.btn-save').innerHTML = '✏️ Actualizar Cita';
-        
-        // Scroll al formulario
-        document.querySelector('.form-sidebar').scrollIntoView({ behavior: 'smooth' });
-      }
     } catch (error) {
-      mostrarMensaje('Error al cargar cita para editar', 'error');
+        mostrarMensaje('Error al cargar cita para editar', 'error');
     }
-  };
+};
 
   // Postergar cita
 // Postergar cita
@@ -1163,96 +1153,94 @@ window.cancelarCita = async function(id) {
 
 
   
-  // Guardar o actualizar cita
-  document.getElementById('formCita').addEventListener('submit', async (e) => {
+// En citas.js - MODIFICAR el submit
+
+document.getElementById('formCita').addEventListener('submit', async (e) => {
     e.preventDefault();
-    
+
     const pacienteId = document.getElementById('pacientesSelect').value;
     if (!pacienteId) {
-      mostrarMensaje('Seleccione un paciente', 'error');
-      return;
+        mostrarMensaje('Seleccione un paciente', 'error');
+        return;
     }
 
     const entidadId = document.getElementById('entidadSelect').value;
     if (!entidadId) {
-      mostrarMensaje('Seleccione una entidad', 'error');
-      return;
+        mostrarMensaje('Seleccione una entidad', 'error');
+        return;
     }
 
     const fechaCita = document.getElementById('fechaCita').value;
     const horaCita = document.getElementById('horaCita').value;
-    
+
     if (!fechaCita || !horaCita) {
-      mostrarMensaje('Complete fecha y hora de la cita', 'error');
-      return;
+        mostrarMensaje('Complete fecha y hora de la cita', 'error');
+        return;
     }
 
+    const tipoId = document.getElementById('tipoAtencion').value;
+    if (!tipoId) {
+        mostrarMensaje('Seleccione el tipo de atención', 'error');
+        return;
+    }
 
-    const tipo = document.getElementById('tipoAtencion').value;
-const motivoTexto = document.getElementById('motivo').value;
-
-if (!tipo) {
-  mostrarMensaje('Seleccione el tipo de atención', 'error');
-  return;
-}
     const estado = document.getElementById('estado').value || 'pendiente';
     const prioridad = document.getElementById('prioridad').checked;
+    const motivoTexto = document.getElementById('motivo').value || '';
 
-const citaData = {
-  paciente_id: parseInt(pacienteId),
-  fecha_cita: fechaCita,
-  entidad_id: parseInt(entidadId),
-  hora_cita: horaCita,
-  tipo_atencion: tipo,      // valor exacto, controlado
-  motivo: motivoTexto,      // solo texto libre de la secretaria
-  estado: estado,
-  prioridad: prioridad
-};
+    const citaData = {
+        paciente_id: parseInt(pacienteId),
+        fecha_cita: fechaCita,
+        entidad_id: parseInt(entidadId),
+        hora_cita: horaCita,
+        tipo_atencion_id: parseInt(tipoId),  // ← CAMBIADO: usar ID
+        motivo: motivoTexto,
+        estado: estado,
+        prioridad: prioridad
+    };
 
     const editandoId = formCita.dataset.editandoId;
-    
-    try {
-      let result;
-      if (editandoId) {
-        // Actualizar cita existente
-        result = await window.api.actualizarCitaCompleta(editandoId, citaData);
-        if (result && result.ok) {
-          mostrarMensaje('✅ Cita actualizada exitosamente', 'exito');
-          delete formCita.dataset.editandoId;
-          document.querySelector('.form-header h2').innerHTML = '📅 Nueva Cita';
-          document.querySelector('.btn-save').innerHTML = '💾 Guardar Cita';
-        }
-      } else {
-        result = await window.api.crearCita(citaData);
-        if (result && result.ok) {
-          mostrarMensaje('✅ Cita guardada exitosamente', 'exito');
-        }
-      }
-      
-      if (result && result.ok) {
-        // Resetear formulario
-        document.getElementById('formCita').reset();
-        document.getElementById('pacientesSelect').value = '';
-        document.getElementById('documento').value = '';
-        document.getElementById('telefono').value = '';
-        document.getElementById('entidadSelect').value = '';
-        document.getElementById('tipoAtencion').value = "Audiometría";
-        document.getElementById('estado').value = "pendiente";
-        document.getElementById('motivo').value = "";
-        document.getElementById('observaciones').value = "";
-        document.getElementById('prioridad').checked = false;
-        buscarPaciente.value = '';
-        
-        await cargarTodasLasCitas();
-      } else {
-        mostrarMensaje('Error: ' + result?.error, 'error');
-      }
-    } catch (error) {
-      console.error('Error:', error);
-      mostrarMensaje('Error al guardar la cita', 'error');
-    }
-  });
 
+    try {
+        let result;
+        if (editandoId) {
+            result = await window.api.actualizarCitaCompleta(editandoId, citaData);
+            if (result && result.ok) {
+                mostrarMensaje('✅ Cita actualizada exitosamente', 'exito');
+                delete formCita.dataset.editandoId;
+                document.querySelector('.form-header h2').innerHTML = '📅 Nueva Cita';
+                document.querySelector('.btn-save').innerHTML = '💾 Guardar Cita';
+            }
+        } else {
+            result = await window.api.crearCita(citaData);
+            if (result && result.ok) {
+                mostrarMensaje('✅ Cita guardada exitosamente', 'exito');
+            }
+        }
+
+        if (result && result.ok) {
+            // Resetear formulario
+            document.getElementById('formCita').reset();
+            document.getElementById('pacientesSelect').value = '';
+            document.getElementById('documento').value = '';
+            document.getElementById('telefono').value = '';
+            document.getElementById('entidadSelect').value = '';
+            document.getElementById('tipoAtencion').value = '';
+            document.getElementById('estado').value = 'pendiente';
+            document.getElementById('motivo').value = '';
+            document.getElementById('observaciones').value = '';
+            document.getElementById('prioridad').checked = false;
+            buscarPaciente.value = '';
+
+            await cargarTodasLasCitas();
+        } else {
+            mostrarMensaje('Error: ' + result?.error, 'error');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        mostrarMensaje('Error al guardar la cita', 'error');
+    }
+});
   // Confirmar postergar
   document.getElementById('confirmarPostergar').addEventListener('click', async () => {
     const nuevaFecha = document.getElementById('nuevaFecha').value;
@@ -1314,10 +1302,38 @@ const citaData = {
   document.getElementById('fechaCita').min = hoy;
   document.getElementById('nuevaFecha').min = hoy;
 
+
+  // En citas.html - DENTRO del <script>, antes de init()
+
+// ============================================
+// CARGAR TIPOS DE ATENCIÓN DESDE LA B.D.
+// ============================================
+async function cargarTiposAtencion() {
+    try {
+        const result = await window.api.obtenerTiposAtencion();
+        if (result && result.ok) {
+            const select = document.getElementById('tipoAtencion');
+            select.innerHTML = '<option value="">-- Seleccione --</option>';
+            result.tipos.forEach(tipo => {
+                const option = document.createElement('option');
+                option.value = tipo.id;
+                option.textContent = tipo.nombre;
+                select.appendChild(option);
+            });
+            console.log('✅ Tipos de atención cargados:', result.tipos.length);
+        } else {
+            console.error('❌ Error cargando tipos:', result?.error);
+        }
+    } catch (error) {
+        console.error('❌ Error cargando tipos de atención:', error);
+    }
+}
+
   // Inicializar
   async function init() {
     await cargarPacientes();
     await cargarEntidades();
+    await cargarTiposAtencion();  // ← NUEVO
     await cargarTodasLasCitas();
   }
   

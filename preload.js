@@ -10,6 +10,11 @@ contextBridge.exposeInMainWorld('api', {
   obtenerUsuarios: () => ipcRenderer.invoke('obtener-usuarios'),
   actualizarRol: (id, rol) => ipcRenderer.invoke('actualizar-rol', id, rol),
 
+
+    obtenerTiposAtencion: () => ipcRenderer.invoke('obtener-tipos-atencion'),
+    obtenerTipoAtencion: (id) => ipcRenderer.invoke('obtener-tipo-atencion', id),
+
+
   // En preload.js, dentro del objeto api, agrega:
 onCargarDetalles: (callback) => {
     ipcRenderer.on('cargar-detalles', (event, datos) => {
@@ -86,6 +91,11 @@ eliminarCita: (id) => ipcRenderer.invoke('eliminar-cita', id),
   obtenerCitaPorId: (id) => ipcRenderer.invoke('obtener-cita-por-id', id),
   actualizarEstadoCita: (id, estado) => ipcRenderer.invoke('actualizar-estado-cita', id, estado),
   obtenerCitasPorPaciente: (pacienteId) => ipcRenderer.invoke('obtener-citas-por-paciente', pacienteId),
+
+  // Generar y mostrar PDF sin descargar
+generarYMostrarPDFSinDescargar: async (citaId) => {
+    return await ipcRenderer.invoke('generar-y-mostrar-pdf-sin-descargar', citaId);
+},
   
   // Navegación
   navegar: (archivo) => ipcRenderer.send('navegar', archivo),

@@ -392,7 +392,7 @@
   }
 
 function obtenerTipoAtencion(cita) {
-  return cita.tipo_atencion || 'No especificado';
+    return cita.tipo_atencion_nombre || 'No especificado';
 }
 
   async function cargarEntidades() {

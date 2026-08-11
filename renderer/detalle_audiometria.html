@@ -282,20 +282,24 @@ function generarFilasFrecuencias(valoresOD, valoresOI) {
 
             let html = `
                 <!-- HEADER VERDE MENTA -->
-                <div class="header">
-                    <div>
-                        <h1>Audiometría Tonal</h1>
-                        <div style="margin-top: 5px; font-size: 14px; opacity: 0.9;">
-                            ${cita.paciente_nombre || 'Paciente'} | 
-                            ${cita.entidad_nombre || 'Sin entidad'}
-                        </div>
-                    </div>
-                    <div>
-                        <span class="badge-estado badge-${cita.estado || 'pendiente'}">
-                            ${cita.estado || 'pendiente'}
-                        </span>
-                    </div>
-                </div>
+ <div class="header">
+    <div>
+        <h1>Audiometría Tonal</h1>
+        <div style="margin-top: 5px; font-size: 14px; opacity: 0.9;">
+            ${cita.paciente_nombre || 'Paciente'} | 
+            ${cita.entidad_nombre || 'Sin entidad'}
+        </div>
+    </div>
+    <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+        <!-- ✅ BOTÓN VER PDF -->
+        <button onclick="verPDF(${cita.id})" style="background: #dc3545; color: white; border: none; padding: 8px 20px; border-radius: 6px; cursor: pointer; font-weight: bold;">
+             Resultado
+        </button>
+        <span class="badge-estado badge-${cita.estado || 'pendiente'}">
+            ${cita.estado || 'pendiente'}
+        </span>
+    </div>
+</div>
 
                 <!-- INFORMACIÓN DEL PACIENTE -->
                 <div class="section">
@@ -418,6 +422,38 @@ function generarFilasFrecuencias(valoresOD, valoresOI) {
 
             container.innerHTML = html;
         }
+
+        // ============================================
+// FUNCIÓN PARA VER PDF SIN DESCARGAR
+// ============================================
+async function verPDF(citaId) {
+    try {
+        const btn = document.querySelector('button[onclick*="verPDF"]');
+        if (btn) {
+            btn.textContent = '⏳ Generando...';
+            btn.disabled = true;
+        }
+
+        const result = await window.api.generarYMostrarPDFSinDescargar(citaId);
+        
+        if (!result.ok) {
+            alert('❌ Error al generar el PDF: ' + (result.error || 'Error desconocido'));
+        }
+        
+        if (btn) {
+            btn.textContent = '📄 Ver PDF';
+            btn.disabled = false;
+        }
+    } catch (error) {
+        console.error('❌ Error:', error);
+        alert('❌ Error al generar el PDF');
+        const btn = document.querySelector('button[onclick*="verPDF"]');
+        if (btn) {
+            btn.textContent = '📄 Ver PDF';
+            btn.disabled = false;
+        }
+    }
+}
 
         function formatearFecha(fecha) {
             if (!fecha) return null;

@@ -708,13 +708,14 @@ tr:hover {
     return `${startStr} - ${endStr}`;
   }
 
+// En citassemana.html - MODIFICAR obtenerTipoAtencion
+
 function obtenerTipoAtencion(cita) {
-    // 🔥 USAR EL CAMPO DEDICADO TIPO_ATENCION, no el motivo
-    const tipo = cita.tipo_atencion || '';
+    // ✅ USAR tipo_atencion_nombre (viene del JOIN)
+    const tipo = cita.tipo_atencion_nombre || '';
     
     if (!tipo) return 'No especificado';
     
-    // Verificar primero el tipo combinado (más específico)
     if (tipo.includes("Audiometria Tonal y Logoadiometria") || 
         tipo.includes("Cuadro Clinico Auditivo")) {
         return "Audiometria Tonal y Logoadiometria";
@@ -861,7 +862,8 @@ function obtenerTipoAtencion(cita) {
     mostrarMensaje('Búsqueda limpiada', 'exito');
   }
 
-// DESPUÉS
+// En citassemana.html - MODIFICAR realizarAtencion
+
 function realizarAtencion(cita) {
     const pacienteCompleto = {
         id: cita.paciente_id,
@@ -878,14 +880,19 @@ function realizarAtencion(cita) {
         entidad_id: cita.entidad_id,
         entidad_nombre: cita.entidad_nombre,
         motivo: cita.motivo || "",
-        tipo_atencion: cita.tipo_atencion || "",
+        tipo_atencion_id: cita.tipo_atencion_id || "",  // ← USAR ID
+        tipo_atencion_nombre: cita.tipo_atencion_nombre || "",
         paciente_id: cita.paciente_id,
         estado: cita.estado || "pendiente",
-        prioridad: cita.prioridad || false
+        prioridad: cita.prioridad || false,
+        panel_html: cita.panel_html || ""  // ← PARA SABER QUÉ HTML ABRIR
     };
     localStorage.setItem("pacienteActual", JSON.stringify(pacienteCompleto));
     localStorage.setItem("citaActual", JSON.stringify(citaCompleta));
 
+    // ✅ USAR EL NOMBRE PARA EL ROUTING (por compatibilidad)
+    const tipo = cita.tipo_atencion_nombre || '';
+    
     const rutas = {
         'Audiometria Tonal y Logoadiometria': 'AudioLogo.html',
         'Prepagada Audiometria Tonal y Logoadiometria': 'AudioLogo.html',
@@ -896,11 +903,24 @@ function realizarAtencion(cita) {
         'Prepagada Audiometria Tonal': 'AudiometriaTonal.html'
     };
 
-    const ruta = rutas[cita.tipo_atencion];
+    // Buscar coincidencia parcial
+    let ruta = null;
+    for (const [key, value] of Object.entries(rutas)) {
+        if (tipo.includes(key) || key.includes(tipo)) {
+            ruta = value;
+            break;
+        }
+    }
+
+    // Si no coincide con el mapa, usar panel_html de la B.D.
+    if (!ruta && cita.panel_html) {
+        ruta = cita.panel_html;
+    }
+
     if (ruta) {
         window.location.href = ruta;
     } else {
-        alert("Este tipo de atención aún no tiene panel asignado: " + (cita.tipo_atencion || 'sin definir'));
+        alert("Este tipo de atención aún no tiene panel asignado: " + (cita.tipo_atencion_nombre || 'sin definir'));
     }
 }
 

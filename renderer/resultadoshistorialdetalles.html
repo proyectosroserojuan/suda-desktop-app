@@ -1012,13 +1012,16 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
 
+
+// En resultadoshistorialdetalles.html - MODIFICAR renderizarCitas
+
 function renderizarCitas(citas) {
     const tbody = document.getElementById('citasBody');
     
     if (!citas || citas.length === 0) {
         tbody.innerHTML = `
             <tr>
-                <td colspan="8" class="empty-state">  <!-- Cambia el colspan a 8 -->
+                <td colspan="8" class="empty-state">
                     <i class="fas fa-calendar-times"></i>
                     <h3>No hay citas registradas</h3>
                     <p>Comience creando una nueva cita en el sistema</p>
@@ -1031,14 +1034,15 @@ function renderizarCitas(citas) {
     tbody.innerHTML = citas.map(cita => {
         const prioridad = cita.prioridad || 'normal';
         const esPrioritaria = prioridad === 'alta';
-        const tipoAtencion = cita.tipo_atencion || 'No especificado';
+        // ✅ USAR tipo_atencion_nombre (viene del JOIN)
+        const tipoAtencion = cita.tipo_atencion_nombre || 'No especificado';
         
         return `
             <tr class="${esPrioritaria ? 'cita-prioritaria' : ''}">
                 <td><strong>${cita.paciente_nombre || 'Paciente'}</strong></td>
                 <td>${formatearFecha(cita.fecha_cita)}</td>
                 <td>${cita.hora_cita || '--:--'}</td>
-                <td><span style="font-weight:500;font-size:0.75rem;">${tipoAtencion}</span></td>  <!-- NUEVA COLUMNA -->
+                <td><span style="font-weight:500;font-size:0.75rem;">${tipoAtencion}</span></td>
                 <td>
                     <span class="badge ${getEstadoBadge(cita.estado)}">
                         ${cita.estado || 'pendiente'}
@@ -1067,6 +1071,8 @@ function renderizarCitas(citas) {
         `;
     }).join('');
 }
+
+
 function aplicarFiltros() {
     const estadoFiltro = document.getElementById('filtroEstado').value;
     const examenFiltro = document.getElementById('filtroExamen').value;
@@ -1154,6 +1160,8 @@ function aplicarFiltros() {
 }
 
 
+// En resultadoshistorialdetalles.html - MODIFICAR verExamen
+
 async function verExamen(citaId, button) {
     try {
         const textoOriginal = button.textContent;
@@ -1162,7 +1170,6 @@ async function verExamen(citaId, button) {
 
         console.log('🔍 Buscando exámenes para cita ID:', citaId);
         
-        // ✅ PASO 1: Primero verificar si existe examen (consulta RÁPIDA)
         const existeResponse = await window.api.verificarExamenPorCita(citaId);
         console.log('📌 Verificación rápida:', existeResponse);
         
@@ -1177,7 +1184,6 @@ async function verExamen(citaId, button) {
             return;
         }
         
-        // ✅ PASO 2: Ahora sí, obtener los datos completos (solo si existe)
         console.log('📥 Cargando datos completos del examen...');
         const response = await window.api.obtenerCitaConExamen(citaId);
         console.log('📥 Respuesta completa:', response);
@@ -1200,7 +1206,7 @@ async function verExamen(citaId, button) {
             return;
         }
 
-        // ✅ PASO 3: Abrir ventana con los datos
+        // ✅ ABRIR VENTANA CON LOS DATOS (el routing usa tipo_atencion_id)
         window.api.abrirVentanaDetalles({ cita: cita });
 
         button.textContent = textoOriginal;

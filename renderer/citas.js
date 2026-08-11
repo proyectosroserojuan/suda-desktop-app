@@ -42,6 +42,27 @@ window.addEventListener('DOMContentLoaded', async () => {
     }
   }
 
+  async function cargarTiposAtencion() {
+    try {
+        const result = await window.api.obtenerTiposAtencion();
+        if (result && result.ok) {
+            const select = document.getElementById('tipoAtencion');
+            select.innerHTML = '<option value="">-- Seleccione --</option>';
+            result.tipos.forEach(tipo => {
+                const option = document.createElement('option');
+                option.value = tipo.id;
+                option.textContent = tipo.nombre;
+                select.appendChild(option);
+            });
+            console.log('✅ Tipos de atención cargados:', result.tipos.length);
+        } else {
+            console.error('❌ Error cargando tipos:', result?.error);
+        }
+    } catch (error) {
+        console.error('❌ Error cargando tipos de atención:', error);
+    }
+}
+
   // Mostrar mensaje
   function mostrarMensaje(texto, tipo) {
     if (mensajeDiv) {

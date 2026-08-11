@@ -105,72 +105,54 @@ ipcMain.on('abrir-ventana-detalles', (event, datosExamen) => {
 
 */
 
-ipcMain.on('abrir-ventana-detalles', (event, datosExamen) => {
+// main.js - REEMPLAZAR el handler existente por este
+
+ipcMain.on('abrir-ventana-detalles', async (event, datosExamen) => {
     const cita = datosExamen.cita || {};
+    const tipoId = cita.tipo_atencion_id;  // ← AHORA USA EL ID
 
-    // Normaliza: sin tildes, minúsculas, sin espacios extra
-    function normalizar(str) {
-        return (str || '')
-            .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
-            .replace(/\s+/g, ' ')
-            .trim()
-            .toLowerCase();
+    if (!tipoId) {
+        console.error('❌ La cita no tiene tipo_atencion_id');
+        return;
     }
 
-    // ✅ Mapa ÚNICO, plano, todo en minúsculas garantizado por código (no a mano)
-    const PANELES = {
-        'audiometria': { archivo: 'detalle_audiometria.html', titulo: 'Audiometría Tonal' },
-        'audiometria tonal': { archivo: 'detalle_audiometria.html', titulo: 'Audiometría Tonal' },
-        'prepagada audiometria tonal': { archivo: 'detalle_audiometria.html', titulo: 'Audiometría Tonal' },
+    try {
+        const tipo = await ServicioTiposAtencion.obtenerPorId(tipoId);
 
-        'logoaudiometria': { archivo: 'detalle_logoaudiometria.html', titulo: 'Logoaudiometría' },
-        'prepagada logoaudiometria': { archivo: 'detalle_logoaudiometria.html', titulo: 'Logoaudiometría' },
-
-        'audiometria tonal y logoadiometria': { archivo: 'detalle_resultado.html', titulo: 'Exámenes Combinados' },
-        'prepagada audiometria tonal y logoadiometria': { archivo: 'detalle_resultado.html', titulo: 'Exámenes Combinados' },
-    };
-
-    const tipoOriginal = cita.tipo_atencion || '';
-    const tipoNormalizado = normalizar(tipoOriginal);
-    const destino = PANELES[tipoNormalizado];
-
-    let archivoDetalle, tituloVentana;
-
-    if (destino) {
-        archivoDetalle = destino.archivo;
-        tituloVentana = destino.titulo;
-    } else {
-        console.error(`⚠️ tipo_atencion NO MAPEADO: "${tipoOriginal}" (normalizado: "${tipoNormalizado}")`);
-        console.error('   Claves válidas:', Object.keys(PANELES));
-        archivoDetalle = 'detalle_resultado.html';
-        tituloVentana = '⚠️ Tipo no reconocido — revisar';
-    }
-
-    console.log(`📄 [ROUTING] tipo_atencion="${tipoOriginal}" → ${archivoDetalle}`);
-
-    const ventanaDetalles = new BrowserWindow({
-        width: 1100,
-        height: 850,
-        resizable: true,
-        maximizable: true,
-        minimizable: true,
-        parent: BrowserWindow.getFocusedWindow(),
-        modal: true,
-        show: false,
-        webPreferences: {
-            nodeIntegration: false,
-            contextIsolation: true,
-            preload: path.join(__dirname, 'preload.js')
+        if (!tipo) {
+            console.error(`❌ No se encontró el tipo de atención con ID: ${tipoId}`);
+            return;
         }
-    });
 
-    ventanaDetalles.setTitle(tituloVentana);
-    ventanaDetalles.loadFile(`renderer/${archivoDetalle}`);
+        console.log(`📄 [ROUTING] tipo_id=${tipoId} (${tipo.nombre}) → ${tipo.panel_html}`);
 
-    ventanaDetalles.once('ready-to-show', () => {
-        ventanaDetalles.show();
-        ventanaDetalles.webContents.send('cargar-detalles', datosExamen);
-    });
+        const ventanaDetalles = new BrowserWindow({
+            width: 1100,
+            height: 850,
+            resizable: true,
+            maximizable: true,
+            minimizable: true,
+            parent: BrowserWindow.getFocusedWindow(),
+            modal: true,
+            show: false,
+            webPreferences: {
+                nodeIntegration: false,
+                contextIsolation: true,
+                preload: path.join(__dirname, 'preload.js')
+            }
+        });
+
+        ventanaDetalles.setTitle(tipo.nombre);
+        ventanaDetalles.loadFile(`renderer/${tipo.panel_html}`);
+
+        ventanaDetalles.once('ready-to-show', () => {
+            ventanaDetalles.show();
+            ventanaDetalles.webContents.send('cargar-detalles', datosExamen);
+        });
+
+    } catch (error) {
+        console.error('❌ Error al abrir ventana de detalles:', error);
+    }
 });
 // Handler para verificar el estado de PostgreSQL
 ipcMain.handle('verificar-postgres', async () => {
@@ -249,6 +231,7 @@ const { obtenerCitasConEstadoExamen, obtenerCitaConExamen } = require('./db/cita
 const { existeExamenPorCitaId } = require('./db/examenes_unificados');
 const pdfRegeneratorService = require('./services/pdfRegeneratorService');
 const EnvioService = require('./services/EnvioService');
+const ServicioTiposAtencion = require('./services/ServicioTiposAtencion');
 
 
 //const pdfViewerService = require('./services/pdfViewerService');
@@ -273,59 +256,65 @@ ipcMain.handle('obtener-citas-con-estado-examen', async () => {
     }
 });
 
-// ============================================================
-// HANDLER PARA REGENERAR PDF DESDE BASE DE DATOS
-// ============================================================
 
-// En main.js - Asegurar que el handler usa el servicio correctamente
+// Obtener todos los tipos para selects
+ipcMain.handle('obtener-tipos-atencion', async () => {
+    try {
+        const tipos = await ServicioTiposAtencion.obtenerParaSelect();
+        return { ok: true, tipos };
+    } catch (error) {
+        console.error('❌ Error obteniendo tipos:', error);
+        return { ok: false, error: error.message };
+    }
+});
+
+// Obtener un tipo por ID (para routing)
+ipcMain.handle('obtener-tipo-atencion', async (event, id) => {
+    try {
+        const tipo = await ServicioTiposAtencion.obtenerPorId(id);
+        return { ok: true, data: tipo };
+    } catch (error) {
+        console.error('❌ Error obteniendo tipo:', error);
+        return { ok: false, error: error.message };
+    }
+});
+
+// main.js - REEMPLAZAR el handler regenerar-pdf
+
 ipcMain.handle('regenerar-pdf', async (event, citaId) => {
     try {
         console.log('🔄 Regenerando PDF para cita:', citaId);
-        
-        // 1. Obtener datos de la cita
+
         const citasDB = require('./db/citas');
         const cita = await citasDB.obtenerCitaPorId(citaId);
         if (!cita) {
             throw new Error('No se encontró la cita');
         }
 
-        
-        
         console.log('📋 Datos de la cita obtenidos:', {
             id: cita.id,
             paciente: cita.paciente_nombre,
-            entidad: cita.entidad_nombre
+            tipo_atencion_id: cita.tipo_atencion_id,
+            tipo_atencion_nombre: cita.tipo_atencion_nombre
         });
 
-        
-        
-// 2. Determinar según el MOTIVO de la cita qué tipo(s) de examen corresponden
-// DESPUÉS — comparación exacta contra el campo dedicado, con respaldo temporal para citas viejas
-const tipo = (cita.tipo_atencion || cita.motivo || '').trim();
+        // ✅ USAR LOS CAMPOS DE LA CITA (vienen del JOIN en citas.js)
+        const requiereAudiometria = cita.requiere_audiometria || false;
+        const requiereLogoaudiometria = cita.requiere_logoaudiometria || false;
 
-const tiposConAudiometria = ['Audiometría', 'Audiometria Tonal y Logoadiometria', 'Prepagada Audiometria Tonal', 'Prepagada Audiometria Tonal y Logoadiometria'];
-const tiposConLogoaudiometria = ['Logoaudiometria', 'Audiometria Tonal y Logoadiometria', 'Prepagada Logoaudiometria', 'Prepagada Audiometria Tonal y Logoadiometria'];
+        console.log('📋 Requiere Audiometría:', requiereAudiometria, '| Requiere Logoaudiometría:', requiereLogoaudiometria);
 
-const requiereAudiometria = tiposConAudiometria.includes(tipo);
-const requiereLogoaudiometria = tiposConLogoaudiometria.includes(tipo);
+        if (!requiereAudiometria && !requiereLogoaudiometria) {
+            throw new Error('Tipo de atención no reconocido: ' + cita.tipo_atencion_nombre);
+        }
 
-console.log('📋 tipo_atencion de la cita:', tipo);
-console.log('📋 Requiere Audiometría:', requiereAudiometria, '| Requiere Logoaudiometría:', requiereLogoaudiometria);
-
-if (!requiereAudiometria && !requiereLogoaudiometria) {
-    throw new Error('Tipo de atención no reconocido: ' + tipo);
-}
-        
-   
-        
         const examenesDB = require('./db/examenes_unificados');
         const { obtenerAudiometriaPorCitaId } = require('./db/audiometrias');
         const { obtenerLogoaudiometriaPorCitaId } = require('./db/logoaudiometrias');
-        
-        // 3. Buscar SOLO lo que corresponde al tipo declarado en la cita, filtrado por cita_id exacto
+
         let examenAudiometria = null;
         let examenLogoaudiometria = null;
-        
+
         if (requiereAudiometria) {
             examenAudiometria = await examenesDB.obtenerExamenesPorCitaYtipo(citaId, 'audiometria');
             if (!examenAudiometria) {
@@ -335,7 +324,7 @@ if (!requiereAudiometria && !requiereLogoaudiometria) {
                 console.log('⚠️ La cita requiere Audiometría pero no se encontró el examen guardado');
             }
         }
-        
+
         if (requiereLogoaudiometria) {
             examenLogoaudiometria = await examenesDB.obtenerExamenesPorCitaYtipo(citaId, 'logoaudiometria');
             if (!examenLogoaudiometria) {
@@ -345,29 +334,81 @@ if (!requiereAudiometria && !requiereLogoaudiometria) {
                 console.log('⚠️ La cita requiere Logoaudiometría pero no se encontró el examen guardado');
             }
         }
-        
+
         if (!examenAudiometria && !examenLogoaudiometria) {
             throw new Error('No se encontró ningún examen guardado que coincida con el tipo de atención de esta cita');
         }
-        
+
+        // ✅ VALIDACIÓN DE SEGURIDAD
+        if (examenAudiometria && examenAudiometria.paciente_id !== cita.paciente_id) {
+            throw new Error('INCONSISTENCIA: La audiometría no pertenece al paciente de la cita.');
+        }
+        if (examenLogoaudiometria && examenLogoaudiometria.paciente_id !== cita.paciente_id) {
+            throw new Error('INCONSISTENCIA: La logoaudiometría no pertenece al paciente de la cita.');
+        }
+
         console.log('📊 Examen Audiometría encontrado:', !!examenAudiometria);
         console.log('📊 Examen Logoaudiometría encontrado:', !!examenLogoaudiometria);
-        
-        // 4. IMPORTAR Y USAR EL SERVICIO
+
         const pdfRegeneratorService = require('./services/pdfRegeneratorService');
-        
-        // 5. REGENERAR PDF (ya no adivina nada, recibe exactamente lo que corresponde)
         const pdfPath = await pdfRegeneratorService.regenerarPDF(cita, examenAudiometria, examenLogoaudiometria);
-        
+
         console.log('✅ PDF regenerado exitosamente:', pdfPath);
         return { ok: true, pdfPath };
-        
+
     } catch (error) {
         console.error('❌ Error regenerando PDF:', error);
         return { ok: false, error: error.message };
     }
 });
 
+// main.js - Agregar después de los otros handlers
+
+// Handler para generar y mostrar PDF sin descargar (solo vista previa)
+ipcMain.handle('generar-y-mostrar-pdf-sin-descargar', async (event, citaId) => {
+    try {
+        console.log('🔄 Generando PDF para vista previa - Cita:', citaId);
+
+        const citasDB = require('./db/citas');
+        const cita = await citasDB.obtenerCitaPorId(citaId);
+        if (!cita) {
+            throw new Error('No se encontró la cita');
+        }
+
+        // Obtener exámenes
+        const examenesDB = require('./db/examenes_unificados');
+        const { obtenerAudiometriaPorCitaId } = require('./db/audiometrias');
+        const { obtenerLogoaudiometriaPorCitaId } = require('./db/logoaudiometrias');
+
+        let examenAudiometria = await examenesDB.obtenerExamenesPorCitaYtipo(citaId, 'audiometria');
+        if (!examenAudiometria) {
+            examenAudiometria = await obtenerAudiometriaPorCitaId(citaId);
+        }
+
+        let examenLogoaudiometria = await examenesDB.obtenerExamenesPorCitaYtipo(citaId, 'logoaudiometria');
+        if (!examenLogoaudiometria) {
+            examenLogoaudiometria = await obtenerLogoaudiometriaPorCitaId(citaId);
+        }
+
+        if (!examenAudiometria && !examenLogoaudiometria) {
+            throw new Error('No se encontraron exámenes para esta cita');
+        }
+
+        // Usar el nuevo servicio para PDF
+        const pdfRegeneratorService = require('./services/pdfRegeneratorService');
+        const pdfPath = await pdfRegeneratorService.regenerarPDF(cita, examenAudiometria, examenLogoaudiometria);
+
+        // Mostrar el PDF en una ventana (sin descargar)
+        await pdfRegeneratorService.mostrarPDFEnVentana(pdfPath, `Resultados - ${cita.paciente_nombre}`);
+
+        console.log('✅ PDF mostrado en ventana');
+        return { ok: true, pdfPath };
+
+    } catch (error) {
+        console.error('❌ Error generando PDF:', error);
+        return { ok: false, error: error.message };
+    }
+});
 
 
 // Handler para abrir WhatsApp
