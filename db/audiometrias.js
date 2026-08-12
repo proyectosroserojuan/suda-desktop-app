@@ -11,7 +11,7 @@ async function guardarAudiometria(data) {
         otoscopia,  // ← AGREGAR ESTO
         valores_od,
         valores_oi,
-        grafica_base64,
+        grafica_tonal_base64,
         pta_via_aerea_od,
         pta_via_osea_od,
         pta_via_aerea_oi,
@@ -27,7 +27,7 @@ async function guardarAudiometria(data) {
         const query = `
             INSERT INTO audiometrias 
             (paciente_id, cita_id, entidad_id, diagnostico_od, diagnostico_oi, observaciones, otoscopia,
-             valores_od, valores_oi, grafica_base64,  pta_via_aerea_od,  pta_via_osea_od, pta_via_aerea_oi, pta_via_osea_oi, fecha_registro)
+             valores_od, valores_oi, grafica_tonal_base64,  pta_via_aerea_od,  pta_via_osea_od, pta_via_aerea_oi, pta_via_osea_oi, fecha_registro)
             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, CURRENT_TIMESTAMP)
             RETURNING id
         `;
@@ -42,7 +42,7 @@ async function guardarAudiometria(data) {
             otoscopia,  // ← AGREGAR ESTO
             JSON.stringify(valores_od),
             JSON.stringify(valores_oi),
-            grafica_base64,
+            grafica_tonal_base64,
             pta_via_aerea_od,
             pta_via_osea_od,
             pta_via_aerea_oi,
@@ -87,7 +87,7 @@ async function obtenerAudiometriaPorCitaId(citaId) {
             console.log('✅ Audiometría encontrada');
             console.log('Datos:', {
                 id: examen.id,
-                tiene_grafica: !!examen.grafica_base64,
+                tiene_grafica: !!examen.grafica_tonal_base64,
                 valores_od: examen.valores_od,
                 valores_oi: examen.valores_oi
             });

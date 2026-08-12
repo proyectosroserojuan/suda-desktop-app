@@ -108,7 +108,7 @@ async function guardarEnBaseDeDatos(pacienteId, citaId, diagnostico, diagnostico
         otoscopia: otoscopia,  // ← AGREGAR
         valores_od: valoresOD,
         valores_oi: valoresOI,
-        grafica_base64: imagenBase64
+        grafica_logo_base64: imagenBase64
     };
     
     console.log('Datos a enviar a window.api:', JSON.stringify(data, null, 2));
@@ -147,7 +147,7 @@ async function generarPDF(paciente, cita, diagnostico, diagnostico_od, diagnosti
             diagnostico_od: diagnostico_od || '',
             diagnostico_oi: diagnostico_oi || '',
             otoscopia: otoscopia,
-            grafica_base64: imagenDataURL || '',
+            grafica_logo_base64: imagenDataURL || '',
             nr_flags: nrFlags || { od: {}, oi: {} }  // ✅ SOLO PARA EL PDF
         };
         

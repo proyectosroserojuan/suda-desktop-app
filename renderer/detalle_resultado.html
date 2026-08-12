@@ -236,252 +236,265 @@
             });
         });
 
-        function mostrarDetalles(datos) {
-            const container = document.getElementById('detalleContainer');
-            
-            if (!datos || !datos.cita) {
-                container.innerHTML = `<div class="error">❌ No se encontraron datos del examen</div>`;
-                return;
-            }
+function mostrarDetalles(datos) {
+    const container = document.getElementById('detalleContainer');
+    
+    if (!datos || !datos.cita) {
+        container.innerHTML = `<div class="error">❌ No se encontraron datos del examen</div>`;
+        return;
+    }
 
-            const cita = datos.cita || {};
-            const examenes = cita.examenes || {};
-            const audiometria = examenes.audiometria || null;
-            const logoaudiometria = examenes.logoaudiometria || null;
+    const cita = datos.cita || {};
+    const examenes = cita.examenes || {};
+    
+    // ✅ OBTENER LOS EXÁMENES (pueden ser el mismo objeto si es combinado)
+    let audiometria = examenes.audiometria || null;
+    let logoaudiometria = examenes.logoaudiometria || null;
+    
+    // ✅ SI ES COMBINADO (mismo objeto) y el tipo contiene 'logoaudiometria',
+    //    el objeto YA TIENE todos los campos, solo hay que usarlos correctamente
+    const esCombinado = audiometria && logoaudiometria && audiometria === logoaudiometria;
+    
+    // ✅ VERIFICAR SI EL REGISTRO TIENE DATOS DE LOGOAUDIOMETRÍA
+    const tieneDatosLogoaudiometria = logoaudiometria && (
+        logoaudiometria.urv_od !== null ||
+        logoaudiometria.urv_oi !== null ||
+        logoaudiometria.upalabra_od !== null ||
+        logoaudiometria.upalabra_oi !== null ||
+        logoaudiometria.udisc_od !== null ||
+        logoaudiometria.udisc_oi !== null ||
+        logoaudiometria.pmax_od !== null ||
+        logoaudiometria.pmax_oi !== null ||
+        logoaudiometria.diagnostico
+    );
 
-            // Verificar si hay algún examen
-            if (!audiometria && !logoaudiometria) {
-                container.innerHTML = `<div class="error">❌ No se encontraron exámenes asociados a esta cita</div>`;
-                return;
-            }
+    // Si no tiene datos de logoaudiometría, ignorarla
+    if (!tieneDatosLogoaudiometria) {
+        logoaudiometria = null;
+    }
 
-            // Contar cuántos exámenes hay
-            const totalExamenes = (audiometria ? 1 : 0) + (logoaudiometria ? 1 : 0);
+    // Si no hay ningún examen
+    if (!audiometria && !logoaudiometria) {
+        container.innerHTML = `<div class="error">❌ No se encontraron exámenes asociados a esta cita</div>`;
+        return;
+    }
 
-            let html = `
-                <!-- HEADER -->
-                <div class="header">
-                    <div>
-                        <h1>Resultados del Examen</h1>
-                        <div style="margin-top: 5px; font-size: 14px; opacity: 0.9;">
-                            ${cita.paciente_nombre || 'Paciente'} | 
-                            ${cita.entidad_nombre || 'Sin entidad'}
-                            <span style="margin-left: 10px; background: #4caf50; padding: 2px 10px; border-radius: 12px; color: white; font-size: 12px;">
-                                ${totalExamenes} examen(es)
-                            </span>
-                        </div>
-                    </div>
+    const totalExamenes = (audiometria ? 1 : 0) + (logoaudiometria ? 1 : 0);
 
+    let html = `
+        <!-- HEADER -->
+        <div class="header">
+            <div>
+                <h1>Resultados del Examen</h1>
+                <div style="margin-top: 5px; font-size: 14px; opacity: 0.9;">
+                    ${cita.paciente_nombre || 'Paciente'} | 
+                    ${cita.entidad_nombre || 'Sin entidad'}
+                    <span style="margin-left: 10px; background: #4caf50; padding: 2px 10px; border-radius: 12px; color: white; font-size: 12px;">
+                        ${totalExamenes} examen(es)
+                    </span>
+                    ${esCombinado ? '<span style="margin-left: 10px; background: #ff9800; padding: 2px 10px; border-radius: 12px; color: white; font-size: 12px;">Combinado</span>' : ''}
+                </div>
+            </div>
+            <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                <button onclick="verPDF(${cita.id})" style="background: #dc3545; color: white; border: none; padding: 8px 20px; border-radius: 6px; cursor: pointer; font-weight: bold;">
+                    📄 Ver PDF
+                </button>
+                <span class="badge-estado badge-${cita.estado || 'pendiente'}">
+                    ${cita.estado || 'pendiente'}
+                </span>
+            </div>
+        </div>
 
+        <!-- INFORMACIÓN DEL PACIENTE -->
+        <div class="section">
+            <div class="section-title">Información del Paciente</div>
+            <div class="grid-2">
+                <div class="info-item">
+                    <div class="label">Nombre</div>
+                    <div class="value">${cita.paciente_nombre || 'N/A'}</div>
+                </div>
+                <div class="info-item">
+                    <div class="label">Documento</div>
+                    <div class="value">${cita.paciente_documento || 'N/A'}</div>
+                </div>
+                <div class="info-item">
+                    <div class="label">Teléfono</div>
+                    <div class="value">${cita.paciente_telefono || 'N/A'}</div>
+                </div>
+                <div class="info-item">
+                    <div class="label">Email</div>
+                    <div class="value">${cita.paciente_email || 'N/A'}</div>
+                </div>
+                <div class="info-item">
+                    <div class="label">Fecha de Nacimiento</div>
+                    <div class="value">${formatearFecha(cita.paciente_fecha_nacimiento) || 'N/A'}</div>
+                </div>
+                <div class="info-item">
+                    <div class="label">Entidad</div>
+                    <div class="value">${cita.entidad_nombre || 'N/A'}</div>
+                </div>
+            </div>
+        </div>
 
+        <!-- TABS PARA EXÁMENES -->
+        <div class="examen-tabs">
+            ${audiometria ? `
+                <div class="examen-tab active" onclick="cambiarTab('audiometria')">
+                    🦻 Audiometría
+                    <span class="badge-small">${formatearFecha(audiometria.fecha_registro) || ''}</span>
+                </div>
+            ` : ''}
+            ${logoaudiometria ? `
+                <div class="examen-tab ${!audiometria ? 'active' : ''}" onclick="cambiarTab('logoaudiometria')">
+                    🗣️ Logoaudiometría
+                    <span class="badge-small">${formatearFecha(logoaudiometria.fecha_registro) || ''}</span>
+                </div>
+            ` : ''}
+        </div>
+    `;
 
-
-                 <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
-        <!-- ✅ BOTÓN VER PDF -->
-        <button onclick="verPDF(${cita.id})" style="background: #dc3545; color: white; border: none; padding: 8px 20px; border-radius: 6px; cursor: pointer; font-weight: bold;">
-             Ver PDF
-        </button>
-        <span class="badge-estado badge-${cita.estado || 'pendiente'}">
-            ${cita.estado || 'pendiente'}
-        </span>
-    </div>
-</div>
-
-                <!-- INFORMACIÓN DEL PACIENTE -->
+    // CONTENIDO AUDIOMETRÍA
+    if (audiometria) {
+        // ✅ EXTRAER OTOSCOPIA (puede estar en cualquiera de los dos)
+        const otoscopia = audiometria.otoscopia || logoaudiometria?.otoscopia || '';
+        
+        html += `
+            <div class="examen-content active" id="contenido-audiometria">
                 <div class="section">
-                    <div class="section-title">Información del Paciente</div>
+                    <div class="section-title">Audiometría</div>
                     <div class="grid-2">
-                        <div class="info-item">
-                            <div class="label">Nombre</div>
-                            <div class="value">${cita.paciente_nombre || 'N/A'}</div>
+                        <div>
+                            <h3 style="color: #1a237e; margin-bottom: 10px;">Oído Derecho (OD)</h3>
+                            <div class="info-item">
+                                <div class="label">PTA Vía Aérea</div>
+                                <div class="value">${audiometria.pta_via_aerea_od !== null && audiometria.pta_via_aerea_od !== undefined ? audiometria.pta_via_aerea_od : 'N/A'}</div>
+                            </div>
+                            <div class="info-item" style="margin-top: 8px;">
+                                <div class="label">PTA Vía Ósea</div>
+                                <div class="value">${audiometria.pta_via_osea_od !== null && audiometria.pta_via_osea_od !== undefined ? audiometria.pta_via_osea_od : 'N/A'}</div>
+                            </div>
+                            <div class="diagnostico-box" style="margin-top: 10px;">
+                                <div class="label">Diagnóstico OD</div>
+                                <div style="margin-top: 5px;">${audiometria.diagnostico_od || 'Sin diagnóstico'}</div>
+                            </div>
                         </div>
-                        <div class="info-item">
-                            <div class="label">Documento</div>
-                            <div class="value">${cita.paciente_documento || 'N/A'}</div>
-                        </div>
-                        <div class="info-item">
-                            <div class="label">Teléfono</div>
-                            <div class="value">${cita.paciente_telefono || 'N/A'}</div>
-                        </div>
-                        <div class="info-item">
-                            <div class="label">Email</div>
-                            <div class="value">${cita.paciente_email || 'N/A'}</div>
-                        </div>
-                        <div class="info-item">
-                            <div class="label">Fecha de Nacimiento</div>
-                            <div class="value">${formatearFecha(cita.paciente_fecha_nacimiento) || 'N/A'}</div>
-                        </div>
-                        <div class="info-item">
-                            <div class="label">Entidad</div>
-                            <div class="value">${cita.entidad_nombre || 'N/A'}</div>
+                        <div>
+                            <h3 style="color: #1a237e; margin-bottom: 10px;">Oído Izquierdo (OI)</h3>
+                            <div class="info-item">
+                                <div class="label">PTA Vía Aérea</div>
+                                <div class="value">${audiometria.pta_via_aerea_oi !== null && audiometria.pta_via_aerea_oi !== undefined ? audiometria.pta_via_aerea_oi : 'N/A'}</div>
+                            </div>
+                            <div class="info-item" style="margin-top: 8px;">
+                                <div class="label">PTA Vía Ósea</div>
+                                <div class="value">${audiometria.pta_via_osea_oi !== null && audiometria.pta_via_osea_oi !== undefined ? audiometria.pta_via_osea_oi : 'N/A'}</div>
+                            </div>
+                            <div class="diagnostico-box" style="margin-top: 10px;">
+                                <div class="label">Diagnóstico OI</div>
+                                <div style="margin-top: 5px;">${audiometria.diagnostico_oi || 'Sin diagnóstico'}</div>
+                            </div>
                         </div>
                     </div>
-                </div>
-
-                <!-- TABS PARA EXÁMENES -->
-                <div class="examen-tabs">
-                    ${audiometria ? `
-                        <div class="examen-tab active" onclick="cambiarTab('audiometria')">
-                          Audiometría
-                            <span class="badge-small">${formatearFecha(audiometria.fecha_registro) || ''}</span>
-                        </div>
-                    ` : ''}
-                    ${logoaudiometria ? `
-                        <div class="examen-tab ${!audiometria ? 'active' : ''}" onclick="cambiarTab('logoaudiometria')">
-                            Logoaudiometría
-                            <span class="badge-small">${formatearFecha(logoaudiometria.fecha_registro) || ''}</span>
+                    ${otoscopia ? `
+                        <div style="margin-top: 15px; background: #f0f7ff; padding: 12px 15px; border-radius: 6px; border-left: 4px solid #1a237e;">
+                            <strong>Otoscopia:</strong> ${otoscopia}
                         </div>
                     ` : ''}
                 </div>
-            `;
 
-            // CONTENIDO AUDIOMETRÍA
-            if (audiometria) {
-                html += `
-                    <div class="examen-content active" id="contenido-audiometria">
-                        <div class="section">
-                            <div class="section-title">Audiometría</div>
-                            <div class="grid-2">
-                                <div>
-                                    <h3 style="color: #1a237e; margin-bottom: 10px;">Oído Derecho (OD)</h3>
-                                    <div class="info-item">
-                                        <div class="label">PTA Vía Aérea</div>
-                                        <div class="value">${audiometria.pta_via_aerea_od || 'N/A'}</div>
-                                    </div>
-                                    <div class="info-item" style="margin-top: 8px;">
-                                        <div class="label">PTA Vía Ósea</div>
-                                        <div class="value">${audiometria.pta_via_osea_od || 'N/A'}</div>
-                                    </div>
-                                    <div class="diagnostico-box" style="margin-top: 10px;">
-                                        <div class="label">Diagnóstico OD</div>
-                                        <div style="margin-top: 5px;">${audiometria.diagnostico_od || 'Sin diagnóstico'}</div>
-                                    </div>
-                                </div>
-                                <div>
-                                    <h3 style="color: #1a237e; margin-bottom: 10px;">Oído Izquierdo (OI)</h3>
-                                    <div class="info-item">
-                                        <div class="label">PTA Vía Aérea</div>
-                                        <div class="value">${audiometria.pta_via_aerea_oi || 'N/A'}</div>
-                                    </div>
-                                    <div class="info-item" style="margin-top: 8px;">
-                                        <div class="label">PTA Vía Ósea</div>
-                                        <div class="value">${audiometria.pta_via_osea_oi || 'N/A'}</div>
-                                    </div>
-                                    <div class="diagnostico-box" style="margin-top: 10px;">
-                                        <div class="label">Diagnóstico OI</div>
-                                        <div style="margin-top: 5px;">${audiometria.diagnostico_oi || 'Sin diagnóstico'}</div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- GRÁFICA AUDIOMETRÍA -->
-                        ${audiometria.grafica_base64 ? `
-                            <div class="section">
-                                <div class="section-title">Gráfica - Audiometría</div>
-                                <div class="grafica-container">
-                                    <img src="${audiometria.grafica_base64}" alt="Gráfica Audiometría" style="max-width: 100%;">
-                                </div>
-                            </div>
-                        ` : ''}
-                    </div>
-                `;
-            }
-
-            // CONTENIDO LOGOAUDIOMETRÍA
-            if (logoaudiometria) {
-                const isActive = !audiometria ? 'active' : '';
-                html += `
-                    <div class="examen-content ${isActive}" id="contenido-logoaudiometria">
-                        <div class="section">
-                            <div class="section-title">🗣️ Logoaudiometría</div>
-                            <div class="grid-2">
-                                <div>
-                                    <h3 style="color: #1a237e; margin-bottom: 10px;">Oído Derecho (OD)</h3>
-                                    <div class="info-item">
-                                        <div class="label">URV</div>
-                                        <div class="value">${logoaudiometria.urv_od || 'N/A'}</div>
-                                    </div>
-                                    <div class="info-item" style="margin-top: 8px;">
-                                        <div class="label">Upalabra</div>
-                                        <div class="value">${logoaudiometria.upalabra_od || 'N/A'}</div>
-                                    </div>
-                                    <div class="info-item" style="margin-top: 8px;">
-                                        <div class="label">Udisc</div>
-                                        <div class="value">${logoaudiometria.udisc_od || 'N/A'}</div>
-                                    </div>
-                                    <div class="info-item" style="margin-top: 8px;">
-                                        <div class="label">Pmax</div>
-                                        <div class="value">${logoaudiometria.pmax_od || 'N/A'}</div>
-                                    </div>
-                                </div>
-                                <div>
-                                    <h3 style="color: #1a237e; margin-bottom: 10px;">Oído Izquierdo (OI)</h3>
-                                    <div class="info-item">
-                                        <div class="label">URV</div>
-                                        <div class="value">${logoaudiometria.urv_oi || 'N/A'}</div>
-                                    </div>
-                                    <div class="info-item" style="margin-top: 8px;">
-                                        <div class="label">Upalabra</div>
-                                        <div class="value">${logoaudiometria.upalabra_oi || 'N/A'}</div>
-                                    </div>
-                                    <div class="info-item" style="margin-top: 8px;">
-                                        <div class="label">Udisc</div>
-                                        <div class="value">${logoaudiometria.udisc_oi || 'N/A'}</div>
-                                    </div>
-                                    <div class="info-item" style="margin-top: 8px;">
-                                        <div class="label">Pmax</div>
-                                        <div class="value">${logoaudiometria.pmax_oi || 'N/A'}</div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="diagnostico-box" style="margin-top: 15px;">
-                                <div class="label">Diagnóstico General</div>
-                                <div style="margin-top: 5px;">${logoaudiometria.diagnostico || 'Sin diagnóstico'}</div>
-                            </div>
-                        </div>
-
-                        <!-- GRÁFICA LOGOAUDIOMETRÍA -->
-                        ${logoaudiometria.grafica_base64 ? `
-                            <div class="section">
-                                <div class="section-title">Gráfica - Logoaudiometría</div>
-                                <div class="grafica-container">
-                                    <img src="${logoaudiometria.grafica_base64}" alt="Gráfica Logoaudiometría" style="max-width: 100%;">
-                                </div>
-                            </div>
-                        ` : ''}
-                    </div>
-                `;
-            }
-
-            // Otoscopia (si existe)
-            const otoscopia = audiometria?.otoscopia || logoaudiometria?.otoscopia;
-            if (otoscopia) {
-                html += `
+                <!-- GRÁFICA AUDIOMETRÍA -->
+                ${audiometria.grafica_tonal_base64 ? `
                     <div class="section">
-                        <div class="section-title">Otoscopia</div>
-                        <div style="background: white; padding: 15px; border-radius: 6px; border: 1px solid #e9ecef;">
-                            ${otoscopia}
+                        <div class="section-title">Gráfica - Audiometría</div>
+                        <div class="grafica-container">
+                            <img src="${audiometria.grafica_tonal_base64}" alt="Gráfica Audiometría" style="max-width: 100%;">
                         </div>
                     </div>
-                `;
-            }
+                ` : ''}
+            </div>
+        `;
+    }
 
-            // Observaciones
-            const observaciones = audiometria?.observaciones || logoaudiometria?.observaciones;
-            if (observaciones) {
-                html += `
-                    <div class="section">
-                        <div class="section-title">Observaciones</div>
-                        <div class="observaciones-box">
-                            ${observaciones}
+    // CONTENIDO LOGOAUDIOMETRÍA
+    if (logoaudiometria) {
+        const isActive = !audiometria ? 'active' : '';
+        html += `
+            <div class="examen-content ${isActive}" id="contenido-logoaudiometria">
+                <div class="section">
+                    <div class="section-title">🗣️ Logoaudiometría</div>
+                    <div class="grid-2">
+                        <div>
+                            <h3 style="color: #1a237e; margin-bottom: 10px;">Oído Derecho (OD)</h3>
+                            <div class="info-item">
+                                <div class="label">URV</div>
+                                <div class="value">${logoaudiometria.urv_od !== null && logoaudiometria.urv_od !== undefined ? logoaudiometria.urv_od : 'N/A'}</div>
+                            </div>
+                            <div class="info-item" style="margin-top: 8px;">
+                                <div class="label">Upalabra</div>
+                                <div class="value">${logoaudiometria.upalabra_od !== null && logoaudiometria.upalabra_od !== undefined ? logoaudiometria.upalabra_od : 'N/A'}</div>
+                            </div>
+                            <div class="info-item" style="margin-top: 8px;">
+                                <div class="label">Udisc</div>
+                                <div class="value">${logoaudiometria.udisc_od !== null && logoaudiometria.udisc_od !== undefined ? logoaudiometria.udisc_od : 'N/A'}</div>
+                            </div>
+                            <div class="info-item" style="margin-top: 8px;">
+                                <div class="label">Pmax</div>
+                                <div class="value">${logoaudiometria.pmax_od !== null && logoaudiometria.pmax_od !== undefined ? logoaudiometria.pmax_od : 'N/A'}</div>
+                            </div>
+                        </div>
+                        <div>
+                            <h3 style="color: #1a237e; margin-bottom: 10px;">Oído Izquierdo (OI)</h3>
+                            <div class="info-item">
+                                <div class="label">URV</div>
+                                <div class="value">${logoaudiometria.urv_oi !== null && logoaudiometria.urv_oi !== undefined ? logoaudiometria.urv_oi : 'N/A'}</div>
+                            </div>
+                            <div class="info-item" style="margin-top: 8px;">
+                                <div class="label">Upalabra</div>
+                                <div class="value">${logoaudiometria.upalabra_oi !== null && logoaudiometria.upalabra_oi !== undefined ? logoaudiometria.upalabra_oi : 'N/A'}</div>
+                            </div>
+                            <div class="info-item" style="margin-top: 8px;">
+                                <div class="label">Udisc</div>
+                                <div class="value">${logoaudiometria.udisc_oi !== null && logoaudiometria.udisc_oi !== undefined ? logoaudiometria.udisc_oi : 'N/A'}</div>
+                            </div>
+                            <div class="info-item" style="margin-top: 8px;">
+                                <div class="label">Pmax</div>
+                                <div class="value">${logoaudiometria.pmax_oi !== null && logoaudiometria.pmax_oi !== undefined ? logoaudiometria.pmax_oi : 'N/A'}</div>
+                            </div>
                         </div>
                     </div>
-                `;
-            }
+                    <div class="diagnostico-box" style="margin-top: 15px;">
+                        <div class="label">Diagnóstico General</div>
+                        <div style="margin-top: 5px;">${logoaudiometria.diagnostico || 'Sin diagnóstico'}</div>
+                    </div>
+                </div>
 
-            container.innerHTML = html;
-        }
+                <!-- GRÁFICA LOGOAUDIOMETRÍA -->
+${logoaudiometria.grafica_logo_base64 ? `
+    <div class="section">
+        <div class="section-title">Gráfica - Logoaudiometría</div>
+        <div class="grafica-container">
+            <img src="${logoaudiometria.grafica_logo_base64}" alt="Gráfica Logoaudiometría" style="max-width: 100%;">
+        </div>
+    </div>
+` : ''}
+            </div>
+        `;
+    }
+
+    // Observaciones (si existen)
+    const observaciones = audiometria?.observaciones || logoaudiometria?.observaciones;
+    if (observaciones) {
+        html += `
+            <div class="section">
+                <div class="section-title">Observaciones</div>
+                <div class="observaciones-box">
+                    ${observaciones}
+                </div>
+            </div>
+        `;
+    }
+
+    container.innerHTML = html;
+}
 
         // Función para cambiar entre pestañas
         function cambiarTab(tipo) {

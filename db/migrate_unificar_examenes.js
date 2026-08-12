@@ -57,7 +57,7 @@ async function migrarTablaUnificada() {
             await client.query(`
                 INSERT INTO examenes_audiologicos 
                 (tipo_examen, paciente_id, cita_id, entidad_id,
-                 diagnostico_od, diagnostico_oi, observaciones,otoscopia, grafica_base64,
+                 diagnostico_od, diagnostico_oi, observaciones,otoscopia, grafica_tonal_base64,
                  valores_od, valores_oi, fecha_registro)
                 VALUES ('audiometria', $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15,)
             `, [
@@ -92,7 +92,7 @@ async function migrarTablaUnificada() {
             await client.query(`
                 INSERT INTO examenes_audiologicos 
                 (tipo_examen, paciente_id, cita_id,
-                 diagnostico, diagnostico_od, diagnostico_oi, grafica_base64, fecha_registro,
+                 diagnostico, diagnostico_od, diagnostico_oi, grafica_logo_base64, fecha_registro,
                  urv_od, urv_oi, upalabra_od, upalabra_oi, udisc_od, udisc_oi, pmax_od, pmax_oi)
                 VALUES ('logoaudiometria', $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
             `, [

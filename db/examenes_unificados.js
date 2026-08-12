@@ -12,7 +12,8 @@ async function guardarExamen(data) {
         diagnostico_od,
         diagnostico_oi,
         observaciones,
-        grafica_base64,
+        grafica_tonal_base64, 
+        grafica_logo_base64,
         otoscopia,
         valores_od,
         valores_oi,
@@ -35,18 +36,18 @@ async function guardarExamen(data) {
         const result = await client.query(
             `INSERT INTO examenes_audiologicos 
              (tipo_examen, paciente_id, cita_id, entidad_id,
-              diagnostico_od, diagnostico_oi, observaciones, grafica_base64,
+              diagnostico_od, diagnostico_oi, observaciones, grafica_tonal_base64, grafica_logo_base64,
               otoscopia,
               valores_od, valores_oi,
               diagnostico,
               urv_od, urv_oi, upalabra_od, upalabra_oi, udisc_od, udisc_oi, pmax_od, pmax_oi,
               pta_via_aerea_od, pta_via_osea_od, pta_via_aerea_oi, pta_via_osea_oi,
               fecha_registro)
-             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, CURRENT_TIMESTAMP)
+             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, CURRENT_TIMESTAMP)
              RETURNING id`,
             [
                 tipo_examen, paciente_id, cita_id, entidad_id,
-                diagnostico_od, diagnostico_oi, observaciones, grafica_base64, otoscopia,
+                diagnostico_od, diagnostico_oi, observaciones, grafica_tonal_base64, grafica_logo_base64, otoscopia,
                 valores_od ? JSON.stringify(valores_od) : null,
                 valores_oi ? JSON.stringify(valores_oi) : null,
                 diagnostico,

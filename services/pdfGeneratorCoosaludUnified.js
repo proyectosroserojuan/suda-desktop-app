@@ -229,10 +229,10 @@ const fontBold = font;
     });
 
     // GRÁFICA DE AUDIOMETRÍA
-    if (datosAudiometria.grafica_base64 && datosAudiometria.grafica_base64.length > 100) {
-        const base64 = datosAudiometria.grafica_base64.split(',')[1];
+    if (datosAudiometria.grafica_tonal_base64 && datosAudiometria.grafica_tonal_base64.length > 100) {
+        const base64 = datosAudiometria.grafica_tonal_base64.split(',')[1];
         const buffer = Buffer.from(base64, 'base64');
-        const img = datosAudiometria.grafica_base64.includes('png')
+        const img = datosAudiometria.grafica_tonal_base64.includes('png')
             ? await pdfDoc.embedPng(buffer)
             : await pdfDoc.embedJpg(buffer);
         
@@ -260,10 +260,10 @@ const fontBold = font;
     }
 
     // GRÁFICA DE LOGOAUDIOMETRÍA
-    if (datosLogoaudiometria.grafica_base64 && datosLogoaudiometria.grafica_base64.length > 100) {
-        const base64 = datosLogoaudiometria.grafica_base64.split(',')[1];
+    if (datosLogoaudiometria.grafica_logo_base64 && datosLogoaudiometria.grafica_logo_base64.length > 100) {
+        const base64 = datosLogoaudiometria.grafica_logo_base64.split(',')[1];
         const buffer = Buffer.from(base64, 'base64');
-        const img = datosLogoaudiometria.grafica_base64.includes('png')
+        const img = datosLogoaudiometria.grafica_logo_base64.includes('png')
             ? await pdfDoc.embedPng(buffer)
             : await pdfDoc.embedJpg(buffer);
         
@@ -687,10 +687,10 @@ page.drawText(`Entidad: ${entidad}`, { x: 50, y: fromTop(185), size: 10, font })
       
       page.drawText('AUDIOMETRÍA TONAL', { x: 150, y: fromTop(200), size: 14, font: fontBold });
 
-      if (datos.grafica_base64 && datos.grafica_base64.length > 100) {
-        const base64 = datos.grafica_base64.split(',')[1];
+      if (datos.grafica_tonal_base64 && datos.grafica_tonal_base64.length > 100) {
+        const base64 = datos.grafica_tonal_base64.split(',')[1];
         const buffer = Buffer.from(base64, 'base64');
-        const img = datos.grafica_base64.includes('png')
+        const img = datos.grafica_tonal_base64.includes('png')
           ? await pdfDoc.embedPng(buffer)
           : await pdfDoc.embedJpg(buffer);
         page.drawImage(img, { x: 80, y: fromTop(350), width: 450, height: 200 });
@@ -894,10 +894,10 @@ page.drawText('LOGOAUDIOMETRÍA', {
 
       page.drawText('LOGOAUDIOMETRÍA', { x: 130, y: fromTop(200), size: 14, font: fontBold });
 
-      if (datos.grafica_base64 && datos.grafica_base64.length > 100) {
-        const base64 = datos.grafica_base64.split(',')[1];
+      if (datos.grafica_logo_base64 && datos.grafica_logo_base64.length > 100) {
+        const base64 = datos.grafica_logo_base64.split(',')[1];
         const buffer = Buffer.from(base64, 'base64');
-        const img = datos.grafica_base64.includes('png')
+        const img = datos.grafica_logo_base64.includes('png')
           ? await pdfDoc.embedPng(buffer)
           : await pdfDoc.embedJpg(buffer);
         page.drawImage(img, { x: 80, y: fromTop(350), width: 450, height: 200 });

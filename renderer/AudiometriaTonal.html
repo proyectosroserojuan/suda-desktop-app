@@ -1796,7 +1796,7 @@ async function onGrabarAudiometriaClick() {
             otoscopia: otoscopia,  // ← AGREGAR ESTA LÍNEA
             valores_od: valores.od,
             valores_oi: valores.oi,
-            grafica_base64: imagenBase64,
+            grafica_tonal_base64: imagenBase64,
             pta_via_aerea_od: ultimosPTA.od_air,
             pta_via_osea_od: ultimosPTA.od_bone,
             pta_via_aerea_oi: ultimosPTA.oi_air,
@@ -1842,7 +1842,7 @@ async function onGrabarAudiometriaClick() {
                 diagnostico_oi: diagnostico_oi,
                 observaciones: observaciones,
                     otoscopia: otoscopia,
-                grafica_base64: imagenBase64,
+                grafica_tonal_base64: imagenBase64,
                    pta: {
         od_air: ultimosPTA.od_air,
         oi_air: ultimosPTA.oi_air,
@@ -2475,7 +2475,7 @@ async function guardarAudiometriaEnBaseDeDatos(pacienteId, citaId, entidadId, di
         otoscopia: otoscopia,  // ← AGREGAR ESTA LÍNEA
         valores_od: valoresOD,
         valores_oi: valoresOI,
-        grafica_base64: imagenBase64,
+        grafica_tonal_base64: imagenBase64,
         pta_via_aerea_od: ptaData.od_air,
         pta_via_osea_od: ptaData.od_bone,
         pta_via_aerea_oi: ptaData.oi_air,

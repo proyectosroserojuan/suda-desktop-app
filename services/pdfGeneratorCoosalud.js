@@ -105,10 +105,10 @@ class PDFGeneratorCoosalud {
 
         // GRAFICA
         const graficaY = tituloY + 30;
-        if (datos.grafica_base64) {
-            const base64 = datos.grafica_base64.split(',')[1];
+        if (datos.grafica_logo_base64) {
+            const base64 = datos.grafica_logo_base64.split(',')[1];
             const buffer = Buffer.from(base64, 'base64');
-            const img = datos.grafica_base64.includes('png')
+            const img = datos.grafica_logo_base64.includes('png')
                 ? await pdfDoc.embedPng(buffer)
                 : await pdfDoc.embedJpg(buffer);
             page.drawImage(img, { x: (width - 420) / 2 - 80, y: fromTop(graficaY + 200), width: 520, height: 180 });
@@ -641,10 +641,10 @@ async generarPDFAudiometria(datos, entidad) {
 
         // GRAFICA
 const graficaY = 240;  // ← Valor fijo, no cambia al mover el título
-if (datos.grafica_base64) {
-            const base64 = datos.grafica_base64.split(',')[1];
+if (datos.grafica_tonal_base64) {
+            const base64 = datos.grafica_tonal_base64.split(',')[1];
             const buffer = Buffer.from(base64, 'base64');
-            const img = datos.grafica_base64.includes('png')
+            const img = datos.grafica_tonal_base64.includes('png')
                 ? await pdfDoc.embedPng(buffer)
                 : await pdfDoc.embedJpg(buffer);
             page.drawImage(img, { 

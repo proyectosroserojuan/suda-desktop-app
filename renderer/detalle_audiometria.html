@@ -390,11 +390,11 @@ function generarFilasFrecuencias(valoresOD, valoresOI) {
 </div>
 
                 <!-- GRÁFICA -->
-                ${audiometria.grafica_base64 ? `
+                ${audiometria.grafica_tonal_base64 ? `
                     <div class="section">
-                        <div class="section-title">📊 Gráfica - Audiometría Tonal</div>
+                        <div class="section-title"> Gráfica - Audiometría Tonal</div>
                         <div class="grafica-container">
-                            <img src="${audiometria.grafica_base64}" alt="Gráfica Audiometría" style="max-width: 100%;">
+                            <img src="${audiometria.grafica_tonal_base64}" alt="Gráfica Audiometría" style="max-width: 100%;">
                         </div>
                     </div>
                 ` : ''}

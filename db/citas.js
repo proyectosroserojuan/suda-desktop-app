@@ -310,7 +310,7 @@ async function obtenerCitasConEstadoExamen() {
             let tieneExamen = false;
 
             const unifiedResult = await db.query(
-                `SELECT id FROM examenes_audiologicos WHERE cita_id = $1 LIMIT 1`,
+                `SELECT id FROM examenes_audiologicos WHERE cita_id = $1`,
                 [cita.id]
             );
             if (unifiedResult.rows.length > 0) {
@@ -464,13 +464,13 @@ async function obtenerCitaConExamen(citaId) {
         const cita = citaResult.rows[0];
         console.log(`✅ Cita encontrada: ${cita.paciente_nombre}`);
 
-        // 2. BUSCAR TODOS LOS EXÁMENES (SIN LIMIT 1)
+        // 2. BUSCAR TODOS LOS EXÁMENES
         const examenes = {
             audiometria: null,
             logoaudiometria: null
         };
 
-        // 🔥 PASO 1: Buscar en examenes_audiologicos (TODOS)
+        // 🔥 PASO 1: Buscar en examenes_audiologicos
         const unifiedResult = await db.query(`
             SELECT * FROM examenes_audiologicos 
             WHERE cita_id = $1 
@@ -479,16 +479,31 @@ async function obtenerCitaConExamen(citaId) {
 
         console.log(`📊 Encontrados ${unifiedResult.rows.length} exámenes en examenes_audiologicos`);
 
-        // 🔥 ITERAR SOBRE TODOS LOS RESULTADOS
+
+
         for (const examen of unifiedResult.rows) {
-            if (examen.tipo_examen === 'audiometria' && !examenes.audiometria) {
-                examenes.audiometria = examen;
-                console.log(`   ✅ Audiometría encontrada en examenes_audiologicos (ID: ${examen.id})`);
-            } else if (examen.tipo_examen === 'logoaudiometria' && !examenes.logoaudiometria) {
-                examenes.logoaudiometria = examen;
-                console.log(`   ✅ Logoaudiometría encontrada en examenes_audiologicos (ID: ${examen.id})`);
-            }
-        }
+    // ✅ Detectar por presencia de datos reales, NO por el nombre de tipo_examen
+    const tieneAudiometria =
+        examen.pta_via_aerea_od !== null || examen.pta_via_aerea_oi !== null ||
+        examen.pta_via_osea_od  !== null || examen.pta_via_osea_oi  !== null ||
+        examen.diagnostico_od   !== null || examen.diagnostico_oi   !== null;
+
+    const tieneLogoaudiometria =
+        examen.urv_od      !== null || examen.urv_oi      !== null ||
+        examen.upalabra_od !== null || examen.upalabra_oi !== null ||
+        examen.udisc_od    !== null || examen.udisc_oi    !== null ||
+        examen.pmax_od     !== null || examen.pmax_oi     !== null ||
+        examen.diagnostico !== null;
+
+    if (tieneAudiometria && !examenes.audiometria) {
+        examenes.audiometria = examen;
+        console.log(`   ✅ Audiometría encontrada (por datos) en registro ${examen.id}`);
+    }
+    if (tieneLogoaudiometria && !examenes.logoaudiometria) {
+        examenes.logoaudiometria = examen;
+        console.log(`   ✅ Logoaudiometría encontrada (por datos) en registro ${examen.id}`);
+    }
+}
 
         // 🔥 PASO 2: Si no se encontró Audiometría, buscar en audiometrias
         if (!examenes.audiometria) {
@@ -534,7 +549,6 @@ async function obtenerCitaConExamen(citaId) {
         throw error;
     }
 }
-
 // Exportar las nuevas funciones
 module.exports = {
   crearCita,

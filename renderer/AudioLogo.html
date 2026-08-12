@@ -311,7 +311,7 @@ iframe {
     }
     
 // ============================================
-// GRABAR AMBOS EXÁMENES (CON PDF)
+// GRABAR AMBOS EXÁMENES (UN SOLO REGISTRO)
 // ============================================
 async function grabarTodos() {
     const btn = document.querySelector('.tab-btn.grabar');
@@ -321,28 +321,26 @@ async function grabarTodos() {
     let rutaPDFGenerado = null;
     let datosParaDetalles = null;
 
-    
-    
     try {
         mostrarLoading(true);
-        
+
         const pacienteData = localStorage.getItem('pacienteActual');
         const citaData = localStorage.getItem('citaActual');
-        
+
         if (!pacienteData) throw new Error('No hay paciente seleccionado');
-        
+
         const paciente = JSON.parse(pacienteData);
         const cita = citaData ? JSON.parse(citaData) : null;
-        
+
         let pacienteId = paciente.id || paciente.id_paciente || paciente.paciente_id;
         let citaId = cita?.id || cita?.id_cita || cita?.cita_id;
-        
+
         if (!pacienteId) throw new Error('ID de paciente no válido');
         if (!citaId) throw new Error('No hay cita seleccionada');
-        
+
         const iframeAudiometria = document.getElementById('iframeAudiometria');
         const iframeLogoaudiometria = document.getElementById('iframeLogoaudiometria');
-        
+
         // Función para obtener datos de un iframe
         function obtenerDatosDeIframe(iframe, accion) {
             return new Promise((resolve) => {
@@ -357,85 +355,86 @@ async function grabarTodos() {
                 setTimeout(() => resolve(null), 5000);
             });
         }
-        
+
         // Obtener datos de Audiometría
         const datosAudiometria = await obtenerDatosDeIframe(iframeAudiometria, 'obtenerTodoAudiometria');
-        
+
         // Obtener datos de Logoaudiometría
         const datosLogoaudiometria = await obtenerDatosDeIframe(iframeLogoaudiometria, 'obtenerTodoLogoaudiometria');
-        
-        let audiometriaGuardada = false;
-        let logoaudiometriaGuardada = false;
-        
-        // Guardar Audiometría
-        if (datosAudiometria && datosAudiometria.tieneDatos) {
+
+        const tieneDatosAudiometria = datosAudiometria && datosAudiometria.tieneDatos;
+        const tieneDatosLogoaudiometria = datosLogoaudiometria && datosLogoaudiometria.tieneDatos;
+
+        // ============================================================
+        // 🔥 GUARDAR UN SOLO REGISTRO CON AMBOS EXÁMENES
+        // ============================================================
+let examenGuardado = false;
+
+if (tieneDatosAudiometria || tieneDatosLogoaudiometria) {
+    // ✅ USA EL NOMBRE DEL TIPO DE ATENCIÓN DE LA CITA
+    let tipoExamen = cita?.tipo_atencion_nombre || 'combinado';
+    
+    console.log('📌 Tipo de examen a guardar:', tipoExamen);
+    console.log('📌 Datos de la cita:', cita);
+    
+    // Si solo hay audiometría, forzar a 'audiometria'
+    if (tieneDatosAudiometria && !tieneDatosLogoaudiometria) {
+        tipoExamen = 'audiometria';
+    } 
+    // Si solo hay logoaudiometría, forzar a 'logoaudiometria'
+    else if (!tieneDatosAudiometria && tieneDatosLogoaudiometria) {
+        tipoExamen = 'logoaudiometria';
+    }
+
+            // ✅ UN SOLO OBJETO CON TODOS LOS DATOS
             const data = {
-                tipo_examen: 'audiometria',
+                tipo_examen: tipoExamen,
                 paciente_id: parseInt(pacienteId),
                 cita_id: parseInt(citaId),
                 entidad_id: cita?.entidad_id || null,
-                diagnostico_od: datosAudiometria.diagnostico_od || '',
-                diagnostico_oi: datosAudiometria.diagnostico_oi || '',
-                observaciones: datosAudiometria.observaciones || '',
-                otoscopia: datosAudiometria.otoscopia || '',
-                grafica_base64: datosAudiometria.grafica || '',
-                valores_od: datosAudiometria.valores_od || {},
-                valores_oi: datosAudiometria.valores_oi || {},
-                pta_via_aerea_od: datosAudiometria.pta?.od_air || null,
-                pta_via_osea_od: datosAudiometria.pta?.od_bone || null,
-                pta_via_aerea_oi: datosAudiometria.pta?.oi_air || null,
-                pta_via_osea_oi: datosAudiometria.pta?.oi_bone || null
+
+                // --- CAMPOS DE AUDIOMETRÍA ---
+                diagnostico_od: datosAudiometria?.diagnostico_od || '',
+                diagnostico_oi: datosAudiometria?.diagnostico_oi || '',
+                observaciones: datosAudiometria?.observaciones || '',
+                otoscopia: datosAudiometria?.otoscopia || '',
+                grafica_tonal_base64: datosAudiometria?.grafica || '',   // ← renombrado
+                grafica_logo_base64: datosLogoaudiometria?.grafica || '', // ← NUEVO
+                valores_od: datosAudiometria?.valores_od || {},
+                valores_oi: datosAudiometria?.valores_oi || {},
+                pta_via_aerea_od: datosAudiometria?.pta?.od_air || null,
+                pta_via_osea_od: datosAudiometria?.pta?.od_bone || null,
+                pta_via_aerea_oi: datosAudiometria?.pta?.oi_air || null,
+                pta_via_osea_oi: datosAudiometria?.pta?.oi_bone || null,
+
+                // --- CAMPOS DE LOGOAUDIOMETRÍA ---
+                diagnostico: datosLogoaudiometria?.diagnostico || '',
+                urv_od: datosLogoaudiometria?.urv_od ? parseInt(datosLogoaudiometria.urv_od) : null,
+                urv_oi: datosLogoaudiometria?.urv_oi ? parseInt(datosLogoaudiometria.urv_oi) : null,
+                upalabra_od: datosLogoaudiometria?.upalabra_od ? parseInt(datosLogoaudiometria.upalabra_od) : null,
+                upalabra_oi: datosLogoaudiometria?.upalabra_oi ? parseInt(datosLogoaudiometria.upalabra_oi) : null,
+                udisc_od: datosLogoaudiometria?.udisc_od ? parseInt(datosLogoaudiometria.udisc_od) : null,
+                udisc_oi: datosLogoaudiometria?.udisc_oi ? parseInt(datosLogoaudiometria.udisc_oi) : null,
+                pmax_od: datosLogoaudiometria?.pmax_od ? parseInt(datosLogoaudiometria.pmax_od) : null,
+                pmax_oi: datosLogoaudiometria?.pmax_oi ? parseInt(datosLogoaudiometria.pmax_oi) : null
             };
-            
+
+            // ✅ GUARDAR UN SOLO REGISTRO
             if (window.api?.guardarExamen) {
                 const result = await window.api.guardarExamen(data);
                 if (result && result.ok) {
-                    audiometriaGuardada = true;
-                    console.log('✅ Audiometría guardada, ID:', result.id);
+                    examenGuardado = true;
+                    console.log('✅ Examen combinado guardado, ID:', result.id);
                 }
             }
         }
-        
-        // Guardar Logoaudiometría
-        if (datosLogoaudiometria && datosLogoaudiometria.tieneDatos) {
-            const data = {
-                tipo_examen: 'logoaudiometria',
-                paciente_id: parseInt(pacienteId),
-                cita_id: parseInt(citaId),
-                entidad_id: cita?.entidad_id || null,
-                diagnostico: datosLogoaudiometria.diagnostico || '',
-                diagnostico_od: datosLogoaudiometria.diagnostico_od || '',
-                diagnostico_oi: datosLogoaudiometria.diagnostico_oi || '',
-                grafica_base64: datosLogoaudiometria.grafica || '',
-                urv_od: datosLogoaudiometria.urv_od ? parseInt(datosLogoaudiometria.urv_od) : null,
-                urv_oi: datosLogoaudiometria.urv_oi ? parseInt(datosLogoaudiometria.urv_oi) : null,
-                upalabra_od: datosLogoaudiometria.upalabra_od ? parseInt(datosLogoaudiometria.upalabra_od) : null,
-                upalabra_oi: datosLogoaudiometria.upalabra_oi ? parseInt(datosLogoaudiometria.upalabra_oi) : null,
-                udisc_od: datosLogoaudiometria.udisc_od ? parseInt(datosLogoaudiometria.udisc_od) : null,
-                udisc_oi: datosLogoaudiometria.udisc_oi ? parseInt(datosLogoaudiometria.udisc_oi) : null,
-                pmax_od: datosLogoaudiometria.pmax_od ? parseInt(datosLogoaudiometria.pmax_od) : null,
-                pmax_oi: datosLogoaudiometria.pmax_oi ? parseInt(datosLogoaudiometria.pmax_oi) : null
-            };
-            
-            if (window.api?.guardarExamen) {
-                const result = await window.api.guardarExamen(data);
-                if (result && result.ok) {
-                    logoaudiometriaGuardada = true;
-                    console.log('✅ Logoaudiometría guardada, ID:', result.id);
-                }
-            }
-        }
-        
+
         // ============================================
         // 🔥 GENERAR PDF COMBINADO
         // ============================================
         const entidadNombre = cita?.entidad_nombre || 'PARTICULAR';
         let pdfGenerado = false;
-        
-        // Verificar si hay datos o gráficas para el PDF
-        const tieneDatosAudiometria = datosAudiometria && datosAudiometria.tieneDatos;
-        const tieneDatosLogoaudiometria = datosLogoaudiometria && datosLogoaudiometria.tieneDatos;
-        
+
         if (tieneDatosAudiometria || tieneDatosLogoaudiometria) {
             // Preparar datos para PDF de Audiometría
             const datosPDFAudiometria = {
@@ -448,7 +447,7 @@ async function grabarTodos() {
                 diagnostico_oi: datosAudiometria?.diagnostico_oi || '',
                 observaciones: datosAudiometria?.observaciones || '',
                 otoscopia: datosAudiometria?.otoscopia || '',
-                grafica_base64: datosAudiometria?.grafica || '',
+                grafica_tonal_base64: datosAudiometria?.grafica || '', 
                 pta: {
                     od_air: datosAudiometria?.pta?.od_air || null,
                     oi_air: datosAudiometria?.pta?.oi_air || null,
@@ -456,7 +455,7 @@ async function grabarTodos() {
                     oi_bone: datosAudiometria?.pta?.oi_bone || null
                 }
             };
-            
+
             // Preparar datos para PDF de Logoaudiometría
             const datosPDFLogoaudiometria = {
                 paciente: { nombre: paciente.nombre || '', documento: paciente.documento || '' },
@@ -475,116 +474,112 @@ async function grabarTodos() {
                 diagnostico: datosLogoaudiometria?.diagnostico || '',
                 diagnostico_od: datosLogoaudiometria?.diagnostico_od || '',
                 diagnostico_oi: datosLogoaudiometria?.diagnostico_oi || '',
-                grafica_base64: datosLogoaudiometria?.grafica || '',
+                grafica_logo_base64: datosLogoaudiometria?.grafica || '',
                 nr_flags: datosLogoaudiometria?.nr_flags || { od: {}, oi: {} }
             };
 
             let pdfResult;
-            
+
             // Elegir el manejador según la entidad
             if (entidadNombre === 'COOSALUD') {
                 if (window.api?.generarPDFCombinadoCoosalud) {
                     pdfResult = await window.api.generarPDFCombinadoCoosalud(
-                        datosPDFAudiometria, 
-                        datosPDFLogoaudiometria, 
+                        datosPDFAudiometria,
+                        datosPDFLogoaudiometria,
                         entidadNombre
                     );
                 }
             } else {
                 if (window.api?.generarPDFCombinado) {
                     pdfResult = await window.api.generarPDFCombinado(
-                        datosPDFAudiometria, 
-                        datosPDFLogoaudiometria, 
+                        datosPDFAudiometria,
+                        datosPDFLogoaudiometria,
                         entidadNombre
                     );
                 }
             }
-            
-if (pdfResult && pdfResult.ok) {
-    pdfGenerado = true;
-    rutaPDFGenerado = pdfResult.path;
-    console.log('✅ PDF Combinado generado:', rutaPDFGenerado);
-}
 
-        
+            if (pdfResult && pdfResult.ok) {
+                pdfGenerado = true;
+                rutaPDFGenerado = pdfResult.path;
+                console.log('✅ PDF Combinado generado:', rutaPDFGenerado);
+            }
+        }
+
         // ============================================
         // 📋 PREPARAR DATOS PARA DETALLES
         // ============================================
-datosParaDetalles = {
-    paciente: paciente.nombre || 'No especificado',
-    documento: paciente.documento || 'No especificado',
-    fecha: cita?.fecha_cita || new Date().toISOString().split('T')[0],
-    entidad: cita?.entidad_nombre || 'Particular',
-    tipo_examen: (tieneDatosAudiometria && tieneDatosLogoaudiometria) ? 'Combinado' : 
-                 (tieneDatosAudiometria ? 'Audiometría' : 
-                 (tieneDatosLogoaudiometria ? 'Logoaudiometría' : 'Sin datos')),
-    observaciones: datosAudiometria?.observaciones || datosLogoaudiometria?.diagnostico || 'Sin observaciones',
-    cita_id: citaId || 'No disponible',
-    
-    // DATOS COMPLETOS DE AUDIOMETRÍA
-    audiometria: datosAudiometria ? {
-        diagnostico_od: datosAudiometria.diagnostico_od || '',
-        diagnostico_oi: datosAudiometria.diagnostico_oi || '',
-        observaciones: datosAudiometria.observaciones || '',
-        otoscopia: datosAudiometria.otoscopia || '',
-        via_aerea: {
-            od: datosAudiometria.valores_od || {},
-            oi: datosAudiometria.valores_oi || {}
-        },
-        via_osea: {
-            od: datosAudiometria.valores_osea_od || {},  // ✅ CORREGIDO
-            oi: datosAudiometria.valores_osea_oi || {}   // ✅ CORREGIDO
-        },
-        pta_od_air: datosAudiometria.pta?.od_air || null,
-        pta_oi_air: datosAudiometria.pta?.oi_air || null,
-        pta_od_bone: datosAudiometria.pta?.od_bone || null,
-        pta_oi_bone: datosAudiometria.pta?.oi_bone || null
-    } : null,
-    
-    // DATOS COMPLETOS DE LOGOAUDIOMETRÍA
-    logoaudiometria: datosLogoaudiometria ? {
-        diagnostico: datosLogoaudiometria.diagnostico || '',
-        diagnostico_od: datosLogoaudiometria.diagnostico_od || '',
-        diagnostico_oi: datosLogoaudiometria.diagnostico_oi || '',
-        urv_od: datosLogoaudiometria.urv_od || null,
-        urv_oi: datosLogoaudiometria.urv_oi || null,
-        upalabra_od: datosLogoaudiometria.upalabra_od || null,
-        upalabra_oi: datosLogoaudiometria.upalabra_oi || null,
-        udisc_od: datosLogoaudiometria.udisc_od || null,
-        udisc_oi: datosLogoaudiometria.udisc_oi || null,
-        pmax_od: datosLogoaudiometria.pmax_od || null,
-        pmax_oi: datosLogoaudiometria.pmax_oi || null
-    } : null
-};
-        
+        datosParaDetalles = {
+            paciente: paciente.nombre || 'No especificado',
+            documento: paciente.documento || 'No especificado',
+            fecha: cita?.fecha_cita || new Date().toISOString().split('T')[0],
+            entidad: cita?.entidad_nombre || 'Particular',
+            tipo_examen: (tieneDatosAudiometria && tieneDatosLogoaudiometria) ? 'Combinado' :
+                         (tieneDatosAudiometria ? 'Audiometría' :
+                         (tieneDatosLogoaudiometria ? 'Logoaudiometría' : 'Sin datos')),
+            observaciones: datosAudiometria?.observaciones || datosLogoaudiometria?.diagnostico || 'Sin observaciones',
+            cita_id: citaId || 'No disponible',
+
+            // DATOS COMPLETOS DE AUDIOMETRÍA
+            audiometria: datosAudiometria ? {
+                diagnostico_od: datosAudiometria.diagnostico_od || '',
+                diagnostico_oi: datosAudiometria.diagnostico_oi || '',
+                observaciones: datosAudiometria.observaciones || '',
+                otoscopia: datosAudiometria.otoscopia || '',
+                via_aerea: {
+                    od: datosAudiometria.valores_od || {},
+                    oi: datosAudiometria.valores_oi || {}
+                },
+                via_osea: {
+                    od: datosAudiometria.valores_osea_od || {},
+                    oi: datosAudiometria.valores_osea_oi || {}
+                },
+                pta_od_air: datosAudiometria.pta?.od_air || null,
+                pta_oi_air: datosAudiometria.pta?.oi_air || null,
+                pta_od_bone: datosAudiometria.pta?.od_bone || null,
+                pta_oi_bone: datosAudiometria.pta?.oi_bone || null
+            } : null,
+
+            // DATOS COMPLETOS DE LOGOAUDIOMETRÍA
+            logoaudiometria: datosLogoaudiometria ? {
+                diagnostico: datosLogoaudiometria.diagnostico || '',
+                diagnostico_od: datosLogoaudiometria.diagnostico_od || '',
+                diagnostico_oi: datosLogoaudiometria.diagnostico_oi || '',
+                urv_od: datosLogoaudiometria.urv_od || null,
+                urv_oi: datosLogoaudiometria.urv_oi || null,
+                upalabra_od: datosLogoaudiometria.upalabra_od || null,
+                upalabra_oi: datosLogoaudiometria.upalabra_oi || null,
+                udisc_od: datosLogoaudiometria.udisc_od || null,
+                udisc_oi: datosLogoaudiometria.udisc_oi || null,
+                pmax_od: datosLogoaudiometria.pmax_od || null,
+                pmax_oi: datosLogoaudiometria.pmax_oi || null
+            } : null
+        };
+
         // ============================================
         // 🎯 MOSTRAR MODAL CON RESULTADOS
         // ============================================
         if (pdfGenerado && rutaPDFGenerado) {
-            // Guardar la ruta del PDF en una variable global
             window.rutaPDFActual = rutaPDFGenerado;
             window.datosExamenActual = datosParaDetalles;
-            
-            // Mostrar el modal
+
             const modal = document.getElementById('modalResultados');
             if (modal) {
                 modal.style.display = 'flex';
             }
         }
-        }
-        
+
         // Mostrar mensaje final
-           // Mostrar mensaje final (solo notificación si NO se mostró el modal)
         if (!pdfGenerado || !rutaPDFGenerado) {
             if (pdfGenerado) {
                 mostrarNotificacion('✅ Exámenes guardados. PDF completo generado');
-            } else if (audiometriaGuardada || logoaudiometriaGuardada) {
+            } else if (examenGuardado) {
                 mostrarNotificacion('✅ Exámenes guardados correctamente');
             } else {
                 mostrarNotificacion('⚠️ No se guardaron datos', true);
             }
         }
-        
+
     } catch (error) {
         console.error('❌ Error:', error);
         mostrarNotificacion('❌ Error: ' + error.message, true);

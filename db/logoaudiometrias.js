@@ -10,7 +10,7 @@ async function guardarLogoaudiometria(data) {
         otoscopia,  // ← AGREGAR ESTO
         valores_od,
         valores_oi,
-        grafica_base64
+        grafica_logo_base64
     } = data;
     
     const client = await pool.connect();
@@ -22,11 +22,11 @@ async function guardarLogoaudiometria(data) {
 const result = await client.query(
     `INSERT INTO logoaudiometrias 
      (paciente_id, cita_id, diagnostico, diagnostico_od, diagnostico_oi, otoscopia,
-      valores_od, valores_oi, grafica_base64, fecha_registro)
+      valores_od, valores_oi, grafica_logo_base64, fecha_registro)
      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, CURRENT_TIMESTAMP)
      RETURNING id`,
     [paciente_id, cita_id, diagnostico, diagnostico_od, diagnostico_oi, otoscopia,
-     valores_od, valores_oi, grafica_base64]
+     valores_od, valores_oi, grafica_logo_base64]
 );
         
         // ACTUALIZAR EL ESTADO DE LA CITA A "ATENDIDA"
@@ -91,7 +91,7 @@ async function obtenerLogoaudiometriaPorCitaId(citaId) {
                 urv_od: examen.valores_od?.urv,
                 upalabra_od: examen.valores_od?.upalabra,
                 urv_oi: examen.valores_oi?.urv,
-                tiene_grafica: !!examen.grafica_base64
+                tiene_grafica: !!examen.grafica_logo_base64
             });
             return examen;
         }

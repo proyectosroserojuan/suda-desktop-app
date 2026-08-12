@@ -1,5 +1,5 @@
 // services/pdfRegeneratorService.js
-const { BrowserWindow, shell } = require('electron');
+const { BrowserWindow } = require('electron');
 const path = require('path');
 const fs = require('fs');
 const os = require('os');
@@ -10,89 +10,146 @@ const pdfGeneratorCoosaludUnified = require('./pdfGeneratorCoosaludUnified');
 const pdfGeneratorCoosalud = require('./pdfGeneratorCoosalud');
 const pdfGenerator = require('./pdfGenerator');
 
-
-// Importar módulos de base de datos
-const examenesDB = require('../db/examenes_unificados');
-
 class PDFRegeneratorService {
     constructor() {
         this.downloadsPath = path.join(os.homedir(), 'Downloads');
         this.tempPath = path.join(os.tmpdir(), 'audiologia_pdfs');
         
-        // Crear carpeta temporal si no existe
         if (!fs.existsSync(this.tempPath)) {
             fs.mkdirSync(this.tempPath, { recursive: true });
         }
     }
 
-async regenerarPDF(cita, examenAudiometria, examenLogoaudiometria) {
-        console.log('\n========== REGENERANDO PDF DESDE BD ==========');
-        console.log('Cita ID:', cita.id);
-        console.log('Paciente:', cita.paciente_nombre);
-        console.log('Entidad:', cita.entidad_nombre);
-        console.log('Tiene Audiometría:', !!examenAudiometria);
-        console.log('Tiene Logoaudiometría:', !!examenLogoaudiometria);
-        
-        try {
-            if (!examenAudiometria && !examenLogoaudiometria) {
-                throw new Error('No hay datos de examen para generar el PDF');
-            }
+// services/pdfRegeneratorService.js - MODIFICAR este método
 
-            const entidad = cita.entidad_nombre || 'UDA';
-            const esCoosalud = entidad.toLowerCase().includes('coosalud') || 
-                              entidad.toLowerCase().includes('progresando');
-            
-            const datosAudiometria = examenAudiometria ? this.prepararDatosParaPDF(cita, examenAudiometria) : null;
-            const datosLogoaudiometria = examenLogoaudiometria ? this.prepararDatosParaPDF(cita, examenLogoaudiometria) : null;
-            
-            let pdfPath = null;
-            
-            if (datosAudiometria && datosLogoaudiometria) {
-                console.log('📄 Generando PDF COMBINADO (Audiometría + Logoaudiometría)');
-                if (esCoosalud) {
-                    pdfPath = await pdfGeneratorCoosaludUnified.generarPDFCombinadoCOO(
-                        datosAudiometria,
-                        datosLogoaudiometria,
-                        entidad
-                    );
-                } else {
-                    pdfPath = await pdfGeneratorUnified.generarPDFCombinado(
-                        datosAudiometria,
-                        datosLogoaudiometria,
-                        entidad
-                    );
-                }
-            } else if (datosAudiometria) {
-                console.log('📄 Generando PDF INDIVIDUAL de AUDIOMETRÍA');
-                if (esCoosalud) {
-                    pdfPath = await pdfGeneratorCoosalud.generarPDF(datosAudiometria, entidad, 'audiometria');
-                } else {
-                    pdfPath = await pdfGenerator.generarPDF(datosAudiometria, entidad, 'audiometria');
-                }
-            } else if (datosLogoaudiometria) {
-                console.log('📄 Generando PDF INDIVIDUAL de LOGOAUDIOMETRÍA');
-                if (esCoosalud) {
-                    pdfPath = await pdfGeneratorCoosalud.generarPDF(datosLogoaudiometria, entidad, 'logoaudiometria');
-                } else {
-                    pdfPath = await pdfGenerator.generarPDF(datosLogoaudiometria, entidad, 'logoaudiometria');
-                }
-            } else {
-                throw new Error('No se encontraron datos válidos para generar el PDF');
-            }
-            
-            console.log('✅ PDF regenerado exitosamente:', pdfPath);
-            return pdfPath;
-            
-        } catch (error) {
-            console.error('❌ Error regenerando PDF:', error);
-            throw error;
+async regenerarPDF(cita, examenAudiometria, examenLogoaudiometria) {
+    console.log('\n========== REGENERANDO PDF DESDE BD ==========');
+    console.log('Cita ID:', cita.id);
+    console.log('Paciente:', cita.paciente_nombre);
+    console.log('Entidad:', cita.entidad_nombre);
+    console.log('Tiene Audiometría:', !!examenAudiometria);
+    console.log('Tiene Logoaudiometría:', !!examenLogoaudiometria);
+    
+    try {
+        if (!examenAudiometria && !examenLogoaudiometria) {
+            throw new Error('No hay datos de examen para generar el PDF');
         }
+
+        const entidad = cita.entidad_nombre || 'UDA';
+        const esCoosalud = entidad.toLowerCase().includes('coosalud') || 
+                          entidad.toLowerCase().includes('progresando');
+        
+        // ✅ PREPARAR DATOS
+        const datosAudiometria = examenAudiometria 
+            ? this.prepararDatosParaPDF(cita, examenAudiometria, 'audiometria')
+            : null;
+            
+        const datosLogoaudiometria = examenLogoaudiometria 
+            ? this.prepararDatosParaPDF(cita, examenLogoaudiometria, 'logoaudiometria')
+            : null;
+        
+        let pdfPath = null;
+        
+        // ✅ GENERAR SEGÚN LO QUE TENGA
+        if (datosAudiometria && datosLogoaudiometria) {
+            console.log('📄 Generando PDF COMBINADO');
+            if (esCoosalud) {
+                pdfPath = await pdfGeneratorCoosaludUnified.generarPDFCombinadoCOO(
+                    datosAudiometria,
+                    datosLogoaudiometria,
+                    entidad
+                );
+            } else {
+                pdfPath = await pdfGeneratorUnified.generarPDFCombinado(
+                    datosAudiometria,
+                    datosLogoaudiometria,
+                    entidad
+                );
+            }
+        } else if (datosAudiometria) {
+            console.log('📄 Generando PDF de AUDIOMETRÍA');
+            if (esCoosalud) {
+                pdfPath = await pdfGeneratorCoosalud.generarPDF(datosAudiometria, entidad, 'audiometria');
+            } else {
+                pdfPath = await pdfGenerator.generarPDF(datosAudiometria, entidad, 'audiometria');
+            }
+        } else if (datosLogoaudiometria) {
+            console.log('📄 Generando PDF de LOGOAUDIOMETRÍA');
+            if (esCoosalud) {
+                pdfPath = await pdfGeneratorCoosalud.generarPDF(datosLogoaudiometria, entidad, 'logoaudiometria');
+            } else {
+                pdfPath = await pdfGenerator.generarPDF(datosLogoaudiometria, entidad, 'logoaudiometria');
+            }
+        } else {
+            throw new Error('No se encontraron datos válidos para generar el PDF');
+        }
+        
+        console.log('✅ PDF regenerado exitosamente:', pdfPath);
+        return pdfPath;
+        
+    } catch (error) {
+        console.error('❌ Error regenerando PDF:', error);
+        throw error;
+    }
+}
+
+    /**
+     * ✅ DETECTAR SI TIENE DATOS DE AUDIOMETRÍA
+     */
+    tieneAudiometria(examen) {
+        if (!examen) return false;
+        
+        // Verificar PTA
+        const tienePTA = !!(examen.pta_via_aerea_od || examen.pta_via_aerea_oi || 
+                           examen.pta_via_osea_od || examen.pta_via_osea_oi);
+        
+        // Verificar diagnósticos
+        const tieneDiagnostico = !!(examen.diagnostico_od || examen.diagnostico_oi);
+        
+        // Verificar valores de frecuencias
+        let tieneValores = false;
+        if (examen.valores_od) {
+            try {
+                const vals = typeof examen.valores_od === 'string' 
+                    ? JSON.parse(examen.valores_od) 
+                    : examen.valores_od;
+                tieneValores = Object.keys(vals).some(k => vals[k] && vals[k] !== '');
+            } catch(e) {}
+        }
+        if (!tieneValores && examen.valores_oi) {
+            try {
+                const vals = typeof examen.valores_oi === 'string' 
+                    ? JSON.parse(examen.valores_oi) 
+                    : examen.valores_oi;
+                tieneValores = Object.keys(vals).some(k => vals[k] && vals[k] !== '');
+            } catch(e) {}
+        }
+        
+        return tienePTA || tieneDiagnostico || tieneValores;
     }
 
     /**
-     * PREPARAR DATOS PARA EL GENERADOR DE PDF
+     * ✅ DETECTAR SI TIENE DATOS DE LOGOAUDIOMETRÍA
      */
-    prepararDatosParaPDF(cita, examenData) {
+    tieneLogoaudiometria(examen) {
+        if (!examen) return false;
+        
+        // Verificar campos de logoaudiometría
+        const tieneURV = !!(examen.urv_od || examen.urv_oi);
+        const tieneUpalabra = !!(examen.upalabra_od || examen.upalabra_oi);
+        const tieneUdisc = !!(examen.udisc_od || examen.udisc_oi);
+        const tienePmax = !!(examen.pmax_od || examen.pmax_oi);
+        const tieneDiagnostico = !!(examen.diagnostico);
+        const tieneGraficaLogo = !!(examen.grafica_logo_base64);
+        
+        return tieneURV || tieneUpalabra || tieneUdisc || tienePmax || 
+               tieneDiagnostico || tieneGraficaLogo;
+    }
+
+    /**
+     * ✅ PREPARAR DATOS PARA EL PDF
+     */
+    prepararDatosParaPDF(cita, examenData, tipo = 'audiometria') {
         let valoresOD = examenData.valores_od || {};
         let valoresOI = examenData.valores_oi || {};
         
@@ -108,7 +165,7 @@ async regenerarPDF(cita, examenAudiometria, examenLogoaudiometria) {
             const num = Number(val);
             return isNaN(num) ? null : num;
         };
-        
+
         return {
             paciente: {
                 nombre: cita.paciente_nombre || '',
@@ -120,7 +177,8 @@ async regenerarPDF(cita, examenAudiometria, examenLogoaudiometria) {
             diagnostico_oi: examenData.diagnostico_oi || '',
             observaciones: examenData.observaciones || '',
             otoscopia: examenData.otoscopia || '',
-            grafica_base64: examenData.grafica_base64 || '',
+            grafica_tonal_base64: examenData.grafica_tonal_base64 || '',
+            grafica_logo_base64: examenData.grafica_logo_base64 || '',
             pta: {
                 od_air: parseNumber(examenData.pta_via_aerea_od),
                 od_bone: parseNumber(examenData.pta_via_osea_od),
@@ -141,7 +199,7 @@ async regenerarPDF(cita, examenAudiometria, examenLogoaudiometria) {
     }
 
     /**
-     * MOSTRAR PDF EN UNA VENTANA - Versión mejorada
+     * MOSTRAR PDF EN VENTANA
      */
     async mostrarPDFEnVentana(pdfPath, titulo = 'Resultados del Examen') {
         if (!pdfPath || !fs.existsSync(pdfPath)) {
@@ -149,7 +207,6 @@ async regenerarPDF(cita, examenAudiometria, examenLogoaudiometria) {
         }
         
         console.log('🖥️ Mostrando PDF en ventana:', pdfPath);
-        console.log('📄 Tamaño del PDF:', fs.statSync(pdfPath).size, 'bytes');
         
         const win = new BrowserWindow({
             width: 1000,
@@ -162,147 +219,52 @@ async regenerarPDF(cita, examenAudiometria, examenLogoaudiometria) {
             }
         });
         
-        // Intentar cargar directamente con file://
         try {
             const fileUrl = `file://${pdfPath.replace(/\\/g, '/')}`;
-            console.log('📂 Cargando URL:', fileUrl);
-            
             await win.loadURL(fileUrl);
             win.show();
             win.focus();
             console.log('✅ PDF cargado directamente');
             return win;
         } catch (error) {
-            console.warn('⚠️ No se pudo cargar directamente, usando visor HTML:', error.message);
-        }
-        
-        // Fallback con visor HTML mejorado
-        const fileUrl = `file://${pdfPath.replace(/\\/g, '/')}`;
-        const htmlContent = `
-            <!DOCTYPE html>
-            <html>
-            <head>
-                <meta charset="UTF-8">
-                <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                <title>${titulo}</title>
-                <style>
-                    * { margin: 0; padding: 0; box-sizing: border-box; }
-                    body { 
-                        background: #f0f0f0; 
-                        font-family: Arial, sans-serif;
-                        height: 100vh;
-                        display: flex;
-                        flex-direction: column;
-                    }
-                    .toolbar {
-                        background: #2c3e50;
-                        color: white;
-                        padding: 8px 20px;
-                        display: flex;
-                        justify-content: space-between;
-                        align-items: center;
-                        flex-shrink: 0;
-                        z-index: 10;
-                    }
-                    .toolbar-title {
-                        font-size: 14px;
-                        font-weight: bold;
-                    }
-                    .toolbar button {
-                        background: #34495e;
-                        color: white;
-                        border: none;
-                        padding: 5px 14px;
-                        border-radius: 4px;
-                        cursor: pointer;
-                        font-size: 12px;
-                        margin-left: 8px;
-                        transition: background 0.2s;
-                    }
-                    .toolbar button:hover {
-                        background: #4a6a8a;
-                    }
-                    .pdf-viewer {
-                        flex: 1;
-                        width: 100%;
-                        background: #525659;
-                        position: relative;
-                    }
-                    .pdf-viewer object,
-                    .pdf-viewer embed {
-                        width: 100%;
-                        height: 100%;
-                        display: block;
-                        border: none;
-                    }
-                    .error-message {
-                        display: none;
-                        padding: 40px;
-                        text-align: center;
-                        color: #666;
-                        position: absolute;
-                        top: 50%;
-                        left: 50%;
-                        transform: translate(-50%, -50%);
-                        background: white;
-                        border-radius: 8px;
-                        box-shadow: 0 4px 20px rgba(0,0,0,0.2);
-                        max-width: 500px;
-                    }
-                    .error-message h2 { margin-bottom: 15px; color: #e74c3c; }
-                    .error-message button {
-                        background: #3498db;
-                        color: white;
-                        border: none;
-                        padding: 10px 24px;
-                        border-radius: 6px;
-                        font-size: 14px;
-                        cursor: pointer;
-                        margin-top: 15px;
-                    }
-                    .error-message button:hover {
-                        background: #2980b9;
-                    }
-                    .error-message .file-path {
-                        font-size: 11px;
-                        color: #999;
-                        word-break: break-all;
-                        margin-top: 10px;
-                    }
-                </style>
-            </head>
-            <body>
-                <div class="toolbar">
-                    <span class="toolbar-title">📄 ${titulo}</span>
-                    <div>
-                        <button onclick="window.print()">🖨️ Imprimir</button>
-                        <button onclick="window.location.reload()">🔄 Recargar</button>
-                        <button onclick="window.open('${fileUrl}', '_blank')">📂 Abrir externo</button>
-                    </div>
-                </div>
-                <div class="pdf-viewer">
-                    <object data="${fileUrl}" type="application/pdf" width="100%" height="100%">
-                        <embed src="${fileUrl}" type="application/pdf" width="100%" height="100%">
-                        <div class="error-message" style="display:block;">
-                            <h2>❌ No se puede mostrar el PDF</h2>
-                            <p>El visor de PDF no está disponible en esta ventana.</p>
-                            <button onclick="window.open('${fileUrl}', '_blank')">
-                                📂 Abrir con visor externo
-                            </button>
-                            <div class="file-path">📁 ${pdfPath}</div>
+            console.warn('⚠️ Error cargando PDF, usando fallback:', error.message);
+            
+            const fileUrl = `file://${pdfPath.replace(/\\/g, '/')}`;
+            const htmlContent = `
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <meta charset="UTF-8">
+                    <title>${titulo}</title>
+                    <style>
+                        body { margin:0; background:#f0f0f0; display:flex; flex-direction:column; height:100vh; }
+                        .toolbar { background:#2c3e50; color:white; padding:8px 20px; display:flex; justify-content:space-between; }
+                        .pdf-viewer { flex:1; }
+                        .pdf-viewer object, .pdf-viewer embed { width:100%; height:100%; }
+                        button { background:#34495e; color:white; border:none; padding:5px 14px; border-radius:4px; cursor:pointer; }
+                        button:hover { background:#4a6a8a; }
+                    </style>
+                </head>
+                <body>
+                    <div class="toolbar">
+                        <span>📄 ${titulo}</span>
+                        <div>
+                            <button onclick="window.print()">🖨️ Imprimir</button>
+                            <button onclick="window.open('${fileUrl}', '_blank')">📂 Abrir externo</button>
                         </div>
-                    </object>
-                </div>
-            </body>
-            </html>
-        `;
-        
-        await win.loadURL(`data:text/html;charset=utf-8,${encodeURIComponent(htmlContent)}`);
-        win.show();
-        win.focus();
-        
-        console.log('✅ PDF cargado con visor HTML');
-        return win;
+                    </div>
+                    <div class="pdf-viewer">
+                        <embed src="${fileUrl}" type="application/pdf" width="100%" height="100%">
+                    </div>
+                </body>
+                </html>
+            `;
+            
+            await win.loadURL(`data:text/html;charset=utf-8,${encodeURIComponent(htmlContent)}`);
+            win.show();
+            win.focus();
+            return win;
+        }
     }
 }
 

@@ -157,7 +157,7 @@ class PDFGeneratorUnified {
     
     const tieneValoresOD = Object.values(valoresOD).some(v => v && v !== '');
     const tieneValoresOI = Object.values(valoresOI).some(v => v && v !== '');
-    const tieneGrafica = datos.grafica_base64 && datos.grafica_base64.length > 100;
+    const tieneGrafica = datos.grafica_tonal_base64 && datos.grafica_tonal_base64.length > 100;
     
     return tieneValoresOD || tieneValoresOI || tieneGrafica;
   }
@@ -168,7 +168,7 @@ class PDFGeneratorUnified {
     
     const tieneValoresOD = valoresOD.urv || valoresOD.upalabra || valoresOD.udisc || valoresOD.pmax;
     const tieneValoresOI = valoresOI.urv || valoresOI.upalabra || valoresOI.udisc || valoresOI.pmax;
-    const tieneGrafica = datos.grafica_base64 && datos.grafica_base64.length > 100;
+    const tieneGrafica = datos.grafica_logo_base64 && datos.grafica_logo_base64.length > 100;
     
     return tieneValoresOD || tieneValoresOI || tieneGrafica;
   }
@@ -479,12 +479,12 @@ const tablaLogoaudiometriaRows = `
     </tr>
 `;
   // Verificar gráficas
-  const graficaAudiometriaHTML = datosAudiometria.grafica_base64 && datosAudiometria.grafica_base64.length > 100 ?
-    `<img src="${datosAudiometria.grafica_base64}" alt="Audiometría Tonal" style="width:100%; max-height: 320px;  object-fit: contain; margin-left: -47px; display: block;">` :
+  const graficaAudiometriaHTML = datosAudiometria.grafica_tonal_base64 && datosAudiometria.grafica_tonal_base64.length > 100 ?
+    `<img src="${datosAudiometria.grafica_tonal_base64}" alt="Audiometría Tonal" style="width:100%; max-height: 320px;  object-fit: contain; margin-left: -47px; display: block;">` :
     `<div class="sin-grafica" style="padding:20px; font-size:10px;">⚠️ No se pudo generar la gráfica de Audiometría</div>`;
 
-  const graficaLogoaudiometriaHTML = datosLogoaudiometria.grafica_base64 && datosLogoaudiometria.grafica_base64.length > 100 ?
-    `<img src="${datosLogoaudiometria.grafica_base64}" alt="Logoaudiometría" style="width:80%; max-height: 180px; object-fit: contain;   ">` :
+  const graficaLogoaudiometriaHTML = datosLogoaudiometria.grafica_logo_base64 && datosLogoaudiometria.grafica_logo_base64.length > 100 ?
+    `<img src="${datosLogoaudiometria.grafica_logo_base64}" alt="Logoaudiometría" style="width:80%; max-height: 180px; object-fit: contain;   ">` :
     `<div class="sin-grafica" style="padding:20px; font-size:10px;">⚠️ No se pudo generar la gráfica de Logoaudiometría</div>`;
 
   // OTOSCOPIA HTML
@@ -873,14 +873,14 @@ freqsConDatos.forEach(f => {
     `;
 });
 
-    const graficaHTML = datos.grafica_base64 && datos.grafica_base64.length > 100 ?
-      `<img src="${datos.grafica_base64}" alt="Audiometría Tonal">` :
+    const graficaHTML = datos.grafica_tonal_base64 && datos.grafica_tonal_base64.length > 100 ?
+      `<img src="${datos.grafica_tonal_base64}" alt="Audiometría Tonal">` :
       `<div class="sin-grafica">⚠️ No se pudo generar la gráfica</div>`;
 
     // OTOSCOPIA HTML
     const otoscopiaHTML = (otoscopia && otoscopia.trim() !== '') 
       ? `<div class="otoscopia-box"><strong>OTOSCOPIA:</strong> ${otoscopia}</div>`
-      : `<div class="otoscopia-box"><strong>OTOSCOPIA:</strong> _________________________</div>`;
+      : `<div class="otoscopia-box"><strong>OTOSCOPIA:</strong></div>`;
 
     return `
       <!DOCTYPE html>
@@ -1070,14 +1070,14 @@ freqsConDatos.forEach(f => {
       `<img src="${imagenes.oidoLogoBase64}" alt="Oído" class="oido-img">` : 
       `<svg width="120" height="120" viewBox="0 0 100 100"><circle cx="50" cy="50" r="40" stroke="#333" stroke-width="2" fill="none"/></svg>`;
 
-    const graficaHTML = datos.grafica_base64 && datos.grafica_base64.length > 100 ?
-      `<img src="${datos.grafica_base64}" alt="Logoaudiometría">` :
+    const graficaHTML = datos.grafica_logo_base64 && datos.grafica_logo_base64 > 100 ?
+      `<img src="${datos.grafica_logo_base64}" alt="Logoaudiometría">` :
       `<div class="sin-grafica">⚠️ No se pudo generar la gráfica</div>`;
 
     // OTOSCOPIA HTML
     const otoscopiaHTML = (otoscopia && otoscopia.trim() !== '') 
       ? `<div class="otoscopia-box"><strong>OTOSCOPIA:</strong> ${otoscopia}</div>`
-      : `<div class="otoscopia-box"><strong>OTOSCOPIA:</strong> _________________________</div>`;
+      : `<div class="otoscopia-box"><strong>OTOSCOPIA:</strong></div>`;
 
     return `
       <!DOCTYPE html>
