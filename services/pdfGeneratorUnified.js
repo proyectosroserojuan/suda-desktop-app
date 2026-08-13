@@ -361,7 +361,7 @@ const pta = datosAudiometria.pta || {};
 
 // Tabla PTA CON BORDES NEGROS (exactamente como en la foto)
 const tablaPTA = `
-<div style="position: fixed; right: 50px; top: 33%; margin: 0; z-index: 1000; width: 320px; height: auto; background: white; padding: 12px; border-radius: 6px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+<div style="position: fixed; right: 50px; top: 29%; margin: 0; z-index: 1000; width: 320px; height: auto; background: white; padding: 12px; border-radius: 6px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
   <div style="font-weight: bold; font-size: 13px; margin-bottom: 6px;">PROMEDIO TONAL (PTA)</div>
   <table style="border-collapse: collapse; font-size: 11px; width: 100%;">  <!-- CAMBIADO: width: 100% -->
     <thead>
@@ -408,6 +408,9 @@ const tablaPTA = `
           <div class="diagnostico-texto">${datosLogoaudiometria.diagnostico || ''}</div>
         </div>
 </div>`;
+
+
+ 
 
   /* Tabla de AUDIOMETRÍA (compacta)
   let tablaAudiometriaRows = '';
@@ -536,6 +539,8 @@ const tablaLogoaudiometriaRows = `
       .info-paciente { 
   flex: 2; 
   padding-left: 5px; /* ← OPCIONAL: para separar del borde interno */
+    position: relative;       /* ← AÑADIR */
+  top: -25px;  
 }
 
 
@@ -547,6 +552,8 @@ const tablaLogoaudiometriaRows = `
 .oido-imagen { 
   flex: 1; 
   text-align: center;  /* ← CAMBIAR de 'right' a 'center' o 'left' */
+   position: relative; 
+  top: -35px;  
   margin-left: -20px;  /* ← MUEVE MÁS A LA IZQUIERDA (valor negativo) */
 }
 .oido-img { 
@@ -567,6 +574,8 @@ const tablaLogoaudiometriaRows = `
   font-size: 9px;
   background: #f9f9f9;
   border-left: 3px solid #1e3a8a;
+    position: absolute;    /* ← ABSOLUTO FIJO */
+  top: 250px;            /* ← AJUSTA: más pequeño = más arriba */
 }
         
 
@@ -647,6 +656,10 @@ const tablaLogoaudiometriaRows = `
     z-index: 100;
 }
 
+.tablas-container {
+  transform: translateY(-30px);   /* ← SOLO ESTA LÍNEA */
+}
+
 
 .qr-central img {
     width: 90px;
@@ -655,12 +668,12 @@ const tablaLogoaudiometriaRows = `
 }
 .sello-central {
     position: fixed;
-   bottom: -30px; 
+   bottom: -5%; 
     left: 45%;
     z-index: 100;
 }
 .sello-central img {
-    width: 400px;
+    width: 500px;
     height: auto;
     opacity: 0.9;
     object-fit: contain;
@@ -674,8 +687,45 @@ const tablaLogoaudiometriaRows = `
   margin-top: 8px;
   background: #ffffff;
   padding: 4px 8px;
-  border-left: 3px solid #1e3a8a;
+  border-left: 3px solid #ccccce;
   color: #1a1a1a;
+}
+
+.graficas-container {
+ transform: translateY(-20px); 
+}
+
+/* ========================================= */
+/* OBSERVACIONES - CON BORDES Y AUTO SALTO */
+/* ========================================= */
+.observaciones-container {
+  border: 2px solid #ebebeb;        /* Borde azul */
+  border-radius: 6px;               /* Esquinas redondeadas */
+  padding: 8px 12px;
+  margin-top: 8px;
+  background: #ffffff;
+  max-height: 120px;                /* Altura máxima antes del scroll/salto */
+  overflow: auto;                   /* Scroll si es necesario */
+  page-break-inside: avoid;         /* Evita que se corte a la mitad */
+  break-inside: avoid;              /* Para navegadores modernos */
+}
+
+.observaciones-titulo {
+  font-weight: bold;
+  font-size: 11px;
+  color: #000000;
+  margin-bottom: 4px;
+  border-bottom: 1px solid #ddd;
+  padding-bottom: 4px;
+}
+
+.observaciones-texto {
+  font-size: 11px;
+  line-height: 1.5;
+  white-space: pre-wrap;           /* Respeta saltos de línea */
+  word-wrap: break-word;           /* Rompe palabras largas */
+  max-height: 80px;                /* Altura del texto */
+  overflow-y: auto;                /* Scroll vertical si es necesario */
 }
 
 .diagnostico-subtitulo { 
@@ -738,9 +788,9 @@ ${imagenes.qrBase64 ? `<div class="qr-central"><img src="${imagenes.qrBase64}" a
       
       <div class="datos-paciente">
         <div class="info-paciente">
-          <p><strong>Nombre:</strong> ${datosAudiometria.paciente?.nombre || '_________________________'}</p>
-          <p><strong>C.C.:</strong> ${datosAudiometria.paciente?.documento || '_________________________'}</p>
-          <p><strong>Entidad:</strong> ${entidad || '_________________________'}</p>
+          <p><strong>Nombre:</strong> ${datosAudiometria.paciente?.nombre || ''}</p>
+          <p><strong>C.C.:</strong> ${datosAudiometria.paciente?.documento || ''}</p>
+          <p><strong>Entidad:</strong> ${entidad || ''}</p>
         </div>
         <div class="oido-imagen">${oidoLogoHTML}</div>
       </div>
@@ -759,6 +809,12 @@ ${imagenes.qrBase64 ? `<div class="qr-central"><img src="${imagenes.qrBase64}" a
   <div class="grafica-columna">
     <div class="grafica-titulo">LOGOAUDIOMETRÍA</div>
     <div class="grafica-img">${graficaLogoaudiometriaHTML}</div>
+
+    
+  </div>
+    <div class="observaciones-container">
+    <div class="observaciones-titulo">OBSERVACIONES</div>
+    <div class="observaciones-texto">${datosAudiometria.observaciones || ''}</div>
   </div>
 </div>
       
@@ -786,15 +842,7 @@ ${imagenes.qrBase64 ? `<div class="qr-central"><img src="${imagenes.qrBase64}" a
 
       
   
-        <div class="diagnostico-columna">
-          <div class="diagnostico-titulo-sec">DIAGNÓSTICO LOGOAUDIOMETRÍA</div>
-          <div class="diagnostico-subtitulo">Oido Derecho.</div>
-          <div class="diagnostico-texto">${datosLogoaudiometria.diagnostico_od || ''}</div>
-          <div class="diagnostico-subtitulo">Oido Izquierdo</div>
-          <div class="diagnostico-texto">${datosLogoaudiometria.diagnostico_oi || ''}</div>
-        <!--  <div class="diagnostico-titulo-sec" style="margin-top:8px;">OBSERVACIONES</div> -->
-          <div class="diagnostico-texto">${datosLogoaudiometria.diagnostico || ''}</div>
-        </div>
+     
 
      
            ${tablaPTA}
