@@ -232,50 +232,14 @@ async function eliminarCita(id) {
     }
 }
 
-
-/*
-async function obtenerCitasConEstadoExamen() {
-    const result = await db.query(`
-        SELECT 
-            c.*,
-            p.nombre as paciente_nombre,
-            p.documento as paciente_documento,
-            p.telefono as paciente_telefono,
-            p.email as paciente_email,
-            p.fecha_nacimiento as paciente_fecha_nacimiento,
-            ent.nombre as entidad_nombre,
-            CASE 
-                WHEN e.id IS NOT NULL THEN true 
-                ELSE false 
-            END as tiene_examen,
-            e.id as examen_id,
-            e.tipo_examen as examen_tipo,
-            e.fecha_registro as examen_fecha
-        FROM citas c
-        JOIN pacientes p ON c.paciente_id = p.id
-        LEFT JOIN entidades ent ON c.entidad_id = ent.id
-        LEFT JOIN examenes_audiologicos e ON c.id = e.cita_id
-        ORDER BY c.fecha_cita DESC, c.hora_cita DESC
-    `);
-    
-    return result.rows;
-}
-
-*/
-
-// ============================================
-// OBTENER CITAS CON ESTADO DE EXAMEN (VERIFICA TODAS LAS TABLAS)
-// ============================================
-
-
-
-
+// REEMPLAZA la función obtenerCitasConEstadoExamen por esta:
 
 async function obtenerCitasConEstadoExamen() {
     console.log('\n🔍 [citas.js] obtenerCitasConEstadoExamen - Iniciando...');
 
     try {
-        const citasResult = await db.query(`
+        // ✅ UNA SOLA CONSULTA CON LEFT JOIN A examenes_audiologicos
+        const result = await db.query(`
             SELECT 
                 c.id,
                 c.paciente_id,
@@ -295,53 +259,18 @@ async function obtenerCitasConEstadoExamen() {
                 p.email as paciente_email,
                 p.fecha_nacimiento as paciente_fecha_nacimiento,
                 e.nombre as entidad_nombre,
-                e.id as entidad_id
+                e.id as entidad_id,
+                CASE WHEN ex.id IS NOT NULL THEN true ELSE false END as tiene_examen
             FROM citas c
             JOIN pacientes p ON c.paciente_id = p.id
             LEFT JOIN entidades e ON c.entidad_id = e.id
             LEFT JOIN tipos_atencion t ON c.tipo_atencion_id = t.id
+            LEFT JOIN examenes_audiologicos ex ON c.id = ex.cita_id
             ORDER BY c.fecha_cita DESC, c.hora_cita DESC
         `);
 
-        const citas = citasResult.rows;
-        console.log(`📊 Total citas encontradas: ${citas.length}`);
-
-        for (let cita of citas) {
-            let tieneExamen = false;
-
-            const unifiedResult = await db.query(
-                `SELECT id FROM examenes_audiologicos WHERE cita_id = $1`,
-                [cita.id]
-            );
-            if (unifiedResult.rows.length > 0) {
-                tieneExamen = true;
-            }
-
-            if (!tieneExamen) {
-                const audioResult = await db.query(
-                    `SELECT id FROM audiometrias WHERE cita_id = $1 LIMIT 1`,
-                    [cita.id]
-                );
-                if (audioResult.rows.length > 0) {
-                    tieneExamen = true;
-                }
-            }
-
-            if (!tieneExamen) {
-                const logoResult = await db.query(
-                    `SELECT id FROM logoaudiometrias WHERE cita_id = $1 LIMIT 1`,
-                    [cita.id]
-                );
-                if (logoResult.rows.length > 0) {
-                    tieneExamen = true;
-                }
-            }
-
-            cita.tiene_examen = tieneExamen;
-        }
-
-        console.log(`✅ Finalizado. ${citas.filter(c => c.tiene_examen).length} citas con examen`);
-        return citas;
+        console.log(`✅ Finalizado. ${result.rows.filter(c => c.tiene_examen).length} citas con examen`);
+        return result.rows;
 
     } catch (error) {
         console.error('❌ Error en obtenerCitasConEstadoExamen:', error);
@@ -350,85 +279,7 @@ async function obtenerCitasConEstadoExamen() {
 }
 
 
-/*
-async function obtenerCitaConExamen(citaId) {
-    console.log('🔍 Buscando cita con exámenes para ID:', citaId);
-    
-    // Primero obtener los datos de la cita y paciente
-    const resultCita = await db.query(`
-        SELECT 
-            c.*,
-            p.nombre as paciente_nombre,
-            p.documento as paciente_documento,
-            p.telefono as paciente_telefono,
-            p.email as paciente_email,
-            p.fecha_nacimiento as paciente_fecha_nacimiento,
-            ent.nombre as entidad_nombre
-        FROM citas c
-        JOIN pacientes p ON c.paciente_id = p.id
-        LEFT JOIN entidades ent ON c.entidad_id = ent.id
-        WHERE c.id = $1
-    `, [citaId]);
-    
-    const cita = resultCita.rows[0] || null;
-    
-    if (!cita) {
-        return null;
-    }
-    
-    // Obtener TODOS los exámenes asociados a la cita
-    const resultExamenes = await db.query(`
-        SELECT 
-            id,
-            tipo_examen,
-            diagnostico_od,
-            diagnostico_oi,
-            observaciones,
-            otoscopia,
-            grafica_base64,
-            valores_od,
-            valores_oi,
-            diagnostico,
-            urv_od,
-            urv_oi,
-            upalabra_od,
-            upalabra_oi,
-            udisc_od,
-            udisc_oi,
-            pmax_od,
-            pmax_oi,
-            pta_via_aerea_od,
-            pta_via_osea_od,
-            pta_via_aerea_oi,
-            pta_via_osea_oi,
-            fecha_registro
-        FROM examenes_audiologicos
-        WHERE cita_id = $1
-        ORDER BY tipo_examen, fecha_registro DESC
-    `, [citaId]);
-    
-    // Agrupar exámenes por tipo
-    const examenes = {
-        audiometria: null,
-        logoaudiometria: null
-    };
-    
-    for (const examen of resultExamenes.rows) {
-        if (examen.tipo_examen === 'audiometria' && !examenes.audiometria) {
-            examenes.audiometria = examen;
-        } else if (examen.tipo_examen === 'logoaudiometria' && !examenes.logoaudiometria) {
-            examenes.logoaudiometria = examen;
-        }
-    }
-    // Devolver la cita con todos los exámenes
-    return {
-        ...cita,
-        examenes: examenes,
-        // Mantener compatibilidad con código existente
-        examen_data: examenes.audiometria || examenes.logoaudiometria || null
-    };
-}
-*/
+// REEMPLAZA la función obtenerCitaConExamen por esta:
 
 async function obtenerCitaConExamen(citaId) {
     console.log(`\n🔍 [citas.js] obtenerCitaConExamen - Cita ID: ${citaId}`);
@@ -464,86 +315,31 @@ async function obtenerCitaConExamen(citaId) {
         const cita = citaResult.rows[0];
         console.log(`✅ Cita encontrada: ${cita.paciente_nombre}`);
 
-        // 2. BUSCAR TODOS LOS EXÁMENES
-        const examenes = {
+        // 2. BUSCAR EN LA TABLA UNIFICADA (SOLO UNA)
+        const examenesUnificados = require('./examenes_unificados');
+        const examen = await examenesUnificados.obtenerExamenPorCitaId(citaId);
+
+        // 3. Asignar exámenes a la cita
+        cita.examenes = {
             audiometria: null,
             logoaudiometria: null
         };
 
-        // 🔥 PASO 1: Buscar en examenes_audiologicos
-        const unifiedResult = await db.query(`
-            SELECT * FROM examenes_audiologicos 
-            WHERE cita_id = $1 
-            ORDER BY fecha_registro DESC
-        `, [citaId]);
-
-        console.log(`📊 Encontrados ${unifiedResult.rows.length} exámenes en examenes_audiologicos`);
-
-
-
-for (const examen of unifiedResult.rows) {
-    // ✅ Detectar por presencia de datos REALES (ni null ni '' cuentan como dato)
-    const tieneValor = (v) => v !== null && v !== undefined && v !== '';
-
-    const tieneAudiometria =
-        tieneValor(examen.pta_via_aerea_od) || tieneValor(examen.pta_via_aerea_oi) ||
-        tieneValor(examen.pta_via_osea_od)  || tieneValor(examen.pta_via_osea_oi)  ||
-        tieneValor(examen.diagnostico_od)   || tieneValor(examen.diagnostico_oi);
-
-    const tieneLogoaudiometria =
-        tieneValor(examen.urv_od)      || tieneValor(examen.urv_oi)      ||
-        tieneValor(examen.upalabra_od) || tieneValor(examen.upalabra_oi) ||
-        tieneValor(examen.udisc_od)    || tieneValor(examen.udisc_oi)    ||
-        tieneValor(examen.pmax_od)     || tieneValor(examen.pmax_oi)     ||
-        tieneValor(examen.diagnostico);
-
-    if (tieneAudiometria && !examenes.audiometria) {
-        examenes.audiometria = examen;
-        console.log(`   ✅ Audiometría encontrada (por datos) en registro ${examen.id}`);
+   if (examen) {
+    // ✅ Usar los flags de tipos_atencion (fuente de verdad clínica),
+    //    no el texto libre de tipo_examen
+    if (cita.requiere_audiometria) {
+        cita.examenes.audiometria = examen;
     }
-    if (tieneLogoaudiometria && !examenes.logoaudiometria) {
-        examenes.logoaudiometria = examen;
-        console.log(`   ✅ Logoaudiometría encontrada (por datos) en registro ${examen.id}`);
+    if (cita.requiere_logoaudiometria) {
+        cita.examenes.logoaudiometria = examen;
     }
-}
-
-        // 🔥 PASO 2: Si no se encontró Audiometría, buscar en audiometrias
-        if (!examenes.audiometria) {
-            const audioResult = await db.query(`
-                SELECT * FROM audiometrias 
-                WHERE cita_id = $1 
-                ORDER BY fecha_registro DESC 
-                LIMIT 1
-            `, [citaId]);
-            
-            if (audioResult.rows.length > 0) {
-                examenes.audiometria = audioResult.rows[0];
-                console.log(`   ✅ Audiometría encontrada en tabla audiometrias (ID: ${examenes.audiometria.id})`);
-            }
+    cita.tiene_examen = true;
+} else {
+            cita.tiene_examen = false;
         }
 
-        // 🔥 PASO 3: Si no se encontró Logoaudiometría, buscar en logoaudiometrias
-        if (!examenes.logoaudiometria) {
-            const logoResult = await db.query(`
-                SELECT * FROM logoaudiometrias 
-                WHERE cita_id = $1 
-                ORDER BY fecha_registro DESC 
-                LIMIT 1
-            `, [citaId]);
-            
-            if (logoResult.rows.length > 0) {
-                examenes.logoaudiometria = logoResult.rows[0];
-                console.log(`   ✅ Logoaudiometría encontrada en tabla logoaudiometrias (ID: ${examenes.logoaudiometria.id})`);
-            }
-        }
-
-        // 3. Asignar exámenes a la cita
-        cita.examenes = examenes;
-        cita.tiene_examen = !!(examenes.audiometria || examenes.logoaudiometria);
-
-        console.log(`📊 Resumen FINAL: Audiometría=${!!examenes.audiometria}, Logoaudiometría=${!!examenes.logoaudiometria}`);
-        console.log(`✅ [citas.js] Finalizado.`);
-        
+        console.log(`📊 Resumen FINAL: Audiometría=${!!cita.examenes.audiometria}, Logoaudiometría=${!!cita.examenes.logoaudiometria}`);
         return cita;
 
     } catch (error) {

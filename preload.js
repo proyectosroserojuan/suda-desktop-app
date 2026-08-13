@@ -63,7 +63,7 @@ actualizarPaciente: (id, data) => ipcRenderer.invoke('actualizar-paciente', id, 
 eliminarPaciente: (id) => ipcRenderer.invoke('eliminar-paciente', id),
 obtenerPacientePorId: (id) => ipcRenderer.invoke('obtener-paciente-por-id', id),
 
-    guardarLogoaudiometria: (data) => ipcRenderer.invoke('guardar-logoaudiometria', data),
+
   obtenerLogoaudiometrias: () => ipcRenderer.invoke('obtener-logoaudiometrias'),
   obtenerLogoaudiometriaPorId: (id) => ipcRenderer.invoke('obtener-logoaudiometria-por-id', id),
   
@@ -74,9 +74,7 @@ generarPDFCombinado: (datosAudiometria, datosLogoaudiometria, entidad) => ipcRen
 // Agregar junto a los otros métodos
 generarPDFCombinadoCoosalud: (datosAudiometria, datosLogoaudiometria, entidad) => ipcRenderer.invoke('generar-pdf-combinado-coosalud', datosAudiometria, datosLogoaudiometria, entidad),
   guardarExamen: (data) => ipcRenderer.invoke('guardar-examen', data),
-  // Audiometrías
-  guardarAudiometria: (data) => ipcRenderer.invoke('guardar-audiometria', data),
-  obtenerAudiometrias: () => ipcRenderer.invoke('obtener-audiometrias'),
+
   // Agregar junto a los otros métodos de citas
 obtenerTodasLasCitas: () => ipcRenderer.invoke('obtener-todas-las-citas'),
 // Agregar al objeto api

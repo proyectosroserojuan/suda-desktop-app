@@ -1261,7 +1261,7 @@ if (imagenes.selloBase64) {
             </div>
             
             <div class="grafica-container">
-                <img src="${datos.grafica_logo_base64 || ''}" alt="Audiometría Tonal">
+                <img src="${datos.grafica_tonal_base64 || ''}" alt="Audiometría Tonal">
             </div>
             
             <div class="two-columns">

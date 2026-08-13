@@ -1,3 +1,5 @@
+
+/*
 const db = require('./connection');
 
 async function guardarAudiometria(data) {
@@ -143,3 +145,4 @@ async function obtenerAudiometriaPorId(id) {
 }
 
 module.exports = { guardarAudiometria, obtenerAudiometrias, obtenerAudiometriaPorId, obtenerAudiometriaPorCitaId   };
+*/

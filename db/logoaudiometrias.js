@@ -1,3 +1,5 @@
+
+/*
 const pool = require('./connection');
 
 async function guardarLogoaudiometria(data) {
@@ -110,3 +112,5 @@ module.exports = {
     obtenerLogoaudiometriaPorId,
      obtenerLogoaudiometriaPorCitaId 
 };
+
+*/

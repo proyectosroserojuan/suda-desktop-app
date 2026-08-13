@@ -208,57 +208,66 @@ class PDFRegeneratorService {
                tieneDiagnostico || tieneGraficaLogo;
     }
 
-    /**
-     * ✅ PREPARAR DATOS PARA EL PDF
-     */
-    prepararDatosParaPDF(cita, examenData, tipo = 'audiometria') {
-        let valoresOD = examenData?.valores_od || {};
-        let valoresOI = examenData?.valores_oi || {};
-        
-        if (typeof valoresOD === 'string') {
-            try { valoresOD = JSON.parse(valoresOD); } catch(e) { valoresOD = {}; }
-        }
-        if (typeof valoresOI === 'string') {
-            try { valoresOI = JSON.parse(valoresOI); } catch(e) { valoresOI = {}; }
-        }
-        
-        const parseNumber = (val) => {
-            if (val === null || val === undefined || val === '') return null;
-            const num = Number(val);
-            return isNaN(num) ? null : num;
-        };
+// En services/pdfRegeneratorService.js - modificar prepararDatosParaPDF
 
-        return {
-            paciente: {
-                nombre: cita.paciente_nombre || '',
-                documento: cita.documento || ''
-            },
-            valores_od: valoresOD,
-            valores_oi: valoresOI,
-            diagnostico_od: examenData?.diagnostico_od || '',
-            diagnostico_oi: examenData?.diagnostico_oi || '',
-            observaciones: examenData?.observaciones || '',
-            otoscopia: examenData?.otoscopia || '',
-            grafica_tonal_base64: examenData?.grafica_tonal_base64 || '',
-            grafica_logo_base64: examenData?.grafica_logo_base64 || '',
-            pta: {
-                od_air: parseNumber(examenData?.pta_via_aerea_od),
-                od_bone: parseNumber(examenData?.pta_via_osea_od),
-                oi_air: parseNumber(examenData?.pta_via_aerea_oi),
-                oi_bone: parseNumber(examenData?.pta_via_osea_oi)
-            },
-            diagnostico: examenData?.diagnostico || '',
-            urv_od: parseNumber(examenData?.urv_od),
-            urv_oi: parseNumber(examenData?.urv_oi),
-            upalabra_od: parseNumber(examenData?.upalabra_od),
-            upalabra_oi: parseNumber(examenData?.upalabra_oi),
-            udisc_od: parseNumber(examenData?.udisc_od),
-            udisc_oi: parseNumber(examenData?.udisc_oi),
-            pmax_od: parseNumber(examenData?.pmax_od),
-            pmax_oi: parseNumber(examenData?.pmax_oi),
-            freqs: ['250', '500', '1000', '2000', '3000', '4000', '6000', '8000']
-        };
+prepararDatosParaPDF(cita, examenData, tipo = 'audiometria') {
+    let valoresOD = examenData?.valores_od || {};
+    let valoresOI = examenData?.valores_oi || {};
+    
+    if (typeof valoresOD === 'string') {
+        try { valoresOD = JSON.parse(valoresOD); } catch(e) { valoresOD = {}; }
     }
+    if (typeof valoresOI === 'string') {
+        try { valoresOI = JSON.parse(valoresOI); } catch(e) { valoresOI = {}; }
+    }
+    
+    const parseNumber = (val) => {
+        if (val === null || val === undefined || val === '') return null;
+        const num = Number(val);
+        return isNaN(num) ? null : num;
+    };
+
+    // 🔥 LOG PARA VERIFICAR QUÉ CAMPOS TIENE examenData
+    console.log('📊 examenData en prepararDatosParaPDF:', {
+        tiene_grafica_tonal: !!examenData?.grafica_tonal_base64,
+        tiene_grafica_logo: !!examenData?.grafica_logo_base64,
+        tiene_grafica_base64: !!examenData?.grafica_base64,
+        tipo: tipo,
+        campos: Object.keys(examenData || {})
+    });
+
+    return {
+        paciente: {
+            nombre: cita.paciente_nombre || '',
+            documento: cita.documento || ''
+        },
+        valores_od: valoresOD,
+        valores_oi: valoresOI,
+        diagnostico_od: examenData?.diagnostico_od || '',
+        diagnostico_oi: examenData?.diagnostico_oi || '',
+        observaciones: examenData?.observaciones || '',
+        otoscopia: examenData?.otoscopia || '',
+        // 🔥 CAMBIAR: Usar grafica_tonal_base64 si existe, si no grafica_base64
+        grafica_tonal_base64: examenData?.grafica_tonal_base64 || examenData?.grafica_base64 || '',
+        grafica_logo_base64: examenData?.grafica_logo_base64 || '',
+        pta: {
+            od_air: parseNumber(examenData?.pta_via_aerea_od),
+            od_bone: parseNumber(examenData?.pta_via_osea_od),
+            oi_air: parseNumber(examenData?.pta_via_aerea_oi),
+            oi_bone: parseNumber(examenData?.pta_via_osea_oi)
+        },
+        diagnostico: examenData?.diagnostico || '',
+        urv_od: parseNumber(examenData?.urv_od),
+        urv_oi: parseNumber(examenData?.urv_oi),
+        upalabra_od: parseNumber(examenData?.upalabra_od),
+        upalabra_oi: parseNumber(examenData?.upalabra_oi),
+        udisc_od: parseNumber(examenData?.udisc_od),
+        udisc_oi: parseNumber(examenData?.udisc_oi),
+        pmax_od: parseNumber(examenData?.pmax_od),
+        pmax_oi: parseNumber(examenData?.pmax_oi),
+        freqs: ['250', '500', '1000', '2000', '3000', '4000', '6000', '8000']
+    };
+}
 
     /**
      * MOSTRAR PDF EN VENTANA

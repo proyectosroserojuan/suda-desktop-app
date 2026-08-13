@@ -398,7 +398,15 @@ const tablaPTA = `
                </div>
 
 
-               
+                       <div class="diagnostico-columna">
+          <div class="diagnostico-titulo-sec">DIAGNÓSTICO LOGOAUDIOMETRÍA</div>
+          <div class="diagnostico-subtitulo">Oido Derecho.</div>
+          <div class="diagnostico-texto">${datosLogoaudiometria.diagnostico_od || ''}</div>
+          <div class="diagnostico-subtitulo">Oido Izquierdo</div>
+          <div class="diagnostico-texto">${datosLogoaudiometria.diagnostico_oi || ''}</div>
+        <!--  <div class="diagnostico-titulo-sec" style="margin-top:8px;">OBSERVACIONES</div> -->
+          <div class="diagnostico-texto">${datosLogoaudiometria.diagnostico || ''}</div>
+        </div>
 </div>`;
 
   /* Tabla de AUDIOMETRÍA (compacta)

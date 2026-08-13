@@ -1,4 +1,6 @@
-const pool = require('./connection');
+
+
+/*const pool = require('./connection');
 
 async function migrarTablaUnificada() {
     const client = await pool.connect();
@@ -125,3 +127,5 @@ migrarTablaUnificada().then(() => {
     console.error(err);
     process.exit(1);
 });
+
+*/

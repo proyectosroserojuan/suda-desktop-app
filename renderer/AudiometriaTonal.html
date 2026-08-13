@@ -1728,24 +1728,22 @@ function drawDirectionalLine(prev, curr, color) {
     drawCtx.restore();
 }
 
-// Esta es la función principal que se ejecuta al hacer clic
+// En AudiometriaTonal.html - REEMPLAZA onGrabarAudiometriaClick
+
 async function onGrabarAudiometriaClick() {
     console.log('=== BOTÓN CLICKEADO ===');
     
     try {
         mostrarLoadingAudiometria(true);
         
-        // 1. Obtener valores del formulario
         const valores = obtenerValoresAudiometria();
         console.log('Valores obtenidos:', valores);
         
-        // 2. Verificar que haya al menos un valor
         const tieneValores = Object.values(valores.od).some(v => v !== '') || Object.values(valores.oi).some(v => v !== '');
         if (!tieneValores) {
             throw new Error('No hay datos para guardar. Complete al menos un valor');
         }
         
-        // 3. Obtener datos del paciente y cita
         const pacienteData = localStorage.getItem('pacienteActual');
         const citaData = localStorage.getItem('citaActual');
         
@@ -1767,15 +1765,13 @@ async function onGrabarAudiometriaClick() {
             throw new Error('No hay cita seleccionada');
         }
         
-        // 4. Obtener diagnósticos
         const diagnostico_od = document.getElementById('diagnostico_od')?.value || '';
         const diagnostico_oi = document.getElementById('diagnostico_oi')?.value || '';
         const observaciones = document.getElementById('observaciones_audiometria')?.value || '';
-        const otoscopia = document.getElementById('otoscopia_audiometria')?.value || '';  // ← AGREGAR ESTA LÍNEA
+        const otoscopia = document.getElementById('otoscopia_audiometria')?.value || '';
         
         console.log('Diagnósticos:', { diagnostico_od, diagnostico_oi, observaciones });
         
-        // 5. Capturar gráfica
         let imagenBase64 = '';
         try {
             const canvasImg = await capturarGraficaAudiometria();
@@ -1785,37 +1781,48 @@ async function onGrabarAudiometriaClick() {
             console.warn('Error capturando gráfica:', err);
         }
         
-        // 6. Preparar datos para guardar
+        // ✅ DATOS PARA guardarExamen
         const data = {
+            tipo_examen: 'audiometria',  // ← NUEVO
             paciente_id: parseInt(pacienteId),
             cita_id: parseInt(citaId),
             entidad_id: cita?.entidad_id || null,
             diagnostico_od: diagnostico_od,
             diagnostico_oi: diagnostico_oi,
             observaciones: observaciones,
-            otoscopia: otoscopia,  // ← AGREGAR ESTA LÍNEA
+            otoscopia: otoscopia,
             valores_od: valores.od,
             valores_oi: valores.oi,
             grafica_tonal_base64: imagenBase64,
+            grafica_logo_base64: null,
             pta_via_aerea_od: ultimosPTA.od_air,
             pta_via_osea_od: ultimosPTA.od_bone,
             pta_via_aerea_oi: ultimosPTA.oi_air,
-            pta_via_osea_oi: ultimosPTA.oi_bone
+            pta_via_osea_oi: ultimosPTA.oi_bone,
+            // Campos de logoaudiometría como null
+            diagnostico: null,
+            urv_od: null,
+            urv_oi: null,
+            upalabra_od: null,
+            upalabra_oi: null,
+            udisc_od: null,
+            udisc_oi: null,
+            pmax_od: null,
+            pmax_oi: null
         };
         
         console.log('Enviando a guardar:', data);
         
-        // 7. Verificar que window.api existe
         if (!window.api) {
             throw new Error('API no disponible. Reinicie la aplicación.');
         }
         
-        // 8. GUARDAR EN BASE DE DATOS
-        if (!window.api.guardarAudiometria) {
-            throw new Error('Función guardarAudiometria no disponible');
+        // ✅ USAR guardarExamen
+        if (!window.api.guardarExamen) {
+            throw new Error('Función guardarExamen no disponible');
         }
         
-        const result = await window.api.guardarAudiometria(data);
+        const result = await window.api.guardarExamen(data);
         
         if (!result || !result.ok) {
             throw new Error(result?.error || 'Error al guardar');
@@ -1824,7 +1831,7 @@ async function onGrabarAudiometriaClick() {
         console.log('✅ Guardado exitoso en BD, ID:', result.id);
         mostrarNotificacionAudiometria('✅ Audiometría guardada exitosamente');
         
-        // 9. GENERAR PDF - Usar el manejador específico para audiometría
+        // GENERAR PDF (igual que antes)
         try {
             const entidadNombre = cita?.entidad_nombre || 'PARTICULAR';
             const datosPDF = {
@@ -1841,18 +1848,16 @@ async function onGrabarAudiometriaClick() {
                 diagnostico_od: diagnostico_od,
                 diagnostico_oi: diagnostico_oi,
                 observaciones: observaciones,
-                    otoscopia: otoscopia,
+                otoscopia: otoscopia,
                 grafica_tonal_base64: imagenBase64,
-                   pta: {
-        od_air: ultimosPTA.od_air,
-        oi_air: ultimosPTA.oi_air,
-        od_bone: ultimosPTA.od_bone,
-        oi_bone: ultimosPTA.oi_bone
-    }
+                pta: {
+                    od_air: ultimosPTA.od_air,
+                    oi_air: ultimosPTA.oi_air,
+                    od_bone: ultimosPTA.od_bone,
+                    oi_bone: ultimosPTA.oi_bone
+                }
             };
             
-            // 🔥 IMPORTANTE: Usar el manejador EXCLUSIVO para audiometría
-            // Si tienes window.api.generarPDFAudiometria (recomendado)
             if (window.api.generarPDFAudiometria) {
                 const pdfResult = await window.api.generarPDFAudiometria(datosPDF, entidadNombre);
                 if (pdfResult && pdfResult.ok) {
@@ -1860,17 +1865,14 @@ async function onGrabarAudiometriaClick() {
                 } else {
                     throw new Error(pdfResult?.error || 'Error al generar PDF');
                 }
-            } 
-            // Fallback: usar el manejador genérico con tipo 'audiometria'
-            else if (window.api.generarPDF) {
+            } else if (window.api.generarPDF) {
                 const pdfResult = await window.api.generarPDF(datosPDF, entidadNombre, 'audiometria');
                 if (pdfResult && pdfResult.ok) {
                     mostrarNotificacionAudiometria(`✅ PDF generado: ${pdfResult.path}`);
                 } else {
                     throw new Error(pdfResult?.error || 'Error al generar PDF');
                 }
-            }
-            else {
+            } else {
                 throw new Error('No hay función disponible para generar PDF');
             }
             

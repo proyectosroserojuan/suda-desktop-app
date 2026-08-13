@@ -94,30 +94,51 @@ function obtenerDatosCita() {
     }
 }
 
-async function guardarEnBaseDeDatos(pacienteId, citaId, diagnostico, diagnostico_od, diagnostico_oi, otoscopia,valoresOD, valoresOI, imagenBase64) {
+// En logoaudiometria.html - REEMPLAZA guardarEnBaseDeDatos
+
+async function guardarEnBaseDeDatos(pacienteId, citaId, diagnostico, diagnostico_od, diagnostico_oi, otoscopia, valoresOD, valoresOI, imagenBase64) {
     console.log('guardarEnBaseDeDatos - Inicio');
     console.log('pacienteId:', pacienteId);
     console.log('citaId:', citaId);
     
     const data = {
+        tipo_examen: 'logoaudiometria',  // ← NUEVO
         paciente_id: pacienteId,
         cita_id: citaId,
+        entidad_id: null,
         diagnostico: diagnostico,
         diagnostico_od: diagnostico_od,
         diagnostico_oi: diagnostico_oi,
-        otoscopia: otoscopia,  // ← AGREGAR
+        otoscopia: otoscopia,
         valores_od: valoresOD,
         valores_oi: valoresOI,
-        grafica_logo_base64: imagenBase64
+        grafica_logo_base64: imagenBase64,
+        // Campos de audiometría como null
+        diagnostico_od: null,
+        diagnostico_oi: null,
+        observaciones: null,
+        grafica_tonal_base64: null,
+        pta_via_aerea_od: null,
+        pta_via_osea_od: null,
+        pta_via_aerea_oi: null,
+        pta_via_osea_oi: null,
+        urv_od: valoresOD?.urv || null,
+        urv_oi: valoresOI?.urv || null,
+        upalabra_od: valoresOD?.upalabra || null,
+        upalabra_oi: valoresOI?.upalabra || null,
+        udisc_od: valoresOD?.udisc || null,
+        udisc_oi: valoresOI?.udisc || null,
+        pmax_od: valoresOD?.pmax || null,
+        pmax_oi: valoresOI?.pmax || null
     };
     
     console.log('Datos a enviar a window.api:', JSON.stringify(data, null, 2));
     
-    if (!window.api || !window.api.guardarLogoaudiometria) {
-        throw new Error('window.api.guardarLogoaudiometria no está disponible');
+    if (!window.api || !window.api.guardarExamen) {
+        throw new Error('window.api.guardarExamen no está disponible');
     }
     
-    const result = await window.api.guardarLogoaudiometria(data);
+    const result = await window.api.guardarExamen(data);
     console.log('Resultado de window.api:', result);
     
     if (!result.ok) {

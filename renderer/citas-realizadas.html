@@ -660,222 +660,180 @@ function determinarTipoCertificado(tipoAtencion) {
 }
 // Función para generar PDF desde una cita realizada
 // Función para generar PDF desde una cita realizada
+// En citas-realizadas.html - REEMPLAZA generarPDFcita
+
 async function generarPDFcita(cita) {
-  try {
-    console.log('========== INICIO generarPDFcita ==========');
-    console.log('Cita ID:', cita.id);
-    console.log('Paciente:', cita.paciente_nombre);
-    console.log('Motivo:', cita.motivo);
-    
-    const buttons = document.querySelectorAll('.btn-pdf');
-    let targetBtn = null;
-    for (let btn of buttons) {
-      if (btn.textContent.includes('PDF') && btn.closest('tr')?.innerHTML.includes(cita.id)) {
-        targetBtn = btn;
-        break;
-      }
-    }
-    
-    if (targetBtn) {
-      targetBtn.textContent = '⏳...';
-      targetBtn.disabled = true;
-    }
-    
-    const tipoCertificado = determinarTipoCertificado(cita.tipo_atencion);
-    console.log('Tipo certificado:', tipoCertificado);
-    
-    // Buscar examen por cita_id
-    let examenData = null;
-    console.log('1. Llamando a obtenerExamenPorCitaId con ID:', cita.id);
-    
-    if (window.api && window.api.obtenerExamenPorCitaId) {
-      const result = await window.api.obtenerExamenPorCitaId(cita.id);
-      console.log('2. Resultado de la búsqueda:', result);
-      
-      if (result.ok && result.examen) {
-        examenData = result.examen;
-        console.log('3. ✅ Examen encontrado!');
-        console.log('3a. examenData completo:', JSON.stringify(examenData, null, 2));
-        console.log('3b. tipo_examen:', examenData.tipo_examen);
-        console.log('3c. grafica_base64 presente?', !!examenData.grafica_base64);
-        console.log('3d. longitud grafica_base64:', examenData.grafica_base64?.length || 0);
-        console.log('3e. valores_od:', examenData.valores_od);
-        console.log('3f. valores_oi:', examenData.valores_oi);
-        console.log('3g. urv_od:', examenData.urv_od);
-        console.log('3h. upalabra_od:', examenData.upalabra_od);
-      } else {
-        console.log('3. ❌ No se encontró examen. result.ok:', result.ok, 'examen:', result.examen);
-      }
-    } else {
-      console.log('2. ❌ window.api.obtenerExamenPorCitaId NO está disponible');
-    }
-    
-    // Preparar datos para el PDF
-    let datosParaPDF = null;
-    
-    if (examenData) {
-      console.log('4. Procesando examenData - tipo:', examenData.tipo_examen);
-      
-      if (examenData.tipo_examen === 'logoaudiometria') {
-        console.log('4a. Procesando como LOGOAUDIOMETRIA');
+    try {
+        console.log('========== INICIO generarPDFcita ==========');
+        console.log('Cita ID:', cita.id);
+        console.log('Paciente:', cita.paciente_nombre);
         
-        let valoresOD = {};
-        let valoresOI = {};
+        const buttons = document.querySelectorAll('.btn-pdf');
+        let targetBtn = null;
+        for (let btn of buttons) {
+            if (btn.closest('tr')?.innerHTML.includes(cita.id)) {
+                targetBtn = btn;
+                break;
+            }
+        }
         
-        // Verificar dónde están los valores
-        if (examenData.urv_od !== undefined) {
-          console.log('4b. Valores encontrados en campos separados (urv_od, etc.)');
-          valoresOD = {
-            urv: examenData.urv_od || '',
-            upalabra: examenData.upalabra_od || '',
-            udisc: examenData.udisc_od || '',
-            pmax: examenData.pmax_od || ''
-          };
-          valoresOI = {
-            urv: examenData.urv_oi || '',
-            upalabra: examenData.upalabra_oi || '',
-            udisc: examenData.udisc_oi || '',
-            pmax: examenData.pmax_oi || ''
-          };
-        } else if (examenData.valores_od) {
-          console.log('4c. Valores encontrados en JSON (valores_od)');
-          valoresOD = typeof examenData.valores_od === 'string' 
-            ? JSON.parse(examenData.valores_od) 
-            : examenData.valores_od;
-          valoresOI = typeof examenData.valores_oi === 'string' 
-            ? JSON.parse(examenData.valores_oi) 
-            : examenData.valores_oi;
+        if (targetBtn) {
+            targetBtn.textContent = '⏳...';
+            targetBtn.disabled = true;
+        }
+        
+        const tipoCertificado = determinarTipoCertificado(cita.tipo_atencion_nombre || cita.tipo_atencion);
+        console.log('Tipo certificado:', tipoCertificado);
+        
+        // ✅ BUSCAR EXAMEN EN TABLA UNIFICADA
+        let examenData = null;
+        if (window.api && window.api.obtenerExamenPorCitaId) {
+            const result = await window.api.obtenerExamenPorCitaId(cita.id);
+            console.log('Resultado de la búsqueda:', result);
+            
+            if (result.ok && result.examen) {
+                examenData = result.examen;
+                console.log('✅ Examen encontrado, tipo:', examenData.tipo_examen);
+            } else {
+                console.log('❌ No se encontró examen');
+            }
+        }
+        
+        // Preparar datos para el PDF
+        let datosParaPDF = null;
+        
+        if (examenData) {
+            console.log('Procesando examenData - tipo:', examenData.tipo_examen);
+            
+            if (examenData.tipo_examen === 'logoaudiometria' || examenData.tipo_examen === 'combinado') {
+                // Logoaudiometría o Combinado (tomar datos de logoaudiometría)
+                let valoresOD = {};
+                let valoresOI = {};
+                
+                if (examenData.urv_od !== undefined && examenData.urv_od !== null) {
+                    valoresOD = {
+                        urv: examenData.urv_od || '',
+                        upalabra: examenData.upalabra_od || '',
+                        udisc: examenData.udisc_od || '',
+                        pmax: examenData.pmax_od || ''
+                    };
+                    valoresOI = {
+                        urv: examenData.urv_oi || '',
+                        upalabra: examenData.upalabra_oi || '',
+                        udisc: examenData.udisc_oi || '',
+                        pmax: examenData.pmax_oi || ''
+                    };
+                } else if (examenData.valores_od) {
+                    valoresOD = typeof examenData.valores_od === 'string' 
+                        ? JSON.parse(examenData.valores_od) 
+                        : examenData.valores_od;
+                    valoresOI = typeof examenData.valores_oi === 'string' 
+                        ? JSON.parse(examenData.valores_oi) 
+                        : examenData.valores_oi;
+                }
+                
+                datosParaPDF = {
+                    paciente: {
+                        nombre: cita.paciente_nombre || '',
+                        documento: cita.documento || ''
+                    },
+                    fecha_cita: cita.fecha_cita || new Date().toISOString().split('T')[0],
+                    valores_od: valoresOD,
+                    valores_oi: valoresOI,
+                    grafica_logo_base64: examenData.grafica_logo_base64 || examenData.grafica_base64 || '',
+                    diagnostico: examenData.diagnostico || '',
+                    diagnostico_od: examenData.diagnostico_od || '',
+                    diagnostico_oi: examenData.diagnostico_oi || ''
+                };
+                
+            } else {
+                // Audiometría (o cualquier otro tipo)
+                let valoresOD = {};
+                let valoresOI = {};
+                
+                try {
+                    if (examenData.valores_od) {
+                        valoresOD = typeof examenData.valores_od === 'string' 
+                            ? JSON.parse(examenData.valores_od) 
+                            : examenData.valores_od;
+                    }
+                    if (examenData.valores_oi) {
+                        valoresOI = typeof examenData.valores_oi === 'string' 
+                            ? JSON.parse(examenData.valores_oi) 
+                            : examenData.valores_oi;
+                    }
+                } catch(e) {
+                    console.warn('Error parseando valores:', e);
+                }
+                
+                datosParaPDF = {
+                    paciente: {
+                        nombre: cita.paciente_nombre || '',
+                        documento: cita.documento || ''
+                    },
+                    fecha_cita: cita.fecha_cita || new Date().toISOString().split('T')[0],
+                    valores_od: valoresOD,
+                    valores_oi: valoresOI,
+                    grafica_tonal_base64: examenData.grafica_tonal_base64 || examenData.grafica_base64 || '',
+                    diagnostico_od: examenData.diagnostico_od || '',
+                    diagnostico_oi: examenData.diagnostico_oi || '',
+                    observaciones: examenData.observaciones || '',
+                    otoscopia: examenData.otoscopia || '',
+                    pta: {
+                        od_air: examenData.pta_via_aerea_od || null,
+                        od_bone: examenData.pta_via_osea_od || null,
+                        oi_air: examenData.pta_via_aerea_oi || null,
+                        oi_bone: examenData.pta_via_osea_oi || null
+                    }
+                };
+            }
         } else {
-          console.log('4d. ⚠️ No se encontraron valores en ninguna estructura');
+            // Sin examen - datos mínimos
+            datosParaPDF = {
+                paciente: {
+                    nombre: cita.paciente_nombre || '',
+                    documento: cita.documento || ''
+                },
+                fecha_cita: cita.fecha_cita || new Date().toISOString().split('T')[0],
+                valores_od: {},
+                valores_oi: {},
+                grafica_tonal_base64: '',
+                grafica_logo_base64: '',
+                diagnostico: '',
+                diagnostico_od: '',
+                diagnostico_oi: ''
+            };
         }
         
-        console.log('4e. valoresOD final:', valoresOD);
-        console.log('4f. valoresOI final:', valoresOI);
+        console.log('Llamando a window.api.generarYMostrarPDF...');
         
-        datosParaPDF = {
-          paciente: {
-            nombre: cita.paciente_nombre,
-            documento: cita.documento
-          },
-          fecha_cita: cita.fecha_cita,
-          valores_od: valoresOD,
-          valores_oi: valoresOI,
-          grafica_base64: examenData.grafica_base64 || '',
-          diagnostico: examenData.diagnostico || '',
-          diagnostico_od: examenData.diagnostico_od || '',
-          diagnostico_oi: examenData.diagnostico_oi || ''
-        };
+        const result = await window.api.generarYMostrarPDF(
+            datosParaPDF, 
+            cita.entidad_nombre || 'No especificada', 
+            tipoCertificado
+        );
         
-      } else if (examenData.tipo_examen === 'audiometria') {
-        console.log('4a. Procesando como AUDIOMETRIA');
-        
-        let valoresOD = {};
-        let valoresOI = {};
-        
-        if (examenData.valores_od) {
-          valoresOD = typeof examenData.valores_od === 'string' 
-            ? JSON.parse(examenData.valores_od) 
-            : examenData.valores_od;
-          valoresOI = typeof examenData.valores_oi === 'string' 
-            ? JSON.parse(examenData.valores_oi) 
-            : examenData.valores_oi;
+        if (!result.ok) {
+            mostrarMensaje('Error al generar PDF: ' + (result.error || 'Desconocido'), 'error');
         }
         
-        console.log('4b. valoresOD (frecuencias):', valoresOD);
+        if (targetBtn) {
+            targetBtn.textContent = '📄 PDF';
+            targetBtn.disabled = false;
+        }
         
-        datosParaPDF = {
-          paciente: {
-            nombre: cita.paciente_nombre,
-            documento: cita.documento
-          },
-          fecha_cita: cita.fecha_cita,
-          valores_od: valoresOD,
-          valores_oi: valoresOI,
-          grafica_base64: examenData.grafica_base64 || '',
-          diagnostico_od: examenData.diagnostico_od || '',
-          diagnostico_oi: examenData.diagnostico_oi || '',
-          observaciones: examenData.observaciones || ''
-        };
-      } else {
-        console.log('4a. ⚠️ Tipo de examen no reconocido:', examenData.tipo_examen);
-        datosParaPDF = {
-          paciente: {
-            nombre: cita.paciente_nombre,
-            documento: cita.documento
-          },
-          fecha_cita: cita.fecha_cita,
-          valores_od: {},
-          valores_oi: {},
-          grafica_base64: '',
-          diagnostico: '',
-          diagnostico_od: '',
-          diagnostico_oi: ''
-        };
-      }
-    } else {
-      console.log('4. ❌ examenData es NULL, usando datos mínimos');
-      datosParaPDF = {
-        paciente: {
-          nombre: cita.paciente_nombre,
-          documento: cita.documento
-        },
-        fecha_cita: cita.fecha_cita,
-        valores_od: {},
-        valores_oi: {},
-        grafica_base64: '',
-        diagnostico: '',
-        diagnostico_od: '',
-        diagnostico_oi: ''
-      };
+    } catch (error) {
+        console.error('❌ ERROR en generarPDFcita:', error);
+        mostrarMensaje('Error al generar el certificado PDF: ' + error.message, 'error');
+        
+        const buttons = document.querySelectorAll('.btn-pdf');
+        for (let btn of buttons) {
+            if (btn.textContent.includes('...')) {
+                btn.textContent = '📄 PDF';
+                btn.disabled = false;
+            }
+        }
     }
-    
-    console.log('5. Datos finales para PDF:');
-    console.log('5a. paciente:', datosParaPDF.paciente);
-    console.log('5b. valores_od:', datosParaPDF.valores_od);
-    console.log('5c. valores_oi:', datosParaPDF.valores_oi);
-    console.log('5d. grafica_base64 existe?', !!datosParaPDF.grafica_base64);
-    console.log('5e. longitud grafica_base64:', datosParaPDF.grafica_base64?.length || 0);
-    console.log('5f. diagnostico_od:', datosParaPDF.diagnostico_od);
-    console.log('5g. diagnostico_oi:', datosParaPDF.diagnostico_oi);
-    
-    console.log('6. Llamando a window.api.generarYMostrarPDF...');
-    
-    // Generar y mostrar PDF
-    const result = await window.api.generarYMostrarPDF(
-      datosParaPDF, 
-      cita.entidad_nombre || 'No especificada', 
-      tipoCertificado
-    );
-    
-    console.log('7. Respuesta de generarYMostrarPDF:', result);
-    
-    if (!result.ok) {
-      console.log('8. Error en respuesta:', result.error);
-      mostrarMensaje('Error al generar PDF: ' + (result.error || 'Desconocido'), 'error');
-    } else {
-      console.log('8. ✅ PDF generado correctamente');
-    }
-    
-    if (targetBtn) {
-      targetBtn.textContent = '📄 PDF';
-      targetBtn.disabled = false;
-    }
-    
-    console.log('========== FIN generarPDFcita ==========');
-    
-  } catch (error) {
-    console.error('❌ ERROR en generarPDFcita:', error);
-    console.error('Stack trace:', error.stack);
-    mostrarMensaje('Error al generar el certificado PDF: ' + error.message, 'error');
-    
-    const buttons = document.querySelectorAll('.btn-pdf');
-    for (let btn of buttons) {
-      if (btn.textContent.includes('...')) {
-        btn.textContent = '📄 PDF';
-        btn.disabled = false;
-      }
-    }
-  }
 }
 
 // Función para generar QR desde una cita realizada
