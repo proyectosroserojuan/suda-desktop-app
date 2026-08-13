@@ -1,4 +1,5 @@
-// services/pdfRegeneratorService.js
+// services/pdfRegeneratorService.js - REEMPLAZAR COMPLETAMENTE
+
 const { BrowserWindow } = require('electron');
 const path = require('path');
 const fs = require('fs');
@@ -20,78 +21,148 @@ class PDFRegeneratorService {
         }
     }
 
-// services/pdfRegeneratorService.js - MODIFICAR este método
-
-async regenerarPDF(cita, examenAudiometria, examenLogoaudiometria) {
-    console.log('\n========== REGENERANDO PDF DESDE BD ==========');
-    console.log('Cita ID:', cita.id);
-    console.log('Paciente:', cita.paciente_nombre);
-    console.log('Entidad:', cita.entidad_nombre);
-    console.log('Tiene Audiometría:', !!examenAudiometria);
-    console.log('Tiene Logoaudiometría:', !!examenLogoaudiometria);
-    
-    try {
-        if (!examenAudiometria && !examenLogoaudiometria) {
-            throw new Error('No hay datos de examen para generar el PDF');
-        }
-
-        const entidad = cita.entidad_nombre || 'UDA';
-        const esCoosalud = entidad.toLowerCase().includes('coosalud') || 
-                          entidad.toLowerCase().includes('progresando');
+    /**
+     * ✅ REGENERAR PDF - USA tipo_atencion_id para decidir
+     */
+    async regenerarPDF(cita, examenAudiometria, examenLogoaudiometria) {
+        console.log('\n========== REGENERANDO PDF DESDE BD ==========');
+        console.log('Cita ID:', cita.id);
+        console.log('Paciente:', cita.paciente_nombre);
+        console.log('Entidad:', cita.entidad_nombre);
+        console.log('Tipo Atención ID:', cita.tipo_atencion_id);
+        console.log('Tiene Audiometría:', !!examenAudiometria);
+        console.log('Tiene Logoaudiometría:', !!examenLogoaudiometria);
         
-        // ✅ PREPARAR DATOS
-        const datosAudiometria = examenAudiometria 
-            ? this.prepararDatosParaPDF(cita, examenAudiometria, 'audiometria')
-            : null;
+        try {
+            if (!examenAudiometria && !examenLogoaudiometria) {
+                throw new Error('No hay datos de examen para generar el PDF');
+            }
+
+            const entidad = cita.entidad_nombre || 'UDA';
+            const esCoosalud = entidad.toLowerCase().includes('coosalud') || 
+                              entidad.toLowerCase().includes('progresando');
             
-        const datosLogoaudiometria = examenLogoaudiometria 
-            ? this.prepararDatosParaPDF(cita, examenLogoaudiometria, 'logoaudiometria')
-            : null;
-        
-        let pdfPath = null;
-        
-        // ✅ GENERAR SEGÚN LO QUE TENGA
-        if (datosAudiometria && datosLogoaudiometria) {
-            console.log('📄 Generando PDF COMBINADO');
-            if (esCoosalud) {
-                pdfPath = await pdfGeneratorCoosaludUnified.generarPDFCombinadoCOO(
-                    datosAudiometria,
-                    datosLogoaudiometria,
-                    entidad
-                );
-            } else {
-                pdfPath = await pdfGeneratorUnified.generarPDFCombinado(
-                    datosAudiometria,
-                    datosLogoaudiometria,
-                    entidad
-                );
+            // ✅ DETERMINAR QUÉ TIPO DE PDF GENERAR SEGÚN tipo_atencion_id
+            const tipoId = cita.tipo_atencion_id;
+            
+            // Tipos combinados: 3 (Audiometria Tonal y Logoadiometria), 
+            // 4 (Cuadro Clinico Auditivo), 7 (Prepagada Audiometria Tonal y Logoadiometria)
+            const esCombinado = [3, 4, 7].includes(tipoId);
+            
+            // Tipos solo audiometría: 1 (Audiometría), 5 (Prepagada Audiometria Tonal)
+            const esSoloAudiometria = [1, 5].includes(tipoId);
+            
+            // Tipos solo logoaudiometría: 2 (Logoaudiometria), 6 (Prepagada Logoaudiometria)
+            const esSoloLogoaudiometria = [2, 6].includes(tipoId);
+            
+            console.log(`📋 Decisión por tipo_atencion_id (${tipoId}):`, {
+                esCombinado,
+                esSoloAudiometria,
+                esSoloLogoaudiometria
+            });
+            
+            let pdfPath = null;
+            
+            // ✅ CASO 1: COMBINADO (tipos 3, 4, 7)
+            if (esCombinado) {
+                console.log('📄 Generando PDF COMBINADO (por tipo_atencion_id)');
+                
+                // Asegurarnos de tener datos de ambos
+                const datosAudiometria = this.prepararDatosParaPDF(cita, examenAudiometria || examenLogoaudiometria, 'audiometria');
+                const datosLogoaudiometria = this.prepararDatosParaPDF(cita, examenLogoaudiometria || examenAudiometria, 'logoaudiometria');
+                
+                if (esCoosalud) {
+                    pdfPath = await pdfGeneratorCoosaludUnified.generarPDFCombinadoCOO(
+                        datosAudiometria,
+                        datosLogoaudiometria,
+                        entidad
+                    );
+                } else {
+                    pdfPath = await pdfGeneratorUnified.generarPDFCombinado(
+                        datosAudiometria,
+                        datosLogoaudiometria,
+                        entidad
+                    );
+                }
             }
-        } else if (datosAudiometria) {
-            console.log('📄 Generando PDF de AUDIOMETRÍA');
-            if (esCoosalud) {
-                pdfPath = await pdfGeneratorCoosalud.generarPDF(datosAudiometria, entidad, 'audiometria');
-            } else {
-                pdfPath = await pdfGenerator.generarPDF(datosAudiometria, entidad, 'audiometria');
+            // ✅ CASO 2: SOLO AUDIOMETRÍA (tipos 1, 5)
+            else if (esSoloAudiometria) {
+                console.log('📄 Generando PDF de AUDIOMETRÍA (por tipo_atencion_id)');
+                const datos = this.prepararDatosParaPDF(cita, examenAudiometria, 'audiometria');
+                
+                if (esCoosalud) {
+                    pdfPath = await pdfGeneratorCoosalud.generarPDF(datos, entidad, 'audiometria');
+                } else {
+                    pdfPath = await pdfGenerator.generarPDF(datos, entidad, 'audiometria');
+                }
             }
-        } else if (datosLogoaudiometria) {
-            console.log('📄 Generando PDF de LOGOAUDIOMETRÍA');
-            if (esCoosalud) {
-                pdfPath = await pdfGeneratorCoosalud.generarPDF(datosLogoaudiometria, entidad, 'logoaudiometria');
-            } else {
-                pdfPath = await pdfGenerator.generarPDF(datosLogoaudiometria, entidad, 'logoaudiometria');
+            // ✅ CASO 3: SOLO LOGOAUDIOMETRÍA (tipos 2, 6)
+            else if (esSoloLogoaudiometria) {
+                console.log('📄 Generando PDF de LOGOAUDIOMETRÍA (por tipo_atencion_id)');
+                const datos = this.prepararDatosParaPDF(cita, examenLogoaudiometria, 'logoaudiometria');
+                
+                if (esCoosalud) {
+                    pdfPath = await pdfGeneratorCoosalud.generarPDF(datos, entidad, 'logoaudiometria');
+                } else {
+                    pdfPath = await pdfGenerator.generarPDF(datos, entidad, 'logoaudiometria');
+                }
             }
-        } else {
-            throw new Error('No se encontraron datos válidos para generar el PDF');
+            // ✅ CASO 4: FALLBACK - Detectar automáticamente
+            else {
+                console.log('⚠️ Tipo no reconocido, detectando automáticamente...');
+                
+                const tieneAudiometria = this.tieneAudiometria(examenAudiometria || examenLogoaudiometria);
+                const tieneLogoaudiometria = this.tieneLogoaudiometria(examenAudiometria || examenLogoaudiometria);
+                
+                if (tieneAudiometria && tieneLogoaudiometria) {
+                    console.log('📄 Generando PDF COMBINADO (detección automática)');
+                    const datosAudiometria = this.prepararDatosParaPDF(cita, examenAudiometria || examenLogoaudiometria, 'audiometria');
+                    const datosLogoaudiometria = this.prepararDatosParaPDF(cita, examenLogoaudiometria || examenAudiometria, 'logoaudiometria');
+                    
+                    if (esCoosalud) {
+                        pdfPath = await pdfGeneratorCoosaludUnified.generarPDFCombinadoCOO(
+                            datosAudiometria,
+                            datosLogoaudiometria,
+                            entidad
+                        );
+                    } else {
+                        pdfPath = await pdfGeneratorUnified.generarPDFCombinado(
+                            datosAudiometria,
+                            datosLogoaudiometria,
+                            entidad
+                        );
+                    }
+                } else if (tieneAudiometria) {
+                    console.log('📄 Generando PDF de AUDIOMETRÍA (detección automática)');
+                    const datos = this.prepararDatosParaPDF(cita, examenAudiometria || examenLogoaudiometria, 'audiometria');
+                    
+                    if (esCoosalud) {
+                        pdfPath = await pdfGeneratorCoosalud.generarPDF(datos, entidad, 'audiometria');
+                    } else {
+                        pdfPath = await pdfGenerator.generarPDF(datos, entidad, 'audiometria');
+                    }
+                } else if (tieneLogoaudiometria) {
+                    console.log('📄 Generando PDF de LOGOAUDIOMETRÍA (detección automática)');
+                    const datos = this.prepararDatosParaPDF(cita, examenLogoaudiometria || examenAudiometria, 'logoaudiometria');
+                    
+                    if (esCoosalud) {
+                        pdfPath = await pdfGeneratorCoosalud.generarPDF(datos, entidad, 'logoaudiometria');
+                    } else {
+                        pdfPath = await pdfGenerator.generarPDF(datos, entidad, 'logoaudiometria');
+                    }
+                } else {
+                    throw new Error('No se encontraron datos válidos para generar el PDF');
+                }
+            }
+            
+            console.log('✅ PDF regenerado exitosamente:', pdfPath);
+            return pdfPath;
+            
+        } catch (error) {
+            console.error('❌ Error regenerando PDF:', error);
+            throw error;
         }
-        
-        console.log('✅ PDF regenerado exitosamente:', pdfPath);
-        return pdfPath;
-        
-    } catch (error) {
-        console.error('❌ Error regenerando PDF:', error);
-        throw error;
     }
-}
 
     /**
      * ✅ DETECTAR SI TIENE DATOS DE AUDIOMETRÍA
@@ -99,28 +170,20 @@ async regenerarPDF(cita, examenAudiometria, examenLogoaudiometria) {
     tieneAudiometria(examen) {
         if (!examen) return false;
         
-        // Verificar PTA
         const tienePTA = !!(examen.pta_via_aerea_od || examen.pta_via_aerea_oi || 
                            examen.pta_via_osea_od || examen.pta_via_osea_oi);
-        
-        // Verificar diagnósticos
         const tieneDiagnostico = !!(examen.diagnostico_od || examen.diagnostico_oi);
         
-        // Verificar valores de frecuencias
         let tieneValores = false;
         if (examen.valores_od) {
             try {
-                const vals = typeof examen.valores_od === 'string' 
-                    ? JSON.parse(examen.valores_od) 
-                    : examen.valores_od;
+                const vals = typeof examen.valores_od === 'string' ? JSON.parse(examen.valores_od) : examen.valores_od;
                 tieneValores = Object.keys(vals).some(k => vals[k] && vals[k] !== '');
             } catch(e) {}
         }
         if (!tieneValores && examen.valores_oi) {
             try {
-                const vals = typeof examen.valores_oi === 'string' 
-                    ? JSON.parse(examen.valores_oi) 
-                    : examen.valores_oi;
+                const vals = typeof examen.valores_oi === 'string' ? JSON.parse(examen.valores_oi) : examen.valores_oi;
                 tieneValores = Object.keys(vals).some(k => vals[k] && vals[k] !== '');
             } catch(e) {}
         }
@@ -134,7 +197,6 @@ async regenerarPDF(cita, examenAudiometria, examenLogoaudiometria) {
     tieneLogoaudiometria(examen) {
         if (!examen) return false;
         
-        // Verificar campos de logoaudiometría
         const tieneURV = !!(examen.urv_od || examen.urv_oi);
         const tieneUpalabra = !!(examen.upalabra_od || examen.upalabra_oi);
         const tieneUdisc = !!(examen.udisc_od || examen.udisc_oi);
@@ -150,8 +212,8 @@ async regenerarPDF(cita, examenAudiometria, examenLogoaudiometria) {
      * ✅ PREPARAR DATOS PARA EL PDF
      */
     prepararDatosParaPDF(cita, examenData, tipo = 'audiometria') {
-        let valoresOD = examenData.valores_od || {};
-        let valoresOI = examenData.valores_oi || {};
+        let valoresOD = examenData?.valores_od || {};
+        let valoresOI = examenData?.valores_oi || {};
         
         if (typeof valoresOD === 'string') {
             try { valoresOD = JSON.parse(valoresOD); } catch(e) { valoresOD = {}; }
@@ -173,27 +235,27 @@ async regenerarPDF(cita, examenAudiometria, examenLogoaudiometria) {
             },
             valores_od: valoresOD,
             valores_oi: valoresOI,
-            diagnostico_od: examenData.diagnostico_od || '',
-            diagnostico_oi: examenData.diagnostico_oi || '',
-            observaciones: examenData.observaciones || '',
-            otoscopia: examenData.otoscopia || '',
-            grafica_tonal_base64: examenData.grafica_tonal_base64 || '',
-            grafica_logo_base64: examenData.grafica_logo_base64 || '',
+            diagnostico_od: examenData?.diagnostico_od || '',
+            diagnostico_oi: examenData?.diagnostico_oi || '',
+            observaciones: examenData?.observaciones || '',
+            otoscopia: examenData?.otoscopia || '',
+            grafica_tonal_base64: examenData?.grafica_tonal_base64 || '',
+            grafica_logo_base64: examenData?.grafica_logo_base64 || '',
             pta: {
-                od_air: parseNumber(examenData.pta_via_aerea_od),
-                od_bone: parseNumber(examenData.pta_via_osea_od),
-                oi_air: parseNumber(examenData.pta_via_aerea_oi),
-                oi_bone: parseNumber(examenData.pta_via_osea_oi)
+                od_air: parseNumber(examenData?.pta_via_aerea_od),
+                od_bone: parseNumber(examenData?.pta_via_osea_od),
+                oi_air: parseNumber(examenData?.pta_via_aerea_oi),
+                oi_bone: parseNumber(examenData?.pta_via_osea_oi)
             },
-            diagnostico: examenData.diagnostico || '',
-            urv_od: parseNumber(examenData.urv_od),
-            urv_oi: parseNumber(examenData.urv_oi),
-            upalabra_od: parseNumber(examenData.upalabra_od),
-            upalabra_oi: parseNumber(examenData.upalabra_oi),
-            udisc_od: parseNumber(examenData.udisc_od),
-            udisc_oi: parseNumber(examenData.udisc_oi),
-            pmax_od: parseNumber(examenData.pmax_od),
-            pmax_oi: parseNumber(examenData.pmax_oi),
+            diagnostico: examenData?.diagnostico || '',
+            urv_od: parseNumber(examenData?.urv_od),
+            urv_oi: parseNumber(examenData?.urv_oi),
+            upalabra_od: parseNumber(examenData?.upalabra_od),
+            upalabra_oi: parseNumber(examenData?.upalabra_oi),
+            udisc_od: parseNumber(examenData?.udisc_od),
+            udisc_oi: parseNumber(examenData?.udisc_oi),
+            pmax_od: parseNumber(examenData?.pmax_od),
+            pmax_oi: parseNumber(examenData?.pmax_oi),
             freqs: ['250', '500', '1000', '2000', '3000', '4000', '6000', '8000']
         };
     }

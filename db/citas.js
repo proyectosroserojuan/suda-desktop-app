@@ -481,19 +481,21 @@ async function obtenerCitaConExamen(citaId) {
 
 
 
-        for (const examen of unifiedResult.rows) {
-    // ✅ Detectar por presencia de datos reales, NO por el nombre de tipo_examen
+for (const examen of unifiedResult.rows) {
+    // ✅ Detectar por presencia de datos REALES (ni null ni '' cuentan como dato)
+    const tieneValor = (v) => v !== null && v !== undefined && v !== '';
+
     const tieneAudiometria =
-        examen.pta_via_aerea_od !== null || examen.pta_via_aerea_oi !== null ||
-        examen.pta_via_osea_od  !== null || examen.pta_via_osea_oi  !== null ||
-        examen.diagnostico_od   !== null || examen.diagnostico_oi   !== null;
+        tieneValor(examen.pta_via_aerea_od) || tieneValor(examen.pta_via_aerea_oi) ||
+        tieneValor(examen.pta_via_osea_od)  || tieneValor(examen.pta_via_osea_oi)  ||
+        tieneValor(examen.diagnostico_od)   || tieneValor(examen.diagnostico_oi);
 
     const tieneLogoaudiometria =
-        examen.urv_od      !== null || examen.urv_oi      !== null ||
-        examen.upalabra_od !== null || examen.upalabra_oi !== null ||
-        examen.udisc_od    !== null || examen.udisc_oi    !== null ||
-        examen.pmax_od     !== null || examen.pmax_oi     !== null ||
-        examen.diagnostico !== null;
+        tieneValor(examen.urv_od)      || tieneValor(examen.urv_oi)      ||
+        tieneValor(examen.upalabra_od) || tieneValor(examen.upalabra_oi) ||
+        tieneValor(examen.udisc_od)    || tieneValor(examen.udisc_oi)    ||
+        tieneValor(examen.pmax_od)     || tieneValor(examen.pmax_oi)     ||
+        tieneValor(examen.diagnostico);
 
     if (tieneAudiometria && !examenes.audiometria) {
         examenes.audiometria = examen;

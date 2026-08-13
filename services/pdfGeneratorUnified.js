@@ -396,6 +396,9 @@ const tablaPTA = `
        <!--   <div class="diagnostico-titulo-sec" style="margin-top:8px;">OBSERVACIONES</div> -->
     <!--      <div class="diagnostico-texto">${datosAudiometria.observaciones || ''}</div> -->
                </div>
+
+
+               
 </div>`;
 
   /* Tabla de AUDIOMETRÍA (compacta)
