@@ -2799,6 +2799,11 @@ if (dataset.customSymbol) {
         if (dataPoint?.esInterpolado && dataPoint?.ocultarPunto) {
             return;
         }
+
+
+          if (dataPoint && dataPoint.esNR) {
+            return;
+        }
         
         // Obtener símbolo personalizado para esta frecuencia específica
         let symbol = dataset.customSymbol;
@@ -4562,7 +4567,7 @@ allInputs.forEach(input => {
         
         if (ear === 'od') {
             // Dibujar O
-            drawCtx.font = 'bold 14px Arial';
+            drawCtx.font = 'bold 20px Arial';
             drawCtx.textAlign = 'center';
             drawCtx.textBaseline = 'middle';
             drawCtx.fillText('O', x, y);
@@ -4571,7 +4576,7 @@ allInputs.forEach(input => {
             const radio = 6;
             const inicioX = x + radio;
             const inicioY = y;
-            const longitud = 12;
+            const longitud = 19;
             const finX = inicioX + longitud;
             const finY = inicioY + (longitud * 0.6);
             

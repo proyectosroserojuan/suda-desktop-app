@@ -137,11 +137,23 @@ function aplicarSimbolosPersonalizados() {
 
     // 🔥 PASO 1: Eliminar TODOS los datasets de puntos clínicos originales
     // (los que tienen label "OD - Puntos clínicos" o "OI - Puntos clínicos")
+// 🔥 PASO 1: Eliminar los datasets de puntos clínicos originales
+    // EXCEPTO cuando el oído está en "Sin Respuesta total" (ahí no hay
+    // símbolos personalizables, y borrarlo causaba que el símbolo NR
+    // con flecha apareciera un instante y luego desapareciera)
+    const odTodoSinRespuesta =
+        noResponseFlags.od.urv && noResponseFlags.od.upalabra &&
+        noResponseFlags.od.udisc && noResponseFlags.od.pmax;
+    const oiTodoSinRespuesta =
+        noResponseFlags.oi.urv && noResponseFlags.oi.upalabra &&
+        noResponseFlags.oi.udisc && noResponseFlags.oi.pmax;
+
     chart.data.datasets = chart.data.datasets.filter(ds => {
+        if (ds.label === 'OD - Puntos clínicos' && odTodoSinRespuesta) return true;
+        if (ds.label === 'OI - Puntos clínicos' && oiTodoSinRespuesta) return true;
         return ds.label !== 'OD - Puntos clínicos' && 
                ds.label !== 'OI - Puntos clínicos';
     });
-
     // 🔥 PASO 2: Eliminar datasets antiguos de enmascaramiento
     chart.data.datasets = chart.data.datasets.filter(
         ds => !ds._enmascLogoPoint

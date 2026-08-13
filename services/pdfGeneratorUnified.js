@@ -361,7 +361,7 @@ const pta = datosAudiometria.pta || {};
 
 // Tabla PTA CON BORDES NEGROS (exactamente como en la foto)
 const tablaPTA = `
-<div style="position: fixed; right: 50px; top: 29%; margin: 0; z-index: 1000; width: 320px; height: auto; background: white; padding: 12px; border-radius: 6px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+<div style="position: fixed; right: 4px; top: 29%; margin: 0; z-index: 1000; width: 420px; height: 300px; background: white; padding: 12px; border-radius: 6px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
   <div style="font-weight: bold; font-size: 13px; margin-bottom: 6px;">PROMEDIO TONAL (PTA)</div>
   <table style="border-collapse: collapse; font-size: 11px; width: 100%;">  <!-- CAMBIADO: width: 100% -->
     <thead>
@@ -385,28 +385,23 @@ const tablaPTA = `
     </tbody>
   </table>
 
-        <!-- DIAGNÓSTICOS: UNO AL LADO DEL OTRO -->
-      <div class="diagnosticos-container">
-        <div class="diagnostico-columna">
-          <div class="diagnostico-titulo-sec">DIAGNÓSTICO AUDIOMETRIA TONAL</div>
-        <!--  <div class="diagnostico-subtitulo">Oido Derecho:</div> -->
-          <div class="diagnostico-texto">${datosAudiometria.diagnostico_od || ''}</div>
-      <!--    <div class="diagnostico-subtitulo">Oido Izquiero:</div> --->
-       <!--   <div class="diagnostico-texto">${datosAudiometria.diagnostico_oi || ''}</div> -->
-       <!--   <div class="diagnostico-titulo-sec" style="margin-top:8px;">OBSERVACIONES</div> -->
-    <!--      <div class="diagnostico-texto">${datosAudiometria.observaciones || ''}</div> -->
-               </div>
 
 
-                       <div class="diagnostico-columna">
-          <div class="diagnostico-titulo-sec">DIAGNÓSTICO LOGOAUDIOMETRÍA</div>
-          <div class="diagnostico-subtitulo">Oido Derecho.</div>
-          <div class="diagnostico-texto">${datosLogoaudiometria.diagnostico_od || ''}</div>
-          <div class="diagnostico-subtitulo">Oido Izquierdo</div>
-          <div class="diagnostico-texto">${datosLogoaudiometria.diagnostico_oi || ''}</div>
-        <!--  <div class="diagnostico-titulo-sec" style="margin-top:8px;">OBSERVACIONES</div> -->
-          <div class="diagnostico-texto">${datosLogoaudiometria.diagnostico || ''}</div>
-        </div>
+  <!-- DIAGNÓSTICOS UNO DEBAJO DEL OTRO -->
+  <div style="margin-top: 10px;">
+    <div style="font-weight: bold; font-size: 11px; margin-top: 8px; margin-bottom: 3px; border-bottom: 1px solid #ddd; padding-bottom: 3px;">DIAGNÓSTICO AUDIOMETRIA TONAL</div>
+    <div style="font-size: 11px; padding: 3px 0; line-height: 1.4; word-wrap: break-word; white-space: pre-wrap;">${datosAudiometria.diagnostico_od || ''}</div>
+    <div style="font-weight: bold; font-size: 11px; margin-top: 10px; margin-bottom: 3px; border-bottom: 1px solid #ddd; padding-bottom: 3px;">DIAGNÓSTICO LOGOAUDIOMETRÍA</div>
+    <div style="font-size: 10px; color: #555; padding: 2px 0;">Oido Derecho:</div>
+    <div style="font-size: 11px; padding: 2px 0 4px 0; line-height: 1.4; word-wrap: break-word; white-space: pre-wrap;">${datosLogoaudiometria.diagnostico_od || ''}</div>
+    <div style="font-size: 10px; color: #555; padding: 2px 0;">Oido Izquierdo:</div>
+    <div style="font-size: 11px; padding: 2px 0 4px 0; line-height: 1.4; word-wrap: break-word; white-space: pre-wrap;">${datosLogoaudiometria.diagnostico_oi || ''}</div>
+ <!--   <div style="font-weight: bold; font-size: 11px; margin-top: 10px; margin-bottom: 3px; border-bottom: 1px solid #ddd; padding-bottom: 3px;">OBSERVACIONES</div> -->
+  <!--    <div style="font-size: 11px; padding: 3px 0; line-height: 1.4; word-wrap: break-word; white-space: pre-wrap;">${datosLogoaudiometria.diagnostico || ''}</div>   -->
+  </div>
+
+
+
 </div>`;
 
 
@@ -494,7 +489,7 @@ const tablaLogoaudiometriaRows = `
 `;
   // Verificar gráficas
   const graficaAudiometriaHTML = datosAudiometria.grafica_tonal_base64 && datosAudiometria.grafica_tonal_base64.length > 100 ?
-    `<img src="${datosAudiometria.grafica_tonal_base64}" alt="Audiometría Tonal" style="width:100%; max-height: 320px;  object-fit: contain; margin-left: -47px; display: block;">` :
+    `<img src="${datosAudiometria.grafica_tonal_base64}" alt="Audiometría Tonal" style="width:100%; max-height: 320px;  object-fit: contain; margin-left: -70px; display: block;">` :
     `<div class="sin-grafica" style="padding:20px; font-size:10px;">⚠️ No se pudo generar la gráfica de Audiometría</div>`;
 
   const graficaLogoaudiometriaHTML = datosLogoaudiometria.grafica_logo_base64 && datosLogoaudiometria.grafica_logo_base64.length > 100 ?
@@ -633,17 +628,7 @@ const tablaLogoaudiometriaRows = `
 
 
         
-.diagnosticos-container {
-  display: flex;
-  gap: 15px;
-  margin: 10px 0;
-  padding: 0 18px;  /* ← AGREGAR ESTO */
-}
 
-
-        .diagnostico-columna {
-          flex: 1;
-        }
 
         /* QR y SELLO en la misma posición que el código original */
 
@@ -668,9 +653,10 @@ const tablaLogoaudiometriaRows = `
 }
 .sello-central {
     position: fixed;
-   bottom: -5%; 
-    left: 45%;
-    z-index: 100;
+    bottom: -60px;
+    right: -60px;
+    z-index: 9999;
+    pointer-events: none;
 }
 .sello-central img {
     width: 500px;
@@ -679,17 +665,7 @@ const tablaLogoaudiometriaRows = `
     object-fit: contain;
 }
 
-/* En el <style> de tu HTML */
-.diagnostico-titulo-sec {
-  font-weight: bold;
-  font-size: 13px;
-  margin-bottom: 6px;
-  margin-top: 8px;
-  background: #ffffff;
-  padding: 4px 8px;
-  border-left: 3px solid #ccccce;
-  color: #1a1a1a;
-}
+
 
 .graficas-container {
  transform: translateY(-20px); 
@@ -719,44 +695,9 @@ const tablaLogoaudiometriaRows = `
   padding-bottom: 4px;
 }
 
-.observaciones-texto {
-  font-size: 11px;
-  line-height: 1.5;
-  white-space: pre-wrap;           /* Respeta saltos de línea */
-  word-wrap: break-word;           /* Rompe palabras largas */
-  max-height: 80px;                /* Altura del texto */
-  overflow-y: auto;                /* Scroll vertical si es necesario */
-}
 
-.diagnostico-subtitulo { 
-  font-weight: bold; 
-  font-size: 11px; 
-  margin-top: 6px; 
-  margin-bottom: 2px; 
-  color: #070707;
-}
 
-.diagnostico-texto { 
-  font-size: 12px; 
-  line-height: 1.4; 
-  white-space: pre-wrap;
-  padding: 3px 15px;  /* ← CAMBIAR: 3px arriba/abajo, 15px lados */
-  background: #ffffff;
-  border-radius: 3px;
-  margin-bottom: 4px;
-  color: #1a1a1a;
-  
-}
 
-."diagnostico-titulo-sec{
-
-  font-weight: bold; 
-  font-size: 11px; 
-  margin-top: 6px; 
-  margin-bottom: 2px; 
-  color: #070707;
-
-}
         
         .footer {
           position: fixed;
