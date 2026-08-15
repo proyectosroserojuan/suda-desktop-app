@@ -96,13 +96,13 @@ function obtenerDatosCita() {
 
 // En logoaudiometria.html - REEMPLAZA guardarEnBaseDeDatos
 
-async function guardarEnBaseDeDatos(pacienteId, citaId, diagnostico, diagnostico_od, diagnostico_oi, otoscopia, valoresOD, valoresOI, imagenBase64) {
+async function guardarEnBaseDeDatos(pacienteId, citaId, diagnostico, diagnostico_od, diagnostico_oi, otoscopia, valoresOD, valoresOI, imagenBase64, tipoAtencionNombre) {
     console.log('guardarEnBaseDeDatos - Inicio');
     console.log('pacienteId:', pacienteId);
     console.log('citaId:', citaId);
     
     const data = {
-        tipo_examen: 'logoaudiometria',  // ← NUEVO
+        tipo_examen: tipoAtencionNombre || 'no especificado',
         paciente_id: pacienteId,
         cita_id: citaId,
         entidad_id: null,
@@ -279,7 +279,8 @@ const diagnostico_oi = obtenerDiscriminacionOI();
             otoscopia,      // ✅ AGREGADO
             valores.od,
             valores.oi,
-            imagenBase64
+            imagenBase64,
+            cita?.tipo_atencion_nombre   // ← NUEVO
         );
         
    

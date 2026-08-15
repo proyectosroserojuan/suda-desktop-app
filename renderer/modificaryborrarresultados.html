@@ -1,0 +1,1147 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Citas | Sistema Médico</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --escala: 1;
+            /* Paleta de azul más claro y sutil */
+            --azul-claro: #e6f0ff;
+            --azul-suave: #b8d4ff;
+            --azul-medio: #7bb3f0;
+            --azul-principal: #4a90d9;
+            --azul-oscuro: #2c6aa0;
+            --azul-bg: #f5f9ff;
+            --azul-borde: #d4e4fc;
+            --azul-hover: #3a7bc8;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, 'Segoe UI', Roboto, Helvetica, sans-serif;
+            background: var(--azul-bg);
+            padding: 0;
+            color: #1e293b;
+            font-size: calc(16px * var(--escala));
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            max-width: 100vw;
+            overflow-x: hidden;
+        }
+
+        /* Header con azul más claro */
+        .header-corporativo {
+            background: linear-gradient(135deg, #5b9bd5 0%, #3a7bc8 50%, #b8d4ff 100%);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: calc(16px * var(--escala)) calc(24px * var(--escala));
+            border-radius: calc(16px * var(--escala));
+            margin-bottom: calc(28px * var(--escala));
+            gap: calc(12px * var(--escala));
+            box-shadow: 0 calc(4px * var(--escala)) calc(20px * var(--escala)) rgba(74, 144, 217, 0.25);
+            flex-wrap: wrap;
+            min-height: calc(80px * var(--escala));
+            flex-shrink: 0;
+        }
+
+        .logo-empresa {
+            height: calc(80px * var(--escala));
+            width: auto;
+            object-fit: contain;
+            background: #ffffff;
+            border-radius: calc(12px * var(--escala));
+            padding: calc(8px * var(--escala)) calc(16px * var(--escala));
+            flex-shrink: 0;
+            box-shadow: 0 calc(2px * var(--escala)) calc(8px * var(--escala)) rgba(0, 0, 0, 0.08);
+        }
+
+        .header-logo {
+            display: flex;
+            align-items: center;
+            gap: calc(16px * var(--escala));
+        }
+
+        .logo-text h1 {
+            font-size: calc(1.3rem * var(--escala));
+            font-weight: 700;
+            letter-spacing: -0.3px;
+            color: #ffffff;
+        }
+        .logo-text span {
+            display: block;
+            font-size: calc(0.7rem * var(--escala));
+            color: rgba(255, 255, 255, 0.8);
+            font-weight: 400;
+        }
+
+        .header-stats {
+            display: flex;
+            gap: calc(10px * var(--escala));
+            align-items: center;
+            flex-shrink: 0;
+            flex-wrap: wrap;
+        }
+
+        .stat-item {
+            background: rgba(255, 255, 255, 0.2);
+            padding: calc(6px * var(--escala)) calc(14px * var(--escala));
+            border-radius: calc(10px * var(--escala));
+            text-align: center;
+            backdrop-filter: blur(6px);
+            border: calc(1px * var(--escala)) solid rgba(255, 255, 255, 0.15);
+            white-space: nowrap;
+        }
+        .stat-item .number {
+            font-size: calc(1.1rem * var(--escala));
+            font-weight: 700;
+            color: #ffffff;
+        }
+        .stat-item .label {
+            font-size: calc(0.6rem * var(--escala));
+            color: rgba(255, 255, 255, 0.75);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: block;
+        }
+
+        .btn-primary {
+            background: #ffffff;
+            color: var(--azul-oscuro);
+            border: none;
+            padding: calc(8px * var(--escala)) calc(16px * var(--escala));
+            border-radius: calc(30px * var(--escala));
+            font-weight: 600;
+            cursor: pointer;
+            font-size: calc(0.75rem * var(--escala));
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: calc(6px * var(--escala));
+            white-space: nowrap;
+        }
+        .btn-primary:hover {
+            transform: translateY(calc(-2px * var(--escala)));
+            box-shadow: 0 calc(4px * var(--escala)) calc(16px * var(--escala)) rgba(255, 255, 255, 0.35);
+        }
+
+        .container {
+            max-width: 100%;
+            margin: 0 auto;
+            width: 100%;
+            padding: 0 calc(16px * var(--escala));
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+        }
+
+        /* Filtros con azul sutil */
+        .filters-section {
+            background: #ffffff;
+            border-radius: calc(12px * var(--escala));
+            padding: calc(20px * var(--escala)) calc(24px * var(--escala));
+            margin-bottom: calc(24px * var(--escala));
+            border: calc(1px * var(--escala)) solid var(--azul-borde);
+            display: flex;
+            gap: calc(16px * var(--escala));
+            flex-wrap: wrap;
+            align-items: center;
+            box-shadow: 0 calc(2px * var(--escala)) calc(8px * var(--escala)) rgba(74, 144, 217, 0.06);
+            flex-shrink: 0;
+        }
+
+        .filters-section select,
+        .filters-section input {
+            padding: calc(10px * var(--escala)) calc(14px * var(--escala));
+            border: calc(1.5px * var(--escala)) solid var(--azul-borde);
+            border-radius: calc(10px * var(--escala));
+            font-size: calc(0.85rem * var(--escala));
+            font-family: inherit;
+            transition: all 0.2s;
+            background: #ffffff;
+            color: #1e293b;
+            flex: 1;
+            min-width: calc(160px * var(--escala));
+        }
+        .filters-section select:focus,
+        .filters-section input:focus {
+            border-color: var(--azul-principal);
+            outline: none;
+            box-shadow: 0 0 0 calc(3px * var(--escala)) rgba(74, 144, 217, 0.2);
+        }
+        .filters-section select {
+            min-width: calc(160px * var(--escala));
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23475569' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right calc(12px * var(--escala)) center;
+            padding-right: calc(36px * var(--escala));
+        }
+
+        /* Tabla */
+        .citas-table {
+            background: #ffffff;
+            border-radius: calc(12px * var(--escala));
+            border: calc(1px * var(--escala)) solid var(--azul-borde);
+            overflow: auto;
+            box-shadow: 0 calc(2px * var(--escala)) calc(8px * var(--escala)) rgba(74, 144, 217, 0.06);
+            width: 100%;
+            flex: 1;
+            min-height: 0;
+            max-height: calc(100vh - 400px * var(--escala));
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: calc(700px * var(--escala));
+        }
+
+        th {
+            text-align: left;
+            padding: calc(14px * var(--escala)) calc(18px * var(--escala));
+            background: var(--azul-claro);
+            font-weight: 600;
+            font-size: calc(0.7rem * var(--escala));
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--azul-oscuro);
+            border-bottom: calc(2px * var(--escala)) solid var(--azul-borde);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            white-space: nowrap;
+        }
+
+        td {
+            padding: calc(12px * var(--escala)) calc(18px * var(--escala));
+            border-bottom: calc(1px * var(--escala)) solid var(--azul-claro);
+            font-size: calc(0.85rem * var(--escala));
+            vertical-align: middle;
+        }
+
+        tr:hover {
+            background: #f8fcff;
+        }
+
+        /* Badges con azul sutil */
+        .badge {
+            display: inline-block;
+            padding: calc(4px * var(--escala)) calc(12px * var(--escala));
+            border-radius: calc(20px * var(--escala));
+            font-size: calc(0.7rem * var(--escala));
+            font-weight: 600;
+            white-space: nowrap;
+        }
+        .badge-success { background: #d4edda; color: #155724; }
+        .badge-warning { background: #fff3cd; color: #856404; }
+        .badge-danger { background: #f8d7da; color: #721c24; }
+        .badge-info { background: var(--azul-claro); color: var(--azul-oscuro); }
+        .badge-secondary { background: #e9ecef; color: #495057; }
+
+        .badge-examen {
+            background: var(--azul-claro);
+            color: var(--azul-oscuro);
+            font-weight: 600;
+            padding: calc(4px * var(--escala)) calc(12px * var(--escala));
+            border-radius: calc(20px * var(--escala));
+            font-size: calc(0.7rem * var(--escala));
+            white-space: nowrap;
+        }
+        .badge-sin-examen {
+            background: #f1f5f9;
+            color: #64748b;
+            font-weight: 600;
+            padding: calc(4px * var(--escala)) calc(12px * var(--escala));
+            border-radius: calc(20px * var(--escala));
+            font-size: calc(0.7rem * var(--escala));
+            white-space: nowrap;
+        }
+
+        /* Prioridad */
+        .badge-prioridad {
+            display: inline-flex;
+            align-items: center;
+            gap: calc(4px * var(--escala));
+            padding: calc(4px * var(--escala)) calc(12px * var(--escala));
+            border-radius: calc(20px * var(--escala));
+            font-size: calc(0.7rem * var(--escala));
+            font-weight: 600;
+            white-space: nowrap;
+        }
+        .badge-prioridad.alta {
+            background: #f8d7da;
+            color: #b02a37;
+        }
+        .badge-prioridad.alta::before {
+            content: "★";
+            font-size: calc(0.75rem * var(--escala));
+        }
+        .badge-prioridad.normal {
+            background: var(--azul-claro);
+            color: var(--azul-oscuro);
+        }
+        .badge-prioridad.normal::before {
+            content: "○";
+            font-size: calc(0.75rem * var(--escala));
+        }
+
+        .cita-prioritaria {
+            border-left: calc(4px * var(--escala)) solid #e06b6b;
+            background-color: #fdf0f0;
+        }
+        .cita-prioritaria:hover {
+            background-color: #fce4e4;
+        }
+
+        /* Botones de acción */
+        .acciones-wrapper {
+            display: flex;
+            gap: calc(6px * var(--escala));
+            flex-wrap: wrap;
+        }
+
+        .btn-accion {
+            background: var(--azul-principal);
+            color: white;
+            border: none;
+            padding: calc(6px * var(--escala)) calc(12px * var(--escala));
+            border-radius: calc(8px * var(--escala));
+            cursor: pointer;
+            font-weight: 600;
+            font-size: calc(0.7rem * var(--escala));
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+        .btn-accion:hover:not(:disabled) {
+            background: var(--azul-hover);
+            transform: translateY(calc(-1px * var(--escala)));
+            box-shadow: 0 calc(4px * var(--escala)) calc(12px * var(--escala)) rgba(74, 144, 217, 0.3);
+        }
+        .btn-accion:disabled {
+            background: #e2e8f0;
+            color: #94a3b8;
+            cursor: not-allowed;
+        }
+
+        .btn-editar {
+            background: #4a90d9;
+        }
+        .btn-editar:hover:not(:disabled) {
+            background: #3a7bc8;
+        }
+
+        .btn-borrar {
+            background: #d97a7a;
+        }
+        .btn-borrar:hover:not(:disabled) {
+            background: #c06060;
+        }
+
+        .btn-ver {
+            background: #2c6aa0;
+        }
+        .btn-ver:hover:not(:disabled) {
+            background: #1f5582;
+        }
+
+        /* Estados vacíos */
+        .empty-state {
+            text-align: center;
+            padding: calc(60px * var(--escala)) calc(20px * var(--escala));
+            color: #94a3b8;
+        }
+        .empty-state i {
+            font-size: calc(3rem * var(--escala));
+            margin-bottom: calc(16px * var(--escala));
+            color: var(--azul-principal);
+        }
+        .empty-state h3 {
+            color: var(--azul-oscuro);
+            margin-bottom: calc(4px * var(--escala));
+        }
+        .empty-state p {
+            font-size: calc(0.9rem * var(--escala));
+        }
+
+        /* Filtros de fecha */
+        .filtros-fecha-rapidos {
+            display: flex;
+            align-items: center;
+            gap: calc(8px * var(--escala));
+            flex-wrap: wrap;
+            padding: calc(8px * var(--escala)) calc(12px * var(--escala));
+            background: #f8fcff;
+            border-radius: calc(10px * var(--escala));
+            border: calc(1px * var(--escala)) solid var(--azul-borde);
+            width: 100%;
+            flex-shrink: 0;
+        }
+        .filtros-fecha-rango {
+            display: flex;
+            align-items: center;
+            gap: calc(8px * var(--escala));
+            flex-wrap: wrap;
+            padding: calc(8px * var(--escala)) calc(12px * var(--escala));
+            background: #f8fcff;
+            border-radius: calc(10px * var(--escala));
+            border: calc(1px * var(--escala)) solid var(--azul-borde);
+            width: 100%;
+            margin-top: calc(8px * var(--escala));
+            flex-shrink: 0;
+        }
+        .filtro-label {
+            font-size: calc(0.75rem * var(--escala));
+            font-weight: 600;
+            color: var(--azul-oscuro);
+            white-space: nowrap;
+        }
+        .btn-filtro-fecha {
+            background: var(--azul-principal);
+            color: white;
+            border: none;
+            padding: calc(5px * var(--escala)) calc(14px * var(--escala));
+            border-radius: calc(20px * var(--escala));
+            font-size: calc(0.7rem * var(--escala));
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+        .btn-filtro-fecha:hover {
+            background: var(--azul-hover);
+            transform: scale(1.05);
+        }
+        .btn-filtro-fecha.activo {
+            background: var(--azul-oscuro);
+            box-shadow: 0 0 0 calc(2px * var(--escala)) #ffffff, 0 0 0 calc(4px * var(--escala)) var(--azul-principal);
+        }
+        .btn-filtro-fecha.btn-aplicar { background: #2c9b6e; }
+        .btn-filtro-fecha.btn-aplicar:hover { background: #21835d; }
+        .btn-filtro-fecha.btn-limpiar { background: #7f8c9e; }
+        .btn-filtro-fecha.btn-limpiar:hover { background: #677383; }
+
+        .input-fecha {
+            padding: calc(5px * var(--escala)) calc(10px * var(--escala));
+            border: calc(1.5px * var(--escala)) solid var(--azul-borde);
+            border-radius: calc(8px * var(--escala));
+            font-size: calc(0.8rem * var(--escala));
+            font-family: inherit;
+            background: white;
+            color: #1e293b;
+        }
+        .input-fecha:focus {
+            border-color: var(--azul-principal);
+            outline: none;
+            box-shadow: 0 0 0 calc(3px * var(--escala)) rgba(74, 144, 217, 0.2);
+        }
+
+        .btn-back {
+            background: rgba(255, 255, 255, 0.2);
+            color: #ffffff;
+            border: calc(1.5px * var(--escala)) solid rgba(255, 255, 255, 0.3);
+            padding: calc(8px * var(--escala)) calc(16px * var(--escala));
+            border-radius: calc(30px * var(--escala));
+            font-weight: 600;
+            cursor: pointer;
+            font-size: calc(0.75rem * var(--escala));
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: calc(8px * var(--escala));
+            white-space: nowrap;
+            backdrop-filter: blur(4px);
+            flex-shrink: 0;
+        }
+        .btn-back:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(calc(-2px * var(--escala)));
+            box-shadow: 0 calc(4px * var(--escala)) calc(16px * var(--escala)) rgba(0, 0, 0, 0.15);
+        }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(4px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        .modal-overlay.visible {
+            display: flex;
+        }
+        .modal {
+            background: #ffffff;
+            border-radius: calc(16px * var(--escala));
+            padding: calc(28px * var(--escala)) calc(32px * var(--escala));
+            max-width: 420px;
+            width: 90%;
+            box-shadow: 0 calc(20px * var(--escala)) calc(60px * var(--escala)) rgba(0, 0, 0, 0.25);
+            border: calc(1px * var(--escala)) solid var(--azul-borde);
+        }
+        .modal h3 {
+            font-size: calc(1.1rem * var(--escala));
+            color: var(--azul-oscuro);
+            margin-bottom: calc(8px * var(--escala));
+        }
+        .modal p {
+            font-size: calc(0.9rem * var(--escala));
+            color: #475569;
+            margin-bottom: calc(16px * var(--escala));
+        }
+        .modal label {
+            font-weight: 600;
+            font-size: calc(0.8rem * var(--escala));
+            color: var(--azul-oscuro);
+            display: block;
+            margin-bottom: calc(4px * var(--escala));
+        }
+        .modal input[type="password"] {
+            width: 100%;
+            padding: calc(10px * var(--escala)) calc(14px * var(--escala));
+            border: calc(1.5px * var(--escala)) solid var(--azul-borde);
+            border-radius: calc(10px * var(--escala));
+            font-size: calc(0.9rem * var(--escala));
+            font-family: inherit;
+            transition: border 0.2s;
+            margin-bottom: calc(16px * var(--escala));
+        }
+        .modal input[type="password"]:focus {
+            border-color: var(--azul-principal);
+            outline: none;
+            box-shadow: 0 0 0 calc(3px * var(--escala)) rgba(74, 144, 217, 0.15);
+        }
+        .modal-actions {
+            display: flex;
+            gap: calc(10px * var(--escala));
+            justify-content: flex-end;
+        }
+        .modal-actions button {
+            padding: calc(8px * var(--escala)) calc(20px * var(--escala));
+            border: none;
+            border-radius: calc(10px * var(--escala));
+            font-weight: 600;
+            font-size: calc(0.8rem * var(--escala));
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .modal-actions .btn-confirmar {
+            background: var(--azul-principal);
+            color: white;
+        }
+        .modal-actions .btn-confirmar:hover {
+            background: var(--azul-hover);
+        }
+        .modal-actions .btn-confirmar.danger {
+            background: #d97a7a;
+        }
+        .modal-actions .btn-confirmar.danger:hover {
+            background: #c06060;
+        }
+        .modal-actions .btn-cancelar {
+            background: #e9ecef;
+            color: #495057;
+        }
+        .modal-actions .btn-cancelar:hover {
+            background: #dde0e3;
+        }
+
+        .loading-state {
+            text-align: center;
+            padding: calc(60px * var(--escala)) calc(20px * var(--escala));
+        }
+        .loading-state .spinner {
+            display: inline-block;
+            width: calc(32px * var(--escala));
+            height: calc(32px * var(--escala));
+            border: calc(3px * var(--escala)) solid var(--azul-borde);
+            border-top: calc(3px * var(--escala)) solid var(--azul-principal);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin-bottom: calc(12px * var(--escala));
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            body { padding: 0; }
+            .container { padding: 0 calc(10px * var(--escala)); }
+            .header-corporativo {
+                padding: calc(12px * var(--escala)) calc(16px * var(--escala));
+                gap: calc(8px * var(--escala));
+                min-height: calc(70px * var(--escala));
+                flex-direction: column;
+                align-items: stretch;
+                text-align: center;
+            }
+            .header-logo { justify-content: center; }
+            .logo-empresa { height: calc(50px * var(--escala)); padding: calc(4px * var(--escala)) calc(10px * var(--escala)); }
+            .logo-text h1 { font-size: calc(0.9rem * var(--escala)); }
+            .logo-text span { display: none; }
+            .header-stats { justify-content: center; }
+            .stat-item { padding: calc(4px * var(--escala)) calc(10px * var(--escala)); flex: 1; min-width: calc(50px * var(--escala)); }
+            .stat-item .number { font-size: calc(0.9rem * var(--escala)); }
+            .stat-item .label { font-size: calc(0.5rem * var(--escala)); }
+            .filters-section { flex-direction: column; padding: calc(12px * var(--escala)) calc(16px * var(--escala)); }
+            .filters-section select, .filters-section input { width: 100%; min-width: unset; flex: 0 0 100%; }
+            .filtros-fecha-rapidos, .filtros-fecha-rango { flex-direction: column; align-items: stretch; gap: calc(6px * var(--escala)); }
+            .input-fecha { width: 100%; }
+            .btn-filtro-fecha { width: 100%; text-align: center; }
+            .citas-table { max-height: calc(100vh - 500px * var(--escala)); }
+            th, td { padding: calc(8px * var(--escala)) calc(12px * var(--escala)); font-size: calc(0.75rem * var(--escala)); }
+            .btn-accion { padding: calc(5px * var(--escala)) calc(10px * var(--escala)); font-size: calc(0.6rem * var(--escala)); }
+            .btn-back { padding: calc(6px * var(--escala)) calc(12px * var(--escala)); font-size: calc(0.65rem * var(--escala)); width: 100%; justify-content: center; }
+            .btn-back span { display: none; }
+            .acciones-wrapper { flex-direction: column; gap: calc(4px * var(--escala)); }
+        }
+        @media (max-width: 480px) {
+            .container { padding: 0 calc(6px * var(--escala)); }
+            .header-corporativo { padding: calc(8px * var(--escala)) calc(10px * var(--escala)); gap: calc(6px * var(--escala)); min-height: calc(60px * var(--escala)); }
+            .logo-empresa { height: calc(40px * var(--escala)); padding: calc(4px * var(--escala)) calc(8px * var(--escala)); }
+            .logo-text h1 { font-size: calc(0.75rem * var(--escala)); }
+            .stat-item .number { font-size: calc(0.75rem * var(--escala)); }
+            .stat-item .label { font-size: calc(0.4rem * var(--escala)); }
+            .citas-table { max-height: calc(100vh - 520px * var(--escala)); }
+            table { min-width: calc(500px * var(--escala)); }
+            th, td { padding: calc(6px * var(--escala)) calc(8px * var(--escala)); font-size: calc(0.65rem * var(--escala)); }
+            .btn-accion { font-size: calc(0.55rem * var(--escala)); padding: calc(4px * var(--escala)) calc(8px * var(--escala)); }
+            .modal { padding: calc(20px * var(--escala)) calc(16px * var(--escala)); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header-corporativo">
+            <div class="header-logo">
+                <img src="../img/saninlogo.jpg" alt="Logo U.D.A." class="logo-empresa" onerror="this.style.display='none'; this.parentElement.innerHTML='<span style=\'font-weight:700;color:#ffffff;font-size:1.5rem;\'>U.D.A.</span>'">
+                <div class="logo-text">
+                    <h1>Historico de Exámenes</h1>
+                    <span>S.U.D.A - Sistema de Unidad Diagnostica Auditiva</span>
+                </div>
+            </div>
+            <button class="btn-back" id="btnVolverDashboard">
+                <i class="fas fa-arrow-left"></i> <span>Volver al Dashboard</span>
+            </button>
+            <div class="header-stats">
+                <div class="stat-item">
+                    <span class="number" id="totalCitas">0</span>
+                    <span class="label">Total</span>
+                </div>
+                <div class="stat-item">
+                    <span class="number" id="citasPendientes">0</span>
+                    <span class="label">Pendientes</span>
+                </div>
+                <button class="btn-primary" id="btnActualizar">
+                    <i class="fas fa-sync-alt"></i> Actualizar
+                </button>
+            </div>
+        </header>
+
+        <!-- Filtros -->
+        <div class="filters-section">
+            <select id="filtroEstado">
+                <option value="todos">Todos los estados</option>
+                <option value="pendiente">Pendiente</option>
+                <option value="confirmada">Confirmada</option>
+                <option value="atendida">Atendida</option>
+                <option value="cancelada">Cancelada</option>
+            </select>
+            <select id="filtroExamen">
+                <option value="todos">Todos</option>
+                <option value="con">Con examen</option>
+                <option value="sin">Sin examen</option>
+            </select>
+            <select id="filtroPrioridad">
+                <option value="todos">Todas las prioridades</option>
+                <option value="alta">Alta</option>
+                <option value="normal">Normal</option>
+            </select>
+            <input type="text" id="buscador" placeholder="Buscar paciente...">
+        </div>
+
+        <!-- Filtros fecha -->
+        <div class="filtros-fecha-rapidos">
+            <span class="filtro-label"><i class="fas fa-clock"></i> Rápido:</span>
+            <button class="btn-filtro-fecha" data-rango="hoy">Hoy</button>
+            <button class="btn-filtro-fecha" data-rango="ayer">Ayer</button>
+            <button class="btn-filtro-fecha" data-rango="anteayer">Anteayer</button>
+            <button class="btn-filtro-fecha" data-rango="semana">Semana pasada</button>
+            <button class="btn-filtro-fecha" data-rango="mes">Mes pasado</button>
+        </div>
+
+        <div class="filtros-fecha-rango">
+            <span class="filtro-label"><i class="fas fa-calendar-alt"></i> Rango:</span>
+            <input type="date" id="fechaDesde" class="input-fecha">
+            <span class="filtro-separador">hasta</span>
+            <input type="date" id="fechaHasta" class="input-fecha">
+            <button class="btn-filtro-fecha btn-aplicar" id="btnFiltrarRango">Aplicar</button>
+            <button class="btn-filtro-fecha btn-limpiar" id="btnLimpiarFechas">Limpiar</button>
+        </div>
+
+        <!-- Tabla -->
+        <div class="citas-table">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Paciente</th>
+                        <th>Fecha</th>
+                        <th>Hora</th>
+                        <th>Tipo Atención</th>
+                        <th>Estado</th>
+                        <th>Examen</th>
+                        <th>Prioridad</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="citasBody">
+                    <tr>
+                        <td colspan="8" class="loading-state">
+                            <div class="spinner"></div>
+                            <p>Cargando citas...</p>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal">
+            <h3 id="modalTitle">Confirmar acción</h3>
+            <p id="modalMessage">Ingresa tu clave para continuar.</p>
+<label for="modalPassword">Código de verificación</label>
+<input type="password" id="modalPassword" placeholder="Ingresa el código" maxlength="4" inputmode="numeric">
+            <div class="modal-actions">
+                <button class="btn-cancelar" id="modalCancelar">Cancelar</button>
+                <button class="btn-confirmar" id="modalConfirmar">Confirmar</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let citasData = [];
+        let filtroFechaActual = null;
+        let modalCallback = null;
+        let modalCitaId = null;
+        let modalAction = null; // 'editar' o 'borrar'
+
+        document.addEventListener('DOMContentLoaded', () => {
+            cargarCitas();
+            document.getElementById('filtroEstado').addEventListener('change', aplicarFiltros);
+            document.getElementById('filtroExamen').addEventListener('change', aplicarFiltros);
+            document.getElementById('filtroPrioridad').addEventListener('change', aplicarFiltros);
+            document.getElementById('buscador').addEventListener('input', aplicarFiltros);
+            document.getElementById('btnActualizar').addEventListener('click', cargarCitas);
+
+            // Filtros rápidos
+            document.querySelectorAll('[data-rango]').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const rango = this.dataset.rango;
+                    if (filtroFechaActual === rango) {
+                        filtroFechaActual = null;
+                        this.classList.remove('activo');
+                    } else {
+                        document.querySelectorAll('[data-rango]').forEach(b => b.classList.remove('activo'));
+                        filtroFechaActual = rango;
+                        this.classList.add('activo');
+                        document.getElementById('fechaDesde').value = '';
+                        document.getElementById('fechaHasta').value = '';
+                    }
+                    aplicarFiltros();
+                });
+            });
+
+            document.getElementById('btnFiltrarRango').addEventListener('click', function() {
+                const desde = document.getElementById('fechaDesde').value;
+                const hasta = document.getElementById('fechaHasta').value;
+                if (!desde && !hasta) {
+                    alert('Por favor, selecciona al menos una fecha');
+                    return;
+                }
+                document.querySelectorAll('[data-rango]').forEach(b => b.classList.remove('activo'));
+                filtroFechaActual = null;
+                aplicarFiltros();
+            });
+
+            document.getElementById('btnLimpiarFechas').addEventListener('click', function() {
+                document.getElementById('fechaDesde').value = '';
+                document.getElementById('fechaHasta').value = '';
+                document.querySelectorAll('[data-rango]').forEach(b => b.classList.remove('activo'));
+                filtroFechaActual = null;
+                aplicarFiltros();
+            });
+
+            // Modal
+            document.getElementById('modalCancelar').addEventListener('click', cerrarModal);
+            document.getElementById('modalOverlay').addEventListener('click', function(e) {
+                if (e.target === this) cerrarModal();
+            });
+            document.getElementById('modalConfirmar').addEventListener('click', ejecutarAccionModal);
+            document.getElementById('modalPassword').addEventListener('keydown', function(e) {
+                if (e.key === 'Enter') ejecutarAccionModal();
+            });
+        });
+
+        async function cargarCitas() {
+            try {
+                const tbody = document.getElementById('citasBody');
+                tbody.innerHTML = `<tr><td colspan="8" class="loading-state"><div class="spinner"></div><p>Cargando citas...</p></td></tr>`;
+                const response = await window.api.obtenerCitasConEstadoExamen();
+                if (!response.ok) throw new Error(response.error || 'Error desconocido');
+                citasData = response.citas || [];
+                document.getElementById('totalCitas').textContent = citasData.length;
+                document.getElementById('citasPendientes').textContent = 
+                    citasData.filter(c => c.estado === 'pendiente' || c.estado === 'confirmada').length;
+                renderizarCitas(citasData);
+            } catch (error) {
+                document.getElementById('citasBody').innerHTML = 
+                    `<tr><td colspan="8" class="error-state"><i class="fas fa-exclamation-circle"></i> Error: ${error.message}</td></tr>`;
+            }
+        }
+
+        function renderizarCitas(citas) {
+            const tbody = document.getElementById('citasBody');
+            if (!citas || citas.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="8" class="empty-state"><i class="fas fa-calendar-times"></i><h3>No hay citas registradas</h3><p>Comience creando una nueva cita en el sistema</p></td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = citas.map(cita => {
+                const prioridad = cita.prioridad || 'normal';
+                const esPrioritaria = prioridad === 'alta';
+                const tipoAtencion = cita.tipo_atencion_nombre || 'No especificado';
+                const tieneExamen = cita.tiene_examen === true;
+
+                return `
+                    <tr class="${esPrioritaria ? 'cita-prioritaria' : ''}">
+                        <td><strong>${cita.paciente_nombre || 'Paciente'}</strong></td>
+                        <td>${formatearFecha(cita.fecha_cita)}</td>
+                        <td>${cita.hora_cita || '--:--'}</td>
+                        <td><span style="font-weight:500;font-size:0.75rem;">${tipoAtencion}</span></td>
+                        <td><span class="badge ${getEstadoBadge(cita.estado)}">${cita.estado || 'pendiente'}</span></td>
+                        <td><span class="${tieneExamen ? 'badge-examen' : 'badge-sin-examen'}">${tieneExamen ? 'Con examen' : 'Sin examen'}</span></td>
+                        <td><span class="badge-prioridad ${prioridad === 'alta' ? 'alta' : 'normal'}">${prioridad === 'alta' ? 'Alta' : 'Normal'}</span></td>
+                        <td>
+                            <div class="acciones-wrapper">
+                                <button class="btn-accion btn-ver" onclick="verExamen(${cita.id}, this)" ${!tieneExamen ? 'disabled' : ''}>
+                                    <i class="fas fa-eye"></i> Ver
+                                </button>
+                                <button class="btn-accion btn-editar" onclick="abrirModalEditar(${cita.id}, this)" ${!tieneExamen ? 'disabled' : ''}>
+                                    <i class="fas fa-edit"></i> Editar
+                                </button>
+                                <button class="btn-accion btn-borrar" onclick="abrirModalBorrar(${cita.id}, this)" ${!tieneExamen ? 'disabled' : ''}>
+                                    <i class="fas fa-trash"></i> Borrar
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        // ===== FUNCIONES DE ACCIÓN =====
+
+        async function verExamen(citaId, button) {
+            try {
+                const textoOriginal = button.textContent;
+                button.textContent = 'Cargando...';
+                button.disabled = true;
+
+                const existeResponse = await window.api.verificarExamenPorCita(citaId);
+                if (!existeResponse.ok) throw new Error(existeResponse.error || 'Error al verificar');
+                if (!existeResponse.existe) {
+                    alert('❌ Esta cita no tiene exámenes asociados.');
+                    button.textContent = textoOriginal;
+                    button.disabled = false;
+                    return;
+                }
+
+                const response = await window.api.obtenerCitaConExamen(citaId);
+                if (!response.ok) throw new Error(response.error || 'Error al obtener examen');
+                const cita = response.cita;
+                if (!cita || !(cita.examenes?.audiometria || cita.examenes?.logoaudiometria)) {
+                    alert('❌ Esta cita no tiene exámenes asociados.');
+                    button.textContent = textoOriginal;
+                    button.disabled = false;
+                    return;
+                }
+                window.api.abrirVentanaDetalles({ cita });
+                button.textContent = textoOriginal;
+                button.disabled = false;
+            } catch (error) {
+                alert(`Error: ${error.message}`);
+                if (button) { button.textContent = 'Ver'; button.disabled = false; }
+            }
+        }
+
+        // ===== MODAL PARA EDITAR / BORRAR =====
+
+        function abrirModalEditar(citaId, button) {
+            if (!button.disabled) {
+                modalAction = 'editar';
+                modalCitaId = citaId;
+                document.getElementById('modalTitle').textContent = '✏️ Editar resultados del examen';
+                document.getElementById('modalMessage').textContent = 'Para editar los resultados de esta cita, ingresa tu clave de usuario.';
+                document.getElementById('modalConfirmar').className = 'btn-confirmar';
+                document.getElementById('modalConfirmar').textContent = 'Editar';
+                mostrarModal();
+            }
+        }
+
+        function abrirModalBorrar(citaId, button) {
+            if (!button.disabled) {
+                modalAction = 'borrar';
+                modalCitaId = citaId;
+                document.getElementById('modalTitle').textContent = '🗑️ Borrar resultados del examen';
+                document.getElementById('modalMessage').textContent = '⚠️ Esta acción eliminará permanentemente los resultados del examen. Ingresa tu clave para confirmar.';
+                document.getElementById('modalConfirmar').className = 'btn-confirmar danger';
+                document.getElementById('modalConfirmar').textContent = 'Borrar';
+                mostrarModal();
+            }
+        }
+
+        function mostrarModal() {
+            document.getElementById('modalOverlay').classList.add('visible');
+            document.getElementById('modalPassword').value = '';
+            document.getElementById('modalPassword').focus();
+        }
+
+        function cerrarModal() {
+            document.getElementById('modalOverlay').classList.remove('visible');
+            modalCitaId = null;
+            modalAction = null;
+            modalCallback = null;
+        }
+
+const CODIGO_VERIFICACION = '2620';
+
+const RUTAS_PANEL = {
+    'Audiometria Tonal y Logoadiometria': 'AudioLogo.html',
+    'Prepagada Audiometria Tonal y Logoadiometria': 'AudioLogo.html',
+    'Cuadro Clinico Auditivo': 'AudioLogo.html',
+    'Logoaudiometria': 'logoaudiometria.html',
+    'Prepagada Logoaudiometria': 'logoaudiometria.html',
+    'Audiometría': 'AudiometriaTonal.html',
+    'Prepagada Audiometria Tonal': 'AudiometriaTonal.html'
+};
+
+function resolverRutaPanel(cita) {
+    // Si la BD ya trae panel_html (viene del JOIN con tipos_atencion), úsalo directo
+    if (cita.panel_html) return cita.panel_html;
+
+    const tipo = cita.tipo_atencion_nombre || '';
+    let ruta = RUTAS_PANEL[tipo] || null;
+
+    if (!ruta) {
+        // Igual que en citassemana.html: probar claves más largas primero
+        const claves = Object.keys(RUTAS_PANEL).sort((a, b) => b.length - a.length);
+        for (const key of claves) {
+            if (tipo.includes(key)) { ruta = RUTAS_PANEL[key]; break; }
+        }
+    }
+    return ruta;
+}
+
+async function irAEditarExamen(citaId) {
+    try {
+        const response = await window.api.obtenerCitaConExamen(citaId);
+        if (!response.ok || !response.cita) throw new Error(response.error || 'No se pudo obtener la cita');
+        const cita = response.cita;
+
+        const ruta = resolverRutaPanel(cita);
+        if (!ruta) {
+            alert('Esta cita no tiene un panel de examen asignado.');
+            return;
+        }
+
+        const pacienteCompleto = {
+            id: cita.paciente_id,
+            nombre: cita.paciente_nombre || '',
+            documento: cita.paciente_documento || cita.documento || '',
+            telefono: cita.paciente_telefono || cita.telefono || '',
+            email: cita.paciente_email || cita.email || '',
+            fecha_nacimiento: cita.paciente_fecha_nacimiento || cita.fecha_nacimiento || ''
+        };
+
+        const citaCompleta = {
+            id: cita.id,
+            fecha_cita: cita.fecha_cita || '',
+            hora_cita: cita.hora_cita || '',
+            entidad_id: cita.entidad_id,
+            entidad_nombre: cita.entidad_nombre,
+            motivo: cita.motivo || '',
+            tipo_atencion_id: cita.tipo_atencion_id || '',
+            tipo_atencion_nombre: cita.tipo_atencion_nombre || '',
+            paciente_id: cita.paciente_id,
+            estado: cita.estado || 'pendiente',
+            prioridad: cita.prioridad || false,
+            panel_html: ruta
+        };
+
+        // Datos igual que citassemana.html, más lo necesario para precargar el examen
+        localStorage.setItem('pacienteActual', JSON.stringify(pacienteCompleto));
+        localStorage.setItem('citaActual', JSON.stringify(citaCompleta));
+        localStorage.setItem('examenActual', JSON.stringify(cita.examenes || {}));
+        localStorage.setItem('modoEdicion', 'true');
+        localStorage.setItem('citaIdEdicion', String(cita.id));
+
+        window.location.href = ruta;
+    } catch (error) {
+        alert(`Error al preparar edición: ${error.message}`);
+    }
+}
+
+async function ejecutarAccionModal() {
+    const codigo = document.getElementById('modalPassword').value.trim();
+    if (!codigo) {
+        alert('Por favor ingresa el código de verificación.');
+        return;
+    }
+
+    if (codigo !== CODIGO_VERIFICACION) {
+        alert('❌ Código incorrecto. Acción cancelada.');
+        cerrarModal();
+        return;
+    }
+
+    const accion = modalAction;
+    const citaId = modalCitaId;
+    cerrarModal();
+
+    if (accion === 'editar') {
+        await irAEditarExamen(citaId);
+    } else if (accion === 'borrar') {
+        try {
+            const result = await window.api.borrarResultadosExamen(citaId);
+            if (!result.ok) throw new Error(result.error || 'Error al borrar');
+            alert('✅ Resultados del examen borrados correctamente. La cita quedó pendiente.');
+            cargarCitas();
+        } catch (error) {
+            alert(`Error al borrar: ${error.message}`);
+        }
+    }
+}
+
+        // ===== FILTROS =====
+
+        function aplicarFiltros() {
+            const estadoFiltro = document.getElementById('filtroEstado').value;
+            const examenFiltro = document.getElementById('filtroExamen').value;
+            const prioridadFiltro = document.getElementById('filtroPrioridad').value;
+            const busqueda = document.getElementById('buscador').value.toLowerCase().trim();
+            const fechaDesde = document.getElementById('fechaDesde').value;
+            const fechaHasta = document.getElementById('fechaHasta').value;
+
+            let filtradas = citasData;
+
+            // Filtro fecha rápida
+            if (filtroFechaActual) {
+                const hoy = new Date(); hoy.setHours(0,0,0,0);
+                const ayer = new Date(hoy); ayer.setDate(ayer.getDate()-1);
+                const anteayer = new Date(hoy); anteayer.setDate(anteayer.getDate()-2);
+                const semanaPasada = new Date(hoy); semanaPasada.setDate(semanaPasada.getDate()-7);
+                const mesPasado = new Date(hoy); mesPasado.setMonth(mesPasado.getMonth()-1);
+
+                filtradas = filtradas.filter(c => {
+                    if (!c.fecha_cita) return false;
+                    const fc = new Date(c.fecha_cita); fc.setHours(0,0,0,0);
+                    switch (filtroFechaActual) {
+                        case 'hoy': return fc.getTime() === hoy.getTime();
+                        case 'ayer': return fc.getTime() === ayer.getTime();
+                        case 'anteayer': return fc.getTime() === anteayer.getTime();
+                        case 'semana': return fc >= semanaPasada && fc < hoy;
+                        case 'mes': return fc >= mesPasado && fc < hoy;
+                        default: return true;
+                    }
+                });
+            }
+
+            // Rango de fechas
+            if (fechaDesde || fechaHasta) {
+                const desde = fechaDesde ? new Date(fechaDesde) : new Date(0);
+                const hasta = fechaHasta ? new Date(fechaHasta) : new Date(8640000000000000);
+                if (fechaDesde) desde.setHours(0,0,0,0);
+                if (fechaHasta) hasta.setHours(23,59,59,999);
+                filtradas = filtradas.filter(c => {
+                    if (!c.fecha_cita) return false;
+                    const fc = new Date(c.fecha_cita);
+                    return fc >= desde && fc <= hasta;
+                });
+            }
+
+            if (estadoFiltro !== 'todos') filtradas = filtradas.filter(c => c.estado === estadoFiltro);
+            if (examenFiltro === 'con') filtradas = filtradas.filter(c => c.tiene_examen === true);
+            else if (examenFiltro === 'sin') filtradas = filtradas.filter(c => c.tiene_examen === false);
+            if (prioridadFiltro !== 'todos') filtradas = filtradas.filter(c => (c.prioridad || 'normal') === prioridadFiltro);
+            if (busqueda) filtradas = filtradas.filter(c => (c.paciente_nombre || '').toLowerCase().includes(busqueda));
+
+            renderizarCitas(filtradas);
+        }
+
+        // ===== UTILS =====
+
+        function formatearFecha(fecha) {
+            if (!fecha) return 'Fecha no disponible';
+            try {
+                const date = new Date(fecha);
+                return date.toLocaleDateString('es-ES', { year: 'numeric', month: 'short', day: 'numeric' });
+            } catch { return fecha; }
+        }
+
+        function getEstadoBadge(estado) {
+            const map = { 'pendiente': 'badge-warning', 'confirmada': 'badge-info', 'atendida': 'badge-success', 'cancelada': 'badge-danger' };
+            return map[estado] || 'badge-warning';
+        }
+
+        // ===== VOLVER DASHBOARD =====
+
+        document.getElementById('btnVolverDashboard').addEventListener('click', function() {
+            if (window.api?.volverDashboard) window.api.volverDashboard();
+            else window.location.href = 'dashboard.html';
+        });
+
+        // ===== ESCALA =====
+
+        function calcularEscala() {
+            const ancho = window.innerWidth;
+            const alto = window.innerHeight;
+            let escala = Math.min(ancho / 1366, alto / 768);
+            return Math.max(0.7, Math.min(1.5, escala));
+        }
+
+        function aplicarEscala() {
+            document.documentElement.style.setProperty('--escala', calcularEscala());
+        }
+
+        document.addEventListener('DOMContentLoaded', aplicarEscala);
+        let tiempoEspera;
+        window.addEventListener('resize', function() {
+            clearTimeout(tiempoEspera);
+            tiempoEspera = setTimeout(aplicarEscala, 150);
+        });
+    </script>
+</body>
+</html>

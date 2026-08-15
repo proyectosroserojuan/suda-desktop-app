@@ -710,7 +710,7 @@ tr:hover {
 
 // En citassemana.html - MODIFICAR obtenerTipoAtencion
 
-function obtenerTipoAtencion(cita) {
+function obtenerCategoriaTipoAtencion(cita) {
     // ✅ USAR tipo_atencion_nombre (viene del JOIN)
     const tipo = cita.tipo_atencion_nombre || '';
     
@@ -803,10 +803,11 @@ function obtenerTipoAtencion(cita) {
     }
     
     // CORREGIDO: El orden de las columnas debe coincidir con el <thead>
-    tbody.innerHTML = citasFiltradas.map(cita => {
+tbody.innerHTML = citasFiltradas.map(cita => {
       const fecha = new Date(cita.fecha_cita);
-      const tipoAtencion = obtenerTipoAtencion(cita);
-      const tipoClass = `tipo-${tipoAtencion.replace(/[^a-zA-Z]/g, '')}`;
+      const tipoAtencionTexto = cita.tipo_atencion_nombre || 'No especificado';
+      const tipoCategoria = obtenerCategoriaTipoAtencion(cita);
+      const tipoClass = `tipo-${tipoCategoria.replace(/[^a-zA-Z]/g, '')}`;
       const estado = cita.estado || 'pendiente';
       const esPrioritaria = cita.prioridad === true;
       const prioridadClass = esPrioritaria ? 'prioritaria' : 'normal';
@@ -824,7 +825,7 @@ function obtenerTipoAtencion(cita) {
           <td class="hora">${cita.hora_cita || '--:--'}</td>
           <td><strong>${cita.paciente_nombre || 'N/A'}</strong></td>
           <td>${cita.documento || 'N/A'}</td>
-          <td><span class="tipo-badge ${tipoClass}">${tipoAtencion}</span></td>
+          <td><span class="tipo-badge ${tipoClass}">${tipoAtencionTexto}</span></td>
             <td style="max-width: 200px; word-wrap: break-word;">${motivoTexto}</td> 
           <td><span class="estado-badge estado-${estado}">${estado === 'pendiente' ? 'Pendiente' : estado}</span></td>
           <td><span class="prioridad-badge ${prioridadClass}">${prioridadTexto}</span></td>
@@ -893,29 +894,34 @@ function realizarAtencion(cita) {
     // ✅ USAR EL NOMBRE PARA EL ROUTING (por compatibilidad)
     const tipo = cita.tipo_atencion_nombre || '';
     
-    const rutas = {
-        'Audiometria Tonal y Logoadiometria': 'AudioLogo.html',
-        'Prepagada Audiometria Tonal y Logoadiometria': 'AudioLogo.html',
-        'Cuadro Clinico Auditivo': 'AudioLogo.html',
-        'Logoaudiometria': 'logoaudiometria.html',
-        'Prepagada Logoaudiometria': 'logoaudiometria.html',
-        'Audiometría': 'AudiometriaTonal.html',
-        'Prepagada Audiometria Tonal': 'AudiometriaTonal.html'
-    };
+const rutas = {
+    'Audiometria Tonal y Logoadiometria': 'AudioLogo.html',
+    'Prepagada Audiometria Tonal y Logoadiometria': 'AudioLogo.html',
+    'Cuadro Clinico Auditivo': 'AudioLogo.html',
+    'Logoaudiometria': 'logoaudiometria.html',
+    'Prepagada Logoaudiometria': 'logoaudiometria.html',
+    'Audiometría': 'AudiometriaTonal.html',
+    'Prepagada Audiometria Tonal': 'AudiometriaTonal.html'
+};
 
-    // Buscar coincidencia parcial
-    let ruta = null;
-    for (const [key, value] of Object.entries(rutas)) {
-        if (tipo.includes(key) || key.includes(tipo)) {
-            ruta = value;
+// 1️⃣ Coincidencia EXACTA primero (sin ambigüedad posible)
+let ruta = rutas[tipo] || null;
+
+// 2️⃣ Solo si no hubo coincidencia exacta, buscar por texto parcial,
+//    probando las claves MÁS LARGAS primero para evitar que un prefijo
+//    (ej. "Audiometria Tonal") gane antes que su versión completa
+//    (ej. "Prepagada Audiometria Tonal y Logoadiometria")
+if (!ruta) {
+    const clavesOrdenadas = Object.keys(rutas).sort((a, b) => b.length - a.length);
+    for (const key of clavesOrdenadas) {
+        if (tipo.includes(key)) {
+            ruta = rutas[key];
             break;
         }
     }
+}
 
-    // Si no coincide con el mapa, usar panel_html de la B.D.
-    if (!ruta && cita.panel_html) {
-        ruta = cita.panel_html;
-    }
+    
 
     if (ruta) {
         window.location.href = ruta;

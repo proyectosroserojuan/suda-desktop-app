@@ -857,6 +857,26 @@ ipcMain.handle('eliminar-paciente', async (event, id) => {
   }
 });
 
+ipcMain.handle('borrar-resultados-examen', async (event, citaId) => {
+    try {
+        const examenesDB = require('./db/examenes_unificados');
+        const citasDB = require('./db/citas');
+
+        const resultado = await examenesDB.eliminarExamenPorCitaId(citaId);
+        if (!resultado.deleted) {
+            return { ok: false, error: 'No se encontró ningún examen para esta cita' };
+        }
+
+        // La cita vuelve a quedar pendiente
+        await citasDB.actualizarEstadoCita(citaId, 'pendiente');
+
+        return { ok: true };
+    } catch (error) {
+        console.error('❌ Error borrando resultados de examen:', error);
+        return { ok: false, error: error.message };
+    }
+});
+
 ipcMain.handle('obtener-paciente-por-id', async (event, id) => {
   try {
     const paciente = await obtenerPacientePorId(id);

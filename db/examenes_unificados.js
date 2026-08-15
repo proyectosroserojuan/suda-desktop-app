@@ -109,6 +109,18 @@ async function obtenerExamenes() {
     return result.rows;
 }
 
+async function eliminarExamenPorCitaId(citaId) {
+    try {
+        const result = await pool.query(
+            'DELETE FROM examenes_audiologicos WHERE cita_id = $1 RETURNING id',
+            [citaId]
+        );
+        return { deleted: result.rowCount > 0 };
+    } catch (error) {
+        throw error;
+    }
+}
+
 // En db/examenes_unificados.js
 
 async function obtenerExamenPorCitaId(citaId) {
@@ -314,5 +326,6 @@ module.exports = {
     obtenerExamenesPorCitaYtipo,
     obtenerExamenesConDetallesCita,
     existeExamenPorCitaId,
-    obtenerExamenesPorCitas
+    obtenerExamenesPorCitas,
+    eliminarExamenPorCitaId
 };

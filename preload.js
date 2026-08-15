@@ -66,6 +66,8 @@ obtenerPacientePorId: (id) => ipcRenderer.invoke('obtener-paciente-por-id', id),
 
   obtenerLogoaudiometrias: () => ipcRenderer.invoke('obtener-logoaudiometrias'),
   obtenerLogoaudiometriaPorId: (id) => ipcRenderer.invoke('obtener-logoaudiometria-por-id', id),
+
+  borrarResultadosExamen: (citaId) => ipcRenderer.invoke('borrar-resultados-examen', citaId),
   
 // Agregar en el objeto api de preload.js:
 generarPDFAudiometria: (datos, entidad) => ipcRenderer.invoke('generar-pdf-audiometria', datos, entidad),

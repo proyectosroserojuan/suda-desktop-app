@@ -712,7 +712,7 @@
       <table>
         <thead>
           <tr>
-            <th>Fecha</th><th>Hora</th><th>Paciente</th><th>Documento</th><th>Entidad</th><th>Prioridad</th><th>Motivo</th><th>Estado</th><th>Acciones</th>
+            <th>Fecha</th><th>Hora</th><th>Paciente</th><th>Documento</th><th>Entidad</th><th>Tipo Atención</th> <th>Prioridad</th><th>Motivo</th><th>Estado</th><th>Acciones</th>
           </tr>
         </thead>
         <tbody id="tablaCitasBody">
@@ -965,7 +965,8 @@ function renderizarTabla() {
         <td>${cita.paciente_nombre || ''}</td>
         <td>${cita.documento || ''}</td>
         <td>${cita.entidad_nombre || ''}</td>
-        <td>${cita.prioridad ? '⭐ Prioritaria' : 'Normal'}</td>
+        <td>${cita.tipo_atencion_nombre || ''}</td>  <!-- NUEVA COLUMNA -->
+        <td>${cita.prioridad ? ' Prioritaria' : 'Normal'}</td>
         <td title="${cita.motivo || ''}">${(cita.motivo || '').substring(0, 30)}${(cita.motivo || '').length > 30 ? '...' : ''}</td>
         <td><span class="badge ${estadoClass}">${cita.estado || 'pendiente'}</span></td>
         <td class="acciones-cell">
