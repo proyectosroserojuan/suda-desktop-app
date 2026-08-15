@@ -364,14 +364,15 @@ page.drawText('PROMEDIO TONAL', {
 // ============================================================
 // DIAGNÓSTICO AUDIOMETRÍA TONAL - CON WRAPPING (DIV)
 // ============================================================
-const diagY = 350;        // Posición Y desde arriba
+const diagY = 340;        // Posición Y desde arriba
 const diagX = 320;        // Posición X desde la izquierda
 
 // Definir el área del "div" para el diagnóstico
 const boxWidth = 210;      // Ancho fijo del div
-const boxHeight = 80;      // Alto fijo del div
+const boxHeight = 50;      // Alto fijo del div
 const boxX = diagX;
-const boxY = diagY + 18;   // Posición Y del div (desde arriba)
+const boxY = 350;
+
 
 // Título principal (fuera del div)
 page.drawText('DIAGNÓSTICO AUDIOMETRIA TONAL', { 
@@ -411,49 +412,56 @@ this.drawWrappedTextInArea(
     fromTop     // Función fromTop
 );
 
-//claveeeee
 // ============================================================
-// DIAGNÓSTICOS DE LOGOAUDIOMETRÍA
+// NUEVO DIAGNÓSTICO DE LOGOAUDIOMETRÍA - CON WRAPPING (DIV)
 // ============================================================
-const diagLogoY = 650;  // ← COORDENADA FIJA (desde arriba)
-const diagLogoX = 40;  // ← COORDENADA FIJA (desde la izquierda)
+const diagLogoY = 420;        // Posición Y desde arriba (AJUSTA SEGÚN NECESITES)
+const diagLogoX = 320;        // Misma X que el cuadro superior
 
-// Título "DIAGNÓSTICO LOGOAUDIOMETRÍA"
+// Definir el área del "div" para el diagnóstico de logoaudiometría
+const boxLogoWidth = 210;      // Mismo ancho que el cuadro superior
+const boxLogoHeight = 30;      // Alto fijo del div (más pequeño porque tiene menos texto)
+const boxLogoX = diagLogoX;
+const boxLogoY = 425; 
+
+
+// Título principal (fuera del div)
 page.drawText('DIAGNÓSTICO LOGOAUDIOMETRÍA', { 
-    x: diagLogoX,        // ← CAMBIADO: diagX → diagLogoX
+    x: diagLogoX, 
     y: fromTop(diagLogoY), 
     size: 9, 
     font: fontBold 
 });
 
-// O.D. (Logoaudiometría)
-page.drawText('O.D', { 
-    x: diagLogoX,        // ← CAMBIADO: diagX → diagLogoX
-    y: fromTop(diagLogoY + 18), 
-    size: 8, 
-    font: fontBold 
-});
-page.drawText((datosLogoaudiometria.diagnostico_od || '').substring(0, 55), { 
-    x: diagLogoX + 35,   // ← CAMBIADO: diagX → diagLogoX
-    y: fromTop(diagLogoY + 18), 
-    size: 8, 
-    font 
+// Dibujar el fondo y borde del div
+page.drawRectangle({
+    x: boxLogoX,
+    y: fromTop(boxLogoY + boxLogoHeight), // Ajuste para que coincida con fromTop
+    width: boxLogoWidth,
+    height: boxLogoHeight,
+    color: rgb(1, 1, 1), // Fondo blanco
+    borderWidth: 0.5,
+    borderColor: rgb(0.5, 0.5, 0.5)
 });
 
-// O.I. (Logoaudiometría)
-page.drawText('O.I:', { 
-    x: diagLogoX,        // ← CAMBIADO: diagX → diagLogoX
-    y: fromTop(diagLogoY + 36), 
-    size: 8, 
-    font: fontBold 
-});
-page.drawText((datosLogoaudiometria.diagnostico_oi || '').substring(0, 55), { 
-    x: diagLogoX + 35,   // ← CAMBIADO: diagX → diagLogoX
-    y: fromTop(diagLogoY + 36), 
-    size: 8, 
-    font 
-});
+// Construir el texto completo del diagnóstico de logoaudiometría
+const diagnosticoLogoOD = datosLogoaudiometria.diagnostico_od || '';
+const diagnosticoLogoOI = datosLogoaudiometria.diagnostico_oi || '';
+const diagnosticoLogoTexto = `O.D: ${diagnosticoLogoOD}\nO.I: ${diagnosticoLogoOI}`;
 
+// Dibujar el diagnóstico con wrapping dentro del div
+this.drawWrappedTextInArea(
+    page,
+    diagnosticoLogoTexto,
+    boxLogoX,
+    boxLogoY,
+    boxLogoWidth,
+    boxLogoHeight,
+    8,          // Tamaño de fuente
+    font,       // Fuente
+    rgb(0, 0, 0), // Color negro
+    fromTop     // Función fromTop
+);
 
 
 
@@ -472,20 +480,53 @@ page.drawText((datosLogoaudiometria.diagnostico_oi || '').substring(0, 55), {
  //   font 
 //});
 
-// OBSERVACIONES
-//page.drawText('OBSERVACIONES', { 
- //   x: diagX, 
- //   y: fromTop(diagY + 60), 
-  //  size: 9, 
-  //  font: fontBold 
-//});
-//page.drawText((datosAudiometria.observaciones || '').substring(0, 70), { 
-  //  x: diagX, 
- //   y: fromTop(diagY + 78), 
- //   size: 8, 
- //   font 
-//});
+// ============================================================
+// OBSERVACIONES - CON WRAPPING (DIV)
+// ============================================================
+const obsY = 600;        // ← Posición Y del TÍTULO (INDEPENDIENTE)
+const obsX = 90;        // ← Misma X que los diagnósticos
 
+// Definir el área del "div" para observaciones
+const obsBoxWidth = 290;      // Mismo ancho que los diagnósticos
+const obsBoxHeight = 60;      // Alto fijo del div (más grande para texto largo)
+const obsBoxX = obsX;
+const obsBoxY = obsY + 20;    // ← Cuadro 20px abajo del título (INDEPENDIENTE)
+
+// Título principal (fuera del div)
+page.drawText('OBSERVACIONES', { 
+    x: obsX, 
+    y: fromTop(obsY), 
+    size: 9, 
+    font: fontBold 
+});
+
+// Dibujar el fondo y borde del div
+page.drawRectangle({
+    x: obsBoxX,
+    y: fromTop(obsBoxY + obsBoxHeight),
+    width: obsBoxWidth,
+    height: obsBoxHeight,
+    color: rgb(1, 1, 1), // Fondo blanco
+    borderWidth: 0.5,
+    borderColor: rgb(0.5, 0.5, 0.5)
+});
+
+// Construir el texto de observaciones
+const observacionesTexto = datosAudiometria.observaciones || '';
+
+// Dibujar las observaciones con wrapping dentro del div
+this.drawWrappedTextInArea(
+    page,
+    observacionesTexto,
+    obsBoxX,
+    obsBoxY,
+    obsBoxWidth,
+    obsBoxHeight,
+    8,          // Tamaño de fuente
+    font,       // Fuente
+    rgb(0, 0, 0), // Color negro
+    fromTop     // Función fromTop
+);
 
 
 

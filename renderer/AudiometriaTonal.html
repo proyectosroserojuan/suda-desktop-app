@@ -8,6 +8,9 @@
 <title>Audiometría Tonal Clínica</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="../services/modalResultados.js"></script>
+ <script src="../services/ctrlGrabar.js"></script>
+ <script src="../services/examenService.js"></script>
 
 <style>
 /* ============================================
@@ -1831,7 +1834,7 @@ async function onGrabarAudiometriaClick() {
         console.log('✅ Guardado exitoso en BD, ID:', result.id);
         mostrarNotificacionAudiometria('✅ Audiometría guardada exitosamente');
         
-        // GENERAR PDF (igual que antes)
+// GENERAR PDF (igual que antes)
         try {
             const entidadNombre = cita?.entidad_nombre || 'PARTICULAR';
             const datosPDF = {
@@ -1857,25 +1860,38 @@ async function onGrabarAudiometriaClick() {
                     oi_bone: ultimosPTA.oi_bone
                 }
             };
-            
+
+            let pdfResult = null;
+
             if (window.api.generarPDFAudiometria) {
-                const pdfResult = await window.api.generarPDFAudiometria(datosPDF, entidadNombre);
-                if (pdfResult && pdfResult.ok) {
-                    mostrarNotificacionAudiometria(`✅ PDF generado: ${pdfResult.path}`);
-                } else {
-                    throw new Error(pdfResult?.error || 'Error al generar PDF');
-                }
+                pdfResult = await window.api.generarPDFAudiometria(datosPDF, entidadNombre);
             } else if (window.api.generarPDF) {
-                const pdfResult = await window.api.generarPDF(datosPDF, entidadNombre, 'audiometria');
-                if (pdfResult && pdfResult.ok) {
-                    mostrarNotificacionAudiometria(`✅ PDF generado: ${pdfResult.path}`);
-                } else {
-                    throw new Error(pdfResult?.error || 'Error al generar PDF');
-                }
+                pdfResult = await window.api.generarPDF(datosPDF, entidadNombre, 'audiometria');
             } else {
                 throw new Error('No hay función disponible para generar PDF');
             }
-            
+
+            if (pdfResult && pdfResult.ok) {
+                if (typeof ModalService !== 'undefined') {
+                    ModalService.mostrar({
+                        rutaPDF: pdfResult.path,
+                        datosExamen: {
+                            paciente: paciente.nombre || '',
+                            documento: paciente.documento || '',
+                            fecha: cita?.fecha_cita || new Date().toISOString().split('T')[0],
+                            entidad: entidadNombre,
+                            tipo_examen: 'Audiometría Tonal',
+                            observaciones: observaciones,
+                            cita_id: citaId
+                        }
+                    });
+                } else {
+                    mostrarNotificacionAudiometria(`✅ PDF generado: ${pdfResult.path}`);
+                }
+            } else {
+                throw new Error(pdfResult?.error || 'Error al generar PDF');
+            }
+
         } catch (err) {
             console.warn('Error generando PDF:', err);
             mostrarNotificacionAudiometria('⚠️ Datos guardados pero error al generar PDF', true);
@@ -4974,19 +4990,21 @@ document.addEventListener('DOMContentLoaded', function() {
             console.log('🔒 Botón "Volver al Dashboard" ocultado (modo combinado)');
         }
         // Ocultar el botón "GRABAR CITA"
-        const botonGrabar = document.getElementById('grabarAudiometriaBtn');
+const botonGrabar = document.getElementById('grabarAudiometriaBtn');
         if (botonGrabar) {
             botonGrabar.style.display = 'none';
             console.log('Botón GRABAR CITA ocultado (modo combinado)');
         }
         
+    } else {
+        if (window.CtrlGService) {
+            CtrlGService.init(function () {
+                if (typeof onGrabarAudiometriaClick === 'function') {
+                    onGrabarAudiometriaClick();
+                }
+            });
+        }
     }
-
-    
-
-    
-
-
 })();
 
 // ============================================
@@ -5556,6 +5574,7 @@ document.addEventListener('DOMContentLoaded', function() {
 </script>
  <script src="../renderer/focus-fix.js"></script>
  <script src="../renderer/simbolos-en-chart/enmascaramientosinrespuestaosea.js"></script>
+ 
  <script>
 function calcularEscala() {
     const ancho = window.innerWidth;
@@ -5578,7 +5597,7 @@ window.addEventListener('resize', function() {
 });
 </script>
 
- 
+
 </body>
 </html>
 

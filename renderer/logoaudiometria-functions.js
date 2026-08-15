@@ -282,12 +282,15 @@ const diagnostico_oi = obtenerDiscriminacionOI();
             imagenBase64
         );
         
-        console.log('✅ Guardado exitoso, ID:', id);
+   
+
+
+console.log('✅ Guardado exitoso, ID:', id);
         mostrarNotificacion('✅ Logoaudiometría guardada exitosamente');
         
         // Generar PDF
         try {
-            await generarPDF(
+            const pdfPath = await generarPDF(
         paciente,           // paciente
         cita,              // cita
         diagnostico,       // diagnostico general
@@ -299,10 +302,26 @@ const diagnostico_oi = obtenerDiscriminacionOI();
         cita?.entidad_nombre,
         nrFlags  // entidad
     );
+
+            if (typeof ModalService !== 'undefined' && pdfPath) {
+                ModalService.mostrar({
+                    rutaPDF: pdfPath,
+                    datosExamen: {
+                        paciente: paciente.nombre || '',
+                        documento: paciente.documento || '',
+                        fecha: cita?.fecha_cita || new Date().toISOString().split('T')[0],
+                        entidad: cita?.entidad_nombre || 'Particular',
+                        tipo_examen: 'Logoaudiometría',
+                        observaciones: diagnostico || '',
+                        cita_id: cita.id
+                    }
+                });
+            }
         } catch (err) {
             console.warn('Error generando PDF:', err);
             mostrarNotificacion('⚠️ Datos guardados pero error al generar PDF', true);
         }
+
         
     } catch (error) {
         console.error('❌ ERROR en onGrabarClick:', error);
