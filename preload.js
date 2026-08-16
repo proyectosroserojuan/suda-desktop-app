@@ -81,6 +81,7 @@ generarPDFCombinadoCoosalud: (datosAudiometria, datosLogoaudiometria, entidad) =
 obtenerTodasLasCitas: () => ipcRenderer.invoke('obtener-todas-las-citas'),
 // Agregar al objeto api
 //generarPDFAudiometria: (datos, entidad) => ipcRenderer.invoke('generar-pdf-audiometria', datos, entidad),
+obtenerReporteEstadisticas: (mes, anio) => ipcRenderer.invoke('obtener-reporte-estadisticas', mes, anio),
 
 // Agregar dentro del objeto api
 actualizarCitaCompleta: (id, data) => ipcRenderer.invoke('actualizar-cita-completa', id, data),

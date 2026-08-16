@@ -577,24 +577,24 @@ bone-row {
 }
 
 .diagnostico-section:nth-of-type(1) h4 {
-    color: #e74c3c !important;
-    border-bottom-color: #e74c3c !important;
+    color: #000000 !important;
+    border-bottom-color: #000000 !important;
 }
 .diagnostico-section:nth-of-type(2) h4 {
-    color: #3498db !important;
-    border-bottom-color: #3498db !important;
+    color: #000000 !important;
+    border-bottom-color: #000000 !important;
 }
 .diagnostico-section:nth-of-type(3) h4 {
-    color: #f59e0b !important;
-    border-bottom-color: #f59e0b !important;
+    color: #000000 !important;
+    border-bottom-color: #000000 !important;
 }
 .diagnostico-section:nth-of-type(4) h4 {
     color: #10b981 !important;
     border-bottom-color: #10b981 !important;
 }
 
-.diagnostico-section:nth-of-type(1) h4::before { content: "🔴 "; }
-.diagnostico-section:nth-of-type(2) h4::before { content: "🔵 "; }
+.diagnostico-section:nth-of-type(1) h4::before { content: ""; }
+.diagnostico-section:nth-of-type(2) h4::before { content: ""; }
 
 /* === RESPONSIVE === */
 @media (max-width: 1024px) {
@@ -1105,8 +1105,8 @@ button:hover {
 <!-- ============================================ -->
 <div class="diagnostics-row">
     <div class="diagnostico-section">
-        <h4 style="color:#e74c3c;">Diagnóstico</h4>
-        <textarea id="diagnostico_od" class="diagnostico-input" rows="3" placeholder="Diagnóstico específico para oído derecho..."></textarea>
+        <h4 style="color:#000000;">Diagnóstico</h4>
+        <textarea id="diagnostico_od" class="diagnostico-input" rows="3" placeholder="Diagnóstico"></textarea>
     </div>
 
 
@@ -1833,6 +1833,12 @@ async function onGrabarAudiometriaClick() {
         
         console.log('✅ Guardado exitoso en BD, ID:', result.id);
         mostrarNotificacionAudiometria('✅ Audiometría guardada exitosamente');
+
+
+        // 🔥 Limpiar modo edición tras guardar
+localStorage.removeItem('modoEdicion');
+localStorage.removeItem('examenActual');
+localStorage.removeItem('citaIdEdicion');
         
 // GENERAR PDF (igual que antes)
         try {
@@ -2541,6 +2547,60 @@ createInputs('oi-inputs', 'oi');
 
 createInputs('od-bone-inputs', 'od-bone', 'bone');
 createInputs('oi-bone-inputs', 'oi-bone', 'bone');
+
+
+// ============================================
+// PRECARGA EN MODO EDICIÓN
+// ============================================
+(function precargarEdicionAudiometria() {
+    const modoEdicion = localStorage.getItem('modoEdicion') === 'true';
+    if (!modoEdicion) return;
+
+    try {
+        const examenGuardado = JSON.parse(localStorage.getItem('examenActual') || '{}');
+        const examen = examenGuardado.audiometria || examenGuardado.logoaudiometria || null;
+        if (!examen) return;
+
+        // Vía aérea OD/OI (valores_od / valores_oi vienen como {freq: valor})
+        const valoresOD = examen.valores_od || {};
+        const valoresOI = examen.valores_oi || {};
+
+        Object.keys(valoresOD).forEach(freq => {
+            const input = document.getElementById(`od_${freq}`);
+            if (input && valoresOD[freq] !== '') input.value = valoresOD[freq];
+        });
+        Object.keys(valoresOI).forEach(freq => {
+            const input = document.getElementById(`oi_${freq}`);
+            if (input && valoresOI[freq] !== '') input.value = valoresOI[freq];
+        });
+
+        // Diagnóstico / otoscopia / observaciones
+        if (document.getElementById('diagnostico_od')) {
+            document.getElementById('diagnostico_od').value = examen.diagnostico_od || '';
+        }
+        if (document.getElementById('otoscopia_audiometria')) {
+            document.getElementById('otoscopia_audiometria').value = examen.otoscopia || '';
+        }
+        if (document.getElementById('observaciones_audiometria')) {
+            document.getElementById('observaciones_audiometria').value = examen.observaciones || '';
+        }
+
+        // Refrescar gráfica y PTA con los valores recién cargados
+        updateChart();
+        actualizarPTA();
+        sincronizarCanvasDesdeInputs();
+        if (typeof redrawAll === 'function') redrawAll();
+
+        // Cambiar el texto del botón para dejar claro que es edición
+        const btnGrabar = document.getElementById('grabarAudiometriaBtn');
+        if (btnGrabar) btnGrabar.textContent = 'ACTUALIZAR CITA';
+
+    } catch (e) {
+        console.error('❌ Error precargando examen en modo edición:', e);
+    }
+})();
+
+
 document.querySelectorAll(".symbol-btn").forEach(btn => {
 
     btn.addEventListener("click", function () {

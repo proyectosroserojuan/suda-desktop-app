@@ -866,6 +866,12 @@ tbody.innerHTML = citasFiltradas.map(cita => {
 // En citassemana.html - MODIFICAR realizarAtencion
 
 function realizarAtencion(cita) {
+
+    // 🔥 IMPORTANTE: limpiar cualquier rastro de modo edición de una sesión anterior
+    localStorage.removeItem('modoEdicion');
+    localStorage.removeItem('examenActual');
+    localStorage.removeItem('citaIdEdicion');
+
     const pacienteCompleto = {
         id: cita.paciente_id,
         nombre: cita.paciente_nombre || "",

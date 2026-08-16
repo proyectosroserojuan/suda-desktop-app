@@ -949,14 +949,11 @@ const RUTAS_PANEL = {
 };
 
 function resolverRutaPanel(cita) {
-    // Si la BD ya trae panel_html (viene del JOIN con tipos_atencion), úsalo directo
-    if (cita.panel_html) return cita.panel_html;
-
     const tipo = cita.tipo_atencion_nombre || '';
     let ruta = RUTAS_PANEL[tipo] || null;
 
     if (!ruta) {
-        // Igual que en citassemana.html: probar claves más largas primero
+        // Probar claves más largas primero (evita que un prefijo gane antes que la versión completa)
         const claves = Object.keys(RUTAS_PANEL).sort((a, b) => b.length - a.length);
         for (const key of claves) {
             if (tipo.includes(key)) { ruta = RUTAS_PANEL[key]; break; }

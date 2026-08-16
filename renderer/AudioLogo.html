@@ -425,6 +425,11 @@ if (tieneDatosAudiometria || tieneDatosLogoaudiometria) {
                 if (result && result.ok) {
                     examenGuardado = true;
                     console.log('✅ Examen combinado guardado, ID:', result.id);
+
+                            // 🔥 Limpiar modo edición tras guardar
+        localStorage.removeItem('modoEdicion');
+        localStorage.removeItem('examenActual');
+        localStorage.removeItem('citaIdEdicion');
                 }
             }
         }

@@ -232,6 +232,7 @@ const { existeExamenPorCitaId } = require('./db/examenes_unificados');
 const pdfRegeneratorService = require('./services/pdfRegeneratorService');
 const EnvioService = require('./services/EnvioService');
 const ServicioTiposAtencion = require('./services/ServicioTiposAtencion');
+const EstadisticasService = require('./services/EstadisticasService');
 
 
 //const pdfViewerService = require('./services/pdfViewerService');
@@ -256,6 +257,15 @@ ipcMain.handle('obtener-citas-con-estado-examen', async () => {
     }
 });
 
+ipcMain.handle('obtener-reporte-estadisticas', async (event, mes, anio) => {
+    try {
+        const reporte = await EstadisticasService.obtenerReporteCompleto(mes, anio);
+        return { ok: true, reporte };
+    } catch (error) {
+        console.error('❌ Error obteniendo reporte de estadísticas:', error);
+        return { ok: false, error: error.message };
+    }
+});
 
 // Obtener todos los tipos para selects
 ipcMain.handle('obtener-tipos-atencion', async () => {
@@ -816,6 +826,7 @@ function createWindow() {
   mainWindow = new BrowserWindow({
     width: 1200,
     height: 800,
+    show: false, 
     focusable: true,  // ← NUEVO
     icon: path.join(__dirname, 'icon.ico'),
     webPreferences: {
@@ -827,6 +838,7 @@ function createWindow() {
 
     mainWindow.once('ready-to-show', () => {
     mainWindow.show();
+    mainWindow.maximize();
     mainWindow.focus();
   });
 

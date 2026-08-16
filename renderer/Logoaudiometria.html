@@ -2076,7 +2076,68 @@ audioInputs.forEach((id, index) => {
 
 resetValues();
 
+// ============================================
+// PRECARGA EN MODO EDICIÓN
+// ============================================
+(function precargarEdicionLogoaudiometria() {
+    const modoEdicion = localStorage.getItem('modoEdicion') === 'true';
+    if (!modoEdicion) return;
 
+    try {
+        const examenGuardado = JSON.parse(localStorage.getItem('examenActual') || '{}');
+        const examen = examenGuardado.logoaudiometria || examenGuardado.audiometria || null;
+        if (!examen) return;
+
+        const setVal = (id, val) => {
+            const el = document.getElementById(id);
+            if (el && val !== null && val !== undefined && val !== '') el.value = val;
+        };
+
+        setVal('od_urv', examen.urv_od);
+        setVal('od_upalabra', examen.upalabra_od);
+        setVal('od_udisc', examen.udisc_od);
+        setVal('od_pmax', examen.pmax_od);
+
+        setVal('oi_urv', examen.urv_oi);
+        setVal('oi_upalabra', examen.upalabra_oi);
+        setVal('oi_udisc', examen.udisc_oi);
+        setVal('oi_pmax', examen.pmax_oi);
+
+        // Restaurar % y dB de discriminación desde el texto guardado
+        // (se guardó como: "Discriminación del X% en dB Y O.D")
+        function parseDiscriminacion(texto) {
+            if (!texto) return { porcentaje: '', db: '' };
+            const m = texto.match(/del\s+([\d.]+)%\s+en\s+dB\s+([\d.]+)/i);
+            return m ? { porcentaje: m[1], db: m[2] } : { porcentaje: '', db: '' };
+        }
+        const discOD = parseDiscriminacion(examen.diagnostico_od);
+        const discOI = parseDiscriminacion(examen.diagnostico_oi);
+        setVal('discriminacion_od_porcentaje', discOD.porcentaje);
+        setVal('discriminacion_od_db', discOD.db);
+        setVal('discriminacion_oi_porcentaje', discOI.porcentaje);
+        setVal('discriminacion_oi_db', discOI.db);
+
+        // Restaurar banderas "Sin respuesta" (NR)
+        const nrFlags = examen.nr_flags || {};
+        ['od', 'oi'].forEach(ear => {
+            const flags = nrFlags[ear] || {};
+            Object.keys(flags).forEach(field => {
+                if (!flags[field]) return;
+                noResponseFlags[ear][field] = true;
+                const btn = document.querySelector(`.nr-btn[data-ear="${ear}"][data-field="${field}"]`);
+                if (btn) btn.classList.add('active');
+            });
+        });
+
+        updateChart();
+
+        const btnGrabar = document.getElementById('grabarBtn');
+        if (btnGrabar) btnGrabar.textContent = 'ACTUALIZAR';
+
+    } catch (e) {
+        console.error('❌ Error precargando logoaudiometría en modo edición:', e);
+    }
+})();
 
 
 document.querySelectorAll(".symbol-btn").forEach(btn => {
