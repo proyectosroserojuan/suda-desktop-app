@@ -4,6 +4,7 @@ const { BrowserWindow } = require('electron');
 const path = require('path');
 const fs = require('fs');
 const os = require('os');
+const https = require('https');
 
 // Importar los generadores de PDF
 const pdfGeneratorUnified = require('./pdfGeneratorUnified');
@@ -18,6 +19,38 @@ class PDFRegeneratorService {
         
         if (!fs.existsSync(this.tempPath)) {
             fs.mkdirSync(this.tempPath, { recursive: true });
+        }
+    }
+
+        // ============================================
+    // MÉTODO NUEVO 1: Descargar imagen desde URL
+    // ============================================
+    descargarImagen(url) {
+        return new Promise((resolve, reject) => {
+            https.get(url, (response) => {
+                if (response.statusCode !== 200) {
+                    reject(new Error(`Error HTTP: ${response.statusCode}`));
+                    return;
+                }
+                const chunks = [];
+                response.on('data', (chunk) => chunks.push(chunk));
+                response.on('end', () => resolve(Buffer.concat(chunks)));
+                response.on('error', reject);
+            }).on('error', reject);
+        });
+    }
+
+    // ============================================
+    // MÉTODO NUEVO 2: Convertir URL a base64
+    // ============================================
+    async urlToBase64(url) {
+        if (!url) return null;
+        try {
+            const buffer = await this.descargarImagen(url);
+            return `data:image/png;base64,${buffer.toString('base64')}`;
+        } catch (error) {
+            console.error('⚠️ Error convirtiendo URL a base64:', error);
+            return null;
         }
     }
 
@@ -68,8 +101,8 @@ class PDFRegeneratorService {
                 console.log('📄 Generando PDF COMBINADO (por tipo_atencion_id)');
                 
                 // Asegurarnos de tener datos de ambos
-                const datosAudiometria = this.prepararDatosParaPDF(cita, examenAudiometria || examenLogoaudiometria, 'audiometria');
-                const datosLogoaudiometria = this.prepararDatosParaPDF(cita, examenLogoaudiometria || examenAudiometria, 'logoaudiometria');
+                const datosAudiometria = await this.prepararDatosParaPDF(cita, examenAudiometria || examenLogoaudiometria, 'audiometria');
+                const datosLogoaudiometria = await this.prepararDatosParaPDF(cita, examenLogoaudiometria || examenAudiometria, 'logoaudiometria');
                 
                 if (esCoosalud) {
                     pdfPath = await pdfGeneratorCoosaludUnified.generarPDFCombinadoCOO(
@@ -88,7 +121,7 @@ class PDFRegeneratorService {
             // ✅ CASO 2: SOLO AUDIOMETRÍA (tipos 1, 5)
             else if (esSoloAudiometria) {
                 console.log('📄 Generando PDF de AUDIOMETRÍA (por tipo_atencion_id)');
-                const datos = this.prepararDatosParaPDF(cita, examenAudiometria, 'audiometria');
+                const datos = await this.prepararDatosParaPDF(cita, examenAudiometria, 'audiometria');
                 
                 if (esCoosalud) {
                     pdfPath = await pdfGeneratorCoosalud.generarPDF(datos, entidad, 'audiometria');
@@ -99,7 +132,7 @@ class PDFRegeneratorService {
             // ✅ CASO 3: SOLO LOGOAUDIOMETRÍA (tipos 2, 6)
             else if (esSoloLogoaudiometria) {
                 console.log('📄 Generando PDF de LOGOAUDIOMETRÍA (por tipo_atencion_id)');
-                const datos = this.prepararDatosParaPDF(cita, examenLogoaudiometria, 'logoaudiometria');
+                const datos = await this.prepararDatosParaPDF(cita, examenLogoaudiometria, 'logoaudiometria');
                 
                 if (esCoosalud) {
                     pdfPath = await pdfGeneratorCoosalud.generarPDF(datos, entidad, 'logoaudiometria');
@@ -116,8 +149,8 @@ class PDFRegeneratorService {
                 
                 if (tieneAudiometria && tieneLogoaudiometria) {
                     console.log('📄 Generando PDF COMBINADO (detección automática)');
-                    const datosAudiometria = this.prepararDatosParaPDF(cita, examenAudiometria || examenLogoaudiometria, 'audiometria');
-                    const datosLogoaudiometria = this.prepararDatosParaPDF(cita, examenLogoaudiometria || examenAudiometria, 'logoaudiometria');
+                    const datosAudiometria = await this.prepararDatosParaPDF(cita, examenAudiometria || examenLogoaudiometria, 'audiometria');
+                    const datosLogoaudiometria = await this.prepararDatosParaPDF(cita, examenLogoaudiometria || examenAudiometria, 'logoaudiometria');
                     
                     if (esCoosalud) {
                         pdfPath = await pdfGeneratorCoosaludUnified.generarPDFCombinadoCOO(
@@ -134,7 +167,7 @@ class PDFRegeneratorService {
                     }
                 } else if (tieneAudiometria) {
                     console.log('📄 Generando PDF de AUDIOMETRÍA (detección automática)');
-                    const datos = this.prepararDatosParaPDF(cita, examenAudiometria || examenLogoaudiometria, 'audiometria');
+                    const datos = await this.prepararDatosParaPDF(cita, examenAudiometria || examenLogoaudiometria, 'audiometria');
                     
                     if (esCoosalud) {
                         pdfPath = await pdfGeneratorCoosalud.generarPDF(datos, entidad, 'audiometria');
@@ -143,7 +176,7 @@ class PDFRegeneratorService {
                     }
                 } else if (tieneLogoaudiometria) {
                     console.log('📄 Generando PDF de LOGOAUDIOMETRÍA (detección automática)');
-                    const datos = this.prepararDatosParaPDF(cita, examenLogoaudiometria || examenAudiometria, 'logoaudiometria');
+                    const datos = await this.prepararDatosParaPDF(cita, examenLogoaudiometria || examenAudiometria, 'logoaudiometria');
                     
                     if (esCoosalud) {
                         pdfPath = await pdfGeneratorCoosalud.generarPDF(datos, entidad, 'logoaudiometria');
@@ -209,65 +242,74 @@ class PDFRegeneratorService {
     }
 
 // En services/pdfRegeneratorService.js - modificar prepararDatosParaPDF
+    async prepararDatosParaPDF(cita, examenData, tipo = 'audiometria') {
+        let valoresOD = examenData?.valores_od || {};
+        let valoresOI = examenData?.valores_oi || {};
+        
+        if (typeof valoresOD === 'string') {
+            try { valoresOD = JSON.parse(valoresOD); } catch(e) { valoresOD = {}; }
+        }
+        if (typeof valoresOI === 'string') {
+            try { valoresOI = JSON.parse(valoresOI); } catch(e) { valoresOI = {}; }
+        }
+        
+        const parseNumber = (val) => {
+            if (val === null || val === undefined || val === '') return null;
+            const num = Number(val);
+            return isNaN(num) ? null : num;
+        };
 
-prepararDatosParaPDF(cita, examenData, tipo = 'audiometria') {
-    let valoresOD = examenData?.valores_od || {};
-    let valoresOI = examenData?.valores_oi || {};
-    
-    if (typeof valoresOD === 'string') {
-        try { valoresOD = JSON.parse(valoresOD); } catch(e) { valoresOD = {}; }
+        // 🔥 NUEVO: Convertir URLs de Cloudinary a base64
+        let graficaTonalBase64 = examenData?.grafica_tonal_base64 || examenData?.grafica_base64 || '';
+        
+        // Si no tiene base64 pero tiene URL de Cloudinary, descargarla
+        if (!graficaTonalBase64 && examenData?.grafica_tonal_url) {
+            console.log('🔄 Descargando imagen tonal desde Cloudinary');
+            graficaTonalBase64 = await this.urlToBase64(examenData.grafica_tonal_url);
+        }
+        
+        let graficaLogoBase64 = examenData?.grafica_logo_base64 || '';
+        if (!graficaLogoBase64 && examenData?.grafica_logo_url) {
+            console.log('🔄 Descargando imagen logo desde Cloudinary');
+            graficaLogoBase64 = await this.urlToBase64(examenData.grafica_logo_url);
+        }
+
+        // Si es logoaudiometria y no tiene logo, intentar con grafica_base64
+        if (tipo === 'logoaudiometria' && !graficaLogoBase64 && examenData?.grafica_base64) {
+            graficaLogoBase64 = examenData.grafica_base64;
+        }
+
+        return {
+            paciente: {
+                nombre: cita.paciente_nombre || '',
+                documento: cita.documento || ''
+            },
+            valores_od: valoresOD,
+            valores_oi: valoresOI,
+            diagnostico_od: examenData?.diagnostico_od || '',
+            diagnostico_oi: examenData?.diagnostico_oi || '',
+            observaciones: examenData?.observaciones || '',
+            otoscopia: examenData?.otoscopia || '',
+            grafica_tonal_base64: graficaTonalBase64,
+            grafica_logo_base64: graficaLogoBase64,
+            pta: {
+                od_air: parseNumber(examenData?.pta_via_aerea_od),
+                od_bone: parseNumber(examenData?.pta_via_osea_od),
+                oi_air: parseNumber(examenData?.pta_via_aerea_oi),
+                oi_bone: parseNumber(examenData?.pta_via_osea_oi)
+            },
+            diagnostico: examenData?.diagnostico || '',
+            urv_od: parseNumber(examenData?.urv_od),
+            urv_oi: parseNumber(examenData?.urv_oi),
+            upalabra_od: parseNumber(examenData?.upalabra_od),
+            upalabra_oi: parseNumber(examenData?.upalabra_oi),
+            udisc_od: parseNumber(examenData?.udisc_od),
+            udisc_oi: parseNumber(examenData?.udisc_oi),
+            pmax_od: parseNumber(examenData?.pmax_od),
+            pmax_oi: parseNumber(examenData?.pmax_oi),
+            freqs: ['250', '500', '1000', '2000', '3000', '4000', '6000', '8000']
+        };
     }
-    if (typeof valoresOI === 'string') {
-        try { valoresOI = JSON.parse(valoresOI); } catch(e) { valoresOI = {}; }
-    }
-    
-    const parseNumber = (val) => {
-        if (val === null || val === undefined || val === '') return null;
-        const num = Number(val);
-        return isNaN(num) ? null : num;
-    };
-
-    // 🔥 LOG PARA VERIFICAR QUÉ CAMPOS TIENE examenData
-    console.log('📊 examenData en prepararDatosParaPDF:', {
-        tiene_grafica_tonal: !!examenData?.grafica_tonal_base64,
-        tiene_grafica_logo: !!examenData?.grafica_logo_base64,
-        tiene_grafica_base64: !!examenData?.grafica_base64,
-        tipo: tipo,
-        campos: Object.keys(examenData || {})
-    });
-
-    return {
-        paciente: {
-            nombre: cita.paciente_nombre || '',
-            documento: cita.documento || ''
-        },
-        valores_od: valoresOD,
-        valores_oi: valoresOI,
-        diagnostico_od: examenData?.diagnostico_od || '',
-        diagnostico_oi: examenData?.diagnostico_oi || '',
-        observaciones: examenData?.observaciones || '',
-        otoscopia: examenData?.otoscopia || '',
-        // 🔥 CAMBIAR: Usar grafica_tonal_base64 si existe, si no grafica_base64
-        grafica_tonal_base64: examenData?.grafica_tonal_base64 || examenData?.grafica_base64 || '',
-        grafica_logo_base64: examenData?.grafica_logo_base64 || '',
-        pta: {
-            od_air: parseNumber(examenData?.pta_via_aerea_od),
-            od_bone: parseNumber(examenData?.pta_via_osea_od),
-            oi_air: parseNumber(examenData?.pta_via_aerea_oi),
-            oi_bone: parseNumber(examenData?.pta_via_osea_oi)
-        },
-        diagnostico: examenData?.diagnostico || '',
-        urv_od: parseNumber(examenData?.urv_od),
-        urv_oi: parseNumber(examenData?.urv_oi),
-        upalabra_od: parseNumber(examenData?.upalabra_od),
-        upalabra_oi: parseNumber(examenData?.upalabra_oi),
-        udisc_od: parseNumber(examenData?.udisc_od),
-        udisc_oi: parseNumber(examenData?.udisc_oi),
-        pmax_od: parseNumber(examenData?.pmax_od),
-        pmax_oi: parseNumber(examenData?.pmax_oi),
-        freqs: ['250', '500', '1000', '2000', '3000', '4000', '6000', '8000']
-    };
-}
 
     /**
      * MOSTRAR PDF EN VENTANA

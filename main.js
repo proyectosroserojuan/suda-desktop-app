@@ -1,9 +1,10 @@
 const { app, BrowserWindow, ipcMain } = require('electron');
-
+require('dotenv').config();
 const { exec } = require('child_process');
 
 const { shell } = require('electron');
 const fs = require('fs');
+
 
 
 
@@ -105,7 +106,95 @@ ipcMain.on('abrir-ventana-detalles', (event, datosExamen) => {
 
 */
 
-// main.js - REEMPLAZAR el handler existente por este
+
+
+// ============================================================
+// HANDLER: abrir-ventana-detalles (CON CONVERSIÓN DE IMÁGENES)
+// ============================================================
+ipcMain.on('abrir-ventana-detalles', async (event, datosExamen) => {
+    const cita = datosExamen.cita || {};
+    const tipoId = cita.tipo_atencion_id;
+
+    if (!tipoId) {
+        console.error('❌ La cita no tiene tipo_atencion_id');
+        return;
+    }
+
+    try {
+        const tipo = await ServicioTiposAtencion.obtenerPorId(tipoId);
+
+        if (!tipo) {
+            console.error(`❌ No se encontró el tipo de atención con ID: ${tipoId}`);
+            return;
+        }
+
+        console.log(`📄 [ROUTING] tipo_id=${tipoId} (${tipo.nombre}) → ${tipo.panel_html}`);
+
+        // 🔥 OBTENER EL EXAMEN Y CONVERTIR IMÁGENES
+        const examenes = datosExamen.cita?.examenes || {};
+        let audiometria = examenes.audiometria || null;
+        let logoaudiometria = examenes.logoaudiometria || null;
+
+        // 🔥 CONVERTIR IMÁGENES DE AUDIOMETRÍA
+        if (audiometria) {
+            if (audiometria.grafica_tonal_url && !audiometria.grafica_tonal_base64) {
+                console.log('🔄 Convirtiendo grafica_tonal_url a base64...');
+                audiometria.grafica_tonal_base64 = await urlToBase64(audiometria.grafica_tonal_url);
+            }
+            // Si tiene grafica_base64 (campo antiguo) pero no grafica_tonal_base64
+            if (audiometria.grafica_base64 && !audiometria.grafica_tonal_base64) {
+                audiometria.grafica_tonal_base64 = audiometria.grafica_base64;
+            }
+        }
+
+        // 🔥 CONVERTIR IMÁGENES DE LOGOAUDIOMETRÍA
+        if (logoaudiometria) {
+            if (logoaudiometria.grafica_logo_url && !logoaudiometria.grafica_logo_base64) {
+                console.log('🔄 Convirtiendo grafica_logo_url a base64...');
+                logoaudiometria.grafica_logo_base64 = await urlToBase64(logoaudiometria.grafica_logo_url);
+            }
+            // Si tiene grafica_base64 (campo antiguo) pero no grafica_logo_base64
+            if (logoaudiometria.grafica_base64 && !logoaudiometria.grafica_logo_base64) {
+                logoaudiometria.grafica_logo_base64 = logoaudiometria.grafica_base64;
+            }
+        }
+
+        // 🔥 ACTUALIZAR los datos con las imágenes convertidas
+        datosExamen.cita.examenes = { audiometria, logoaudiometria };
+        if (audiometria) datosExamen.cita.examenes.audiometria = audiometria;
+        if (logoaudiometria) datosExamen.cita.examenes.logoaudiometria = logoaudiometria;
+
+        const ventanaDetalles = new BrowserWindow({
+            width: 1100,
+            height: 850,
+            resizable: true,
+            maximizable: true,
+            minimizable: true,
+            parent: BrowserWindow.getFocusedWindow(),
+            modal: true,
+            show: false,
+            webPreferences: {
+                nodeIntegration: false,
+                contextIsolation: true,
+                preload: path.join(__dirname, 'preload.js')
+            }
+        });
+
+        ventanaDetalles.setTitle(tipo.nombre);
+        ventanaDetalles.loadFile(`renderer/${tipo.panel_html}`);
+
+        ventanaDetalles.once('ready-to-show', () => {
+            ventanaDetalles.show();
+            ventanaDetalles.webContents.send('cargar-detalles', datosExamen);
+        });
+
+    } catch (error) {
+        console.error('❌ Error al abrir ventana de detalles:', error);
+    }
+});
+
+
+/* main.js - REEMPLAZAR el handler existente por este
 
 ipcMain.on('abrir-ventana-detalles', async (event, datosExamen) => {
     const cita = datosExamen.cita || {};
@@ -154,6 +243,10 @@ ipcMain.on('abrir-ventana-detalles', async (event, datosExamen) => {
         console.error('❌ Error al abrir ventana de detalles:', error);
     }
 });
+
+
+*/
+
 // Handler para verificar el estado de PostgreSQL
 ipcMain.handle('verificar-postgres', async () => {
   return new Promise((resolve) => {
@@ -230,9 +323,12 @@ const { obtenerCitasConDetalles, obtenerCitasPorMes, obtenerEstadisticasPorEntid
 const { obtenerCitasConEstadoExamen, obtenerCitaConExamen } = require('./db/citas');
 const { existeExamenPorCitaId } = require('./db/examenes_unificados');
 const pdfRegeneratorService = require('./services/pdfRegeneratorService');
+const cloudinaryService = require('./services/cloudinaryService');
+
 const EnvioService = require('./services/EnvioService');
 const ServicioTiposAtencion = require('./services/ServicioTiposAtencion');
 const EstadisticasService = require('./services/EstadisticasService');
+
 
 
 //const pdfViewerService = require('./services/pdfViewerService');
@@ -256,6 +352,34 @@ ipcMain.handle('obtener-citas-con-estado-examen', async () => {
         return { ok: false, error: error.message };
     }
 });
+
+// ============================================
+// 🔥 FUNCIÓN PARA CONVERTIR URL A BASE64
+// ============================================
+async function urlToBase64(url) {
+    if (!url) return null;
+    try {
+        const https = require('https');
+        return new Promise((resolve, reject) => {
+            https.get(url, (response) => {
+                if (response.statusCode !== 200) {
+                    reject(new Error(`Error HTTP: ${response.statusCode}`));
+                    return;
+                }
+                const chunks = [];
+                response.on('data', (chunk) => chunks.push(chunk));
+                response.on('end', () => {
+                    const buffer = Buffer.concat(chunks);
+                    resolve(`data:image/png;base64,${buffer.toString('base64')}`);
+                });
+                response.on('error', reject);
+            }).on('error', reject);
+        });
+    } catch (error) {
+        console.error('⚠️ Error convirtiendo URL a base64:', error);
+        return null;
+    }
+}
 
 ipcMain.handle('obtener-reporte-estadisticas', async (event, mes, anio) => {
     try {

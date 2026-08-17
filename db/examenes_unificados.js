@@ -3,12 +3,13 @@
 // ================================================================
 
 const pool = require('./connection');
+const cloudinaryService = require('../services/cloudinaryService');
 
 /**
  * GUARDAR EXAMEN UNIFICADO (Audiometría o Logoaudiometría)
  */
 async function guardarExamen(data) {
-    const { 
+    const {
         tipo_examen,
         paciente_id,
         cita_id,
@@ -16,8 +17,8 @@ async function guardarExamen(data) {
         diagnostico_od,
         diagnostico_oi,
         observaciones,
-        grafica_tonal_base64, 
-        grafica_logo_base64,
+        grafica_tonal_base64,   // llega igual que siempre desde el frontend
+        grafica_logo_base64,    // llega igual que siempre desde el frontend
         otoscopia,
         valores_od,
         valores_oi,
@@ -31,36 +32,71 @@ async function guardarExamen(data) {
         udisc_od, udisc_oi,
         pmax_od, pmax_oi
     } = data;
-    
+
+    // 1️⃣ SUBIR IMÁGENES A CLOUDINARY (fuera de la transacción de BD,
+    //    para no dejar el pool bloqueado esperando la red)
+    let graficaTonal = { url: null, public_id: null };
+    let graficaLogo = { url: null, public_id: null };
+
+    try {
+        const [resTonal, resLogo] = await Promise.all([
+            grafica_tonal_base64
+                ? cloudinaryService.subirImagenBase64(
+                    grafica_tonal_base64,
+                    'suda/examenes',
+                    `cita_${cita_id}_tonal`
+                  )
+                : Promise.resolve(null),
+            grafica_logo_base64
+                ? cloudinaryService.subirImagenBase64(
+                    grafica_logo_base64,
+                    'suda/examenes',
+                    `cita_${cita_id}_logo`
+                  )
+                : Promise.resolve(null)
+        ]);
+
+        if (resTonal) graficaTonal = resTonal;
+        if (resLogo) graficaLogo = resLogo;
+
+    } catch (error) {
+        // ⚠️ IMPORTANTE: si Cloudinary falla, NO abortamos el guardado clínico.
+        // El examen se guarda igual (sin imagen) y queda registrado en el log.
+        console.error('⚠️ Error subiendo a Cloudinary, se guarda el examen sin imagen:', error);
+    }
+
     const client = await pool.connect();
-    
+
     try {
         await client.query('BEGIN');
-        
+
         const result = await client.query(
-            `INSERT INTO examenes_audiologicos 
+            `INSERT INTO examenes_audiologicos
              (tipo_examen, paciente_id, cita_id, entidad_id,
-              diagnostico_od, diagnostico_oi, observaciones, 
-              grafica_tonal_base64, grafica_logo_base64,
+              diagnostico_od, diagnostico_oi, observaciones,
+              grafica_tonal_url, grafica_tonal_public_id,
+              grafica_logo_url, grafica_logo_public_id,
               otoscopia,
               valores_od, valores_oi,
               diagnostico,
-              urv_od, urv_oi, upalabra_od, upalabra_oi, 
+              urv_od, urv_oi, upalabra_od, upalabra_oi,
               udisc_od, udisc_oi, pmax_od, pmax_oi,
-              pta_via_aerea_od, pta_via_osea_od, 
+              pta_via_aerea_od, pta_via_osea_od,
               pta_via_aerea_oi, pta_via_osea_oi,
               fecha_registro)
-             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, CURRENT_TIMESTAMP)
+             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15,
+                     $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, CURRENT_TIMESTAMP)
              RETURNING id`,
             [
                 tipo_examen, paciente_id, cita_id, entidad_id,
-                diagnostico_od, diagnostico_oi, observaciones, 
-                grafica_tonal_base64, grafica_logo_base64, 
+                diagnostico_od, diagnostico_oi, observaciones,
+                graficaTonal.url, graficaTonal.public_id,
+                graficaLogo.url, graficaLogo.public_id,
                 otoscopia,
                 valores_od ? JSON.stringify(valores_od) : null,
                 valores_oi ? JSON.stringify(valores_oi) : null,
                 diagnostico,
-                urv_od, urv_oi, upalabra_od, upalabra_oi, 
+                urv_od, urv_oi, upalabra_od, upalabra_oi,
                 udisc_od, udisc_oi, pmax_od, pmax_oi,
                 pta_via_aerea_od || null,
                 pta_via_osea_od || null,
@@ -68,18 +104,18 @@ async function guardarExamen(data) {
                 pta_via_osea_oi || null
             ]
         );
-        
+
         if (cita_id) {
             await client.query(
-                `UPDATE citas SET estado = 'atendida' WHERE id = $1`, 
+                `UPDATE citas SET estado = 'atendida' WHERE id = $1`,
                 [cita_id]
             );
             console.log(`✅ Cita ${cita_id} actualizada a estado "atendida"`);
         }
-        
+
         await client.query('COMMIT');
         return { id: result.rows[0].id, ok: true };
-        
+
     } catch (error) {
         await client.query('ROLLBACK');
         console.error('❌ Error guardando examen:', error);
@@ -88,7 +124,6 @@ async function guardarExamen(data) {
         client.release();
     }
 }
-
 /**
  * OBTENER TODOS LOS EXÁMENES
  */

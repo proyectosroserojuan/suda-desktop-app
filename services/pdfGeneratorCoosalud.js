@@ -104,16 +104,46 @@ class PDFGeneratorCoosalud {
         page.drawText('LOGOAUDIOMETRÍA', { x: 150, y: fromTop(tituloY), size: 16, font: fontBold });
 
         // GRAFICA
+        // =========================
+        // GRAFICA
+        // =========================
         const graficaY = tituloY + 30;
-        if (datos.grafica_logo_base64) {
-            const base64 = datos.grafica_logo_base64.split(',')[1];
-            const buffer = Buffer.from(base64, 'base64');
-            const img = datos.grafica_logo_base64.includes('png')
-                ? await pdfDoc.embedPng(buffer)
-                : await pdfDoc.embedJpg(buffer);
-            page.drawImage(img, { x: (width - 420) / 2 - 80, y: fromTop(graficaY + 200), width: 520, height: 180 });
+
+        // 🔥 DECIDIR QUÉ IMAGEN USAR
+        let imagenBase64 = null;
+
+        // Si es audiometría, usar grafica_tonal_base64
+        if (tipo === 'audiometria' && datos.grafica_tonal_base64) {
+            imagenBase64 = datos.grafica_tonal_base64;
+        }
+        // Si es logoaudiometría, usar grafica_logo_base64
+        else if (tipo === 'logoaudiometria' && datos.grafica_logo_base64) {
+            imagenBase64 = datos.grafica_logo_base64;
+        }
+        // Fallback: usar cualquier imagen disponible
+        else if (datos.grafica_tonal_base64) {
+            imagenBase64 = datos.grafica_tonal_base64;
+        }
+        else if (datos.grafica_logo_base64) {
+            imagenBase64 = datos.grafica_logo_base64;
+        }
+        else if (datos.grafica_base64) {
+            imagenBase64 = datos.grafica_base64;
         }
 
+        if (imagenBase64) {
+            const base64 = imagenBase64.split(',')[1];
+            const buffer = Buffer.from(base64, 'base64');
+            const img = imagenBase64.includes('png')
+                ? await pdfDoc.embedPng(buffer)
+                : await pdfDoc.embedJpg(buffer);
+            page.drawImage(img, {
+                x: (width - 420) / 2 - 80,
+                y: fromTop(graficaY + 200),
+                width: 520,
+                height: 180
+            });
+        }
         // BLOQUE INFERIOR
         const bloqueY = graficaY + 240;
 
@@ -640,18 +670,25 @@ async generarPDFAudiometria(datos, entidad) {
         });
 
         // GRAFICA
-const graficaY = 240;  // ← Valor fijo, no cambia al mover el título
-if (datos.grafica_tonal_base64) {
-            const base64 = datos.grafica_tonal_base64.split(',')[1];
+        // =========================
+        // GRAFICA
+        // =========================
+        const graficaY = 240;
+
+        // 🔥 USAR grafica_tonal_base64 para audiometría
+        let imagenBase64 = datos.grafica_tonal_base64 || datos.grafica_base64;
+
+        if (imagenBase64) {
+            const base64 = imagenBase64.split(',')[1];
             const buffer = Buffer.from(base64, 'base64');
-            const img = datos.grafica_tonal_base64.includes('png')
+            const img = imagenBase64.includes('png')
                 ? await pdfDoc.embedPng(buffer)
                 : await pdfDoc.embedJpg(buffer);
-            page.drawImage(img, { 
-                x: (width - 420) / 2 - 75, 
-                y: fromTop(graficaY + 300), 
-                width: 520, 
-                height: 280 
+            page.drawImage(img, {
+                x: (width - 420) / 2 - 75,
+                y: fromTop(graficaY + 300),
+                width: 520,
+                height: 280
             });
         }
 
