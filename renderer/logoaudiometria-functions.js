@@ -258,6 +258,10 @@ const diagnostico_oi = obtenerDiscriminacionOI();
         if (!cita || !cita.id) {
             throw new Error('No hay cita seleccionada');
         }
+
+
+                const resultado = await window.DuplicadoService.ejecutarConControl(
+            async () => {
         
         // Capturar gráfica
         let imagenBase64 = '';
@@ -318,14 +322,32 @@ console.log('✅ Guardado exitoso, ID:', id);
                     }
                 });
             }
-        } catch (err) {
+          } catch (err) {
             console.warn('Error generando PDF:', err);
             mostrarNotificacion('⚠️ Datos guardados pero error al generar PDF', true);
         }
 
-        
+        return { ok: true, id };
+
+            },
+            cita.id,
+            {},
+            mostrarNotificacion
+        );
+
+        if (!resultado.ok) {
+            if (resultado.cancelado || resultado.enProceso) {
+                return;
+            }
+            throw new Error(resultado.error || 'Error al guardar');
+        }
+
     } catch (error) {
         console.error('❌ ERROR en onGrabarClick:', error);
+
+
+
+
         mostrarNotificacion(`❌ Error: ${error.message}`, true);
     } finally {
         mostrarLoading(false);

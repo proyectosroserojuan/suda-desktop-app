@@ -11,6 +11,7 @@
 <script src="../services/modalResultados.js"></script>
  <script src="../services/ctrlGrabar.js"></script>
  <script src="../services/examenService.js"></script>
+  <script src="../services/duplicadoService.js"></script>
 
 <style>
 /* ============================================
@@ -1767,8 +1768,14 @@ async function onGrabarAudiometriaClick() {
         if (!citaId) {
             throw new Error('No hay cita seleccionada');
         }
-        
+
+        const resultado = await window.DuplicadoService.ejecutarConControl(
+            async () => {
+
         const diagnostico_od = document.getElementById('diagnostico_od')?.value || '';
+
+
+
         const diagnostico_oi = document.getElementById('diagnostico_oi')?.value || '';
         const observaciones = document.getElementById('observaciones_audiometria')?.value || '';
         const otoscopia = document.getElementById('otoscopia_audiometria')?.value || '';
@@ -1898,13 +1905,35 @@ localStorage.removeItem('citaIdEdicion');
                 throw new Error(pdfResult?.error || 'Error al generar PDF');
             }
 
+
+
+
+
         } catch (err) {
             console.warn('Error generando PDF:', err);
             mostrarNotificacionAudiometria('⚠️ Datos guardados pero error al generar PDF', true);
         }
-        
+
+        return { ok: true, id: result.id };
+
+            },
+            citaId,
+            {},
+            mostrarNotificacionAudiometria
+        );
+
+        if (!resultado.ok) {
+            if (resultado.cancelado || resultado.enProceso) {
+                return;
+            }
+            throw new Error(resultado.error || 'Error al guardar');
+        }
+
     } catch (error) {
         console.error('❌ ERROR:', error);
+
+
+
         mostrarNotificacionAudiometria(`❌ Error: ${error.message}`, true);
     } finally {
         mostrarLoadingAudiometria(false);
