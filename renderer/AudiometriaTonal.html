@@ -3213,6 +3213,9 @@ const xPositions = [
 ].map(v => v * SCALE_X);
 window.xPositions = xPositions;
 
+
+
+
 function getValues(prefix, tipo = 'air') {
     return freqs.map((f, index) => {
         const inputId = tipo === 'air' ? `${prefix}_${f}` : `${prefix}_${f}`;
@@ -3279,6 +3282,31 @@ if (rawValue === "-") {
                     noResponse: false,
                     esInterpolado: true,
                     ocultarPunto: true  // 🔥 NUEVO: oculta el punto
+                };
+            }
+                        // 🔥 NUEVO (AÑADIDO, no reemplaza nada de arriba):
+            // Si el bloque anterior no pudo interpolar porque el vecino es SR/NR/-,
+            // este bloque adicional lo intenta usando 110 dB como valor efectivo.
+            const esSinRespuesta = (input) => {
+                if (!input) return false;
+                const v = input.value.trim().toUpperCase();
+                return v === 'SR' || v === 'NR' || v === '-';
+            };
+
+            const valorEfectivoAnterior = esSinRespuesta(inputAnterior) ? 110 : valAnterior;
+            const valorEfectivoPosterior = esSinRespuesta(inputPosterior) ? 110 : valPosterior;
+
+            if (
+                valorEfectivoAnterior !== null && !isNaN(valorEfectivoAnterior) &&
+                valorEfectivoPosterior !== null && !isNaN(valorEfectivoPosterior)
+            ) {
+                const interpoladoConSR = (valorEfectivoAnterior + valorEfectivoPosterior) / 2;
+                return {
+                    x: xPositions[index],
+                    y: interpoladoConSR,
+                    noResponse: false,
+                    esInterpolado: true,
+                    ocultarPunto: true
                 };
             }
         }
