@@ -688,6 +688,14 @@ generarLogoaudiometriaHTML(datos, entidad, imagenes) {
             height: 500px;
             opacity: 1;
           }
+
+          .diagnostico-container {
+    margin: 20px 0 15px 0;
+    padding: 12px 10px;
+    border: 1px solid #d0d0d0;
+    border-radius: 4px;
+    background: #fcfcfc;
+}
           
           .footer {
             position: fixed;
@@ -760,12 +768,12 @@ generarLogoaudiometriaHTML(datos, entidad, imagenes) {
   </table>
 </div>
 
-            <!--
-            <div class="observaciones">
-              <div class="diagnostico-titulo">OBSERVACIONES</div>
-              <div class="diagnostico-texto">${diagnostico || ''}</div>
-            </div>
-            -->
+     
+  <div class="diagnostico-container observaciones">
+  <div class="diagnostico-titulo">OBSERVACIONES</div>
+  <div class="diagnostico-texto">${diagnostico || ''}</div>
+</div>
+            
 
 
           </div>
@@ -1025,16 +1033,19 @@ if (imagenes.selloBase64) {
 
 .sello-central {
     position: fixed;
-    top: 600px;
-    left: 50%;
-    z-index: 99999;
+    bottom: -60px;
+    right: -60px;
+    z-index: 9999;
+    pointer-events: none;
 }
-
 .sello-central img {
-    width: 400px;
-    height: 500px;
-    opacity: 1;
-}           .header { text-align: center; margin-bottom: 20px; width: 100%; }
+    width: 500px;
+    height: auto;
+    opacity: 0.9;
+    object-fit: contain;
+}       
+    
+.header { text-align: center; margin-bottom: 20px; width: 100%; }
                 .header img { width: 100%; max-height: 140px; object-fit: contain; }
                 .fecha { text-align: left; font-size: 11px; margin-bottom: 20px; }
                 .datos-paciente {
@@ -1188,7 +1199,69 @@ if (imagenes.selloBase64) {
     font-size: 14px;
 }
 
+/* === NUEVO: Diagnóstico y Observaciones lado a lado === */
+.dx-obs-row {
+    display: flex;
+    flex-direction: row;
+    gap: 2mm;
+    width: 100%;  /* ← CAMBIO: de 85mm a 100% */
+    margin: 0 0 10px 0;
+}
 
+/* Contenedor de diagnósticos (OD + OI) */
+.dx-diagnosticos {
+    display: flex;
+    flex-direction: row;
+    gap: 2mm;
+    width: 100%;  /* ← Cambia este valor para dar más/menos ancho */
+    flex-shrink: 0;  /* ← Evita que se encoja */
+}
+
+/* Contenedor de observaciones */
+.dx-observaciones {
+    width: 100%;  /* ← Cambia este valor para dar más/menos ancho */
+    flex-shrink: 0;  /* ← Evita que se encoja */
+}
+
+.dx-obs-box {
+    box-sizing: border-box;
+    border: 1px solid #d0d0d0;
+    border-radius: 1mm;
+    background: #fcfcfc;
+    padding: 2mm;
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+    word-break: break-word;
+    page-break-inside: auto;
+}
+
+/* Anchos específicos para cada tipo */
+.dx-diagnostico-od {
+    flex: 1;  /* ← SIN CAMBIO */
+}
+
+.dx-diagnostico-oi {
+    flex: 1;  /* ← SIN CAMBIO */
+}
+
+.dx-observacion {
+    flex: 1;  /* ← SIN CAMBIO */
+}
+
+.dx-obs-box .diagnostico-titulo {
+    font-size: 9px;
+    text-align: center;
+    text-transform: uppercase;
+    border-bottom: 1px solid #e0e0e0;
+    padding-bottom: 1mm;
+    margin-bottom: 2mm;
+}
+
+.dx-obs-box .diagnostico-texto {
+    font-size: 8.5px;
+    line-height: 1.4;
+    white-space: pre-wrap;
+}
 
 .otoscopia-container {
     margin: 5px 0 5px 18px;    /* ← CAMBIAR: 18px de margen izquierdo */
@@ -1265,21 +1338,28 @@ if (imagenes.selloBase64) {
             </div>
             
             <div class="two-columns">
-                <div class="columna-izquierda">
-                    <div class="diagnostico-box">
-                        <div class="diagnostico-titulo">DIAGNÓSTICO</div>
-                        <div class="diagnostico-subtitulo"></div>
-                        <div class="diagnostico-texto">${datos.diagnostico_od || ''}</div>
-                   <!--     <div class="diagnostico-subtitulo">O.I.</div>  -->
-                   <!--        <div class="diagnostico-texto">${datos.diagnostico_oi || ''}</div> -->
-                    </div>
+      
 
-                    <!--
-                    <div class="diagnostico-box">
-                        <div class="diagnostico-titulo">OBSERVACIONES</div>
-                        <div class="diagnostico-texto">${datos.observaciones || ''}</div>
-                    </div>
-                    -->
+<div class="columna-izquierda">
+    <div class="dx-obs-row">
+        <!-- Contenedor de diagnósticos -->
+        <div class="dx-diagnosticos">
+            <div class="dx-obs-box dx-diagnostico-od">
+                <div class="diagnostico-titulo">DIAGNÓSTICO</div>
+                <div class="diagnostico-texto">${datos.diagnostico_od || ''}</div>
+            </div>
+
+        </div>
+        
+        <!-- Contenedor de observaciones -->
+        <div class="dx-observaciones">
+            <div class="dx-obs-box dx-observacion">
+                <div class="diagnostico-titulo">OBSERVACIONES</div>
+                <div class="diagnostico-texto">${datos.observaciones || ''}</div>
+            </div>
+        </div>
+    </div>
+                 
                     
 
                     <div class="pta-container">

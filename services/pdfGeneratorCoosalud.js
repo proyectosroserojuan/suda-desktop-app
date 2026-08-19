@@ -6,9 +6,361 @@ const { PDFDocument, rgb, StandardFonts } = require('pdf-lib');
 const fontkit = require('@pdf-lib/fontkit'); // ← AGREGAR ESTA LÍNEA
 
 class PDFGeneratorCoosalud {
+
+
+
+    
   constructor() {
     this.imagesPath = path.join(__dirname, '../assets/images');
   }
+
+
+
+/**
+ * DIBUJAR TEXTO EN CUADRO CON AJUSTE DE LÍNEA Y SALTO DE PÁGINA
+ * @param {Object} page - Página del PDF
+ * @param {string} text - Texto a dibujar
+ * @param {number} x - Posición X del cuadro
+ * @param {number} y - Posición Y del cuadro (desde arriba)
+ * @param {number} width - Ancho del cuadro
+ * @param {number} maxHeight - Altura máxima del cuadro (si se excede, salta a nueva página)
+ * @param {number} fontSize - Tamaño de fuente
+ * @param {Object} font - Fuente embedida
+ * @param {Object} fontBold - Fuente bold (opcional)
+ * @param {Object} color - Color del texto (opcional)
+ * @param {number} lineSpacing - Espaciado entre líneas (opcional, default: 1.2)
+ * @param {string} label - Etiqueta opcional antes del texto
+ * @param {Object} pdfDoc - Documento PDF para crear nuevas páginas
+ * @param {Object} options - Opciones adicionales
+ * @param {number} options.marginTop - Margen superior de página (default: 80)
+ * @param {number} options.marginBottom - Margen inferior de página (default: 80)
+ * @returns {Array} - Array con información de páginas y posiciones
+ */
+async drawWrappedTextInBox({
+    page,
+    text,
+    x,
+    y,
+    width,
+    maxHeight,
+    fontSize = 10,
+    font,
+    fontBold = null,
+    color = rgb(0, 0, 0),
+    lineSpacing = 1.2,
+    label = '',
+    pdfDoc,
+    options = {}
+}) {
+    const {
+        marginTop = 80,
+        marginBottom = 80,
+        drawBorder = true,
+        borderColor = rgb(0, 0, 0),
+        borderWidth = 0.5,
+        labelColor = rgb(0, 0, 0),
+        labelSize = 11,
+        labelFont = fontBold || font,
+        backgroundColor = null,
+        padding = 5,
+        showLabelOnNewPage = true
+    } = options;
+
+    const fromTop = (yPos) => page.getHeight() - yPos;
+    const pageHeight = page.getHeight();
+
+    // Si no hay texto, dibujar solo la etiqueta si existe
+    if (!text || text.trim() === '') {
+        if (label) {
+            page.drawText(label, {
+                x: x,
+                y: fromTop(y),
+                size: labelSize,
+                font: labelFont,
+                color: labelColor
+            });
+        }
+        return [{ page, y, usedHeight: 0 }];
+    }
+
+    // Dividir el texto en palabras
+    const words = text.split(' ');
+    let lines = [];
+    let currentLine = '';
+    let currentY = y;
+
+    // Calcular ancho disponible para texto (restando padding)
+    const availableWidth = width - (padding * 2);
+    const lineHeight = fontSize * lineSpacing;
+
+    // Función para calcular ancho del texto
+    const getTextWidth = (text, size) => {
+        return font.widthOfTextAtSize(text, size);
+    };
+
+    // Generar líneas con ajuste de palabras
+    for (const word of words) {
+        const testLine = currentLine + (currentLine ? ' ' : '') + word;
+        const testWidth = getTextWidth(testLine, fontSize);
+
+        if (testWidth <= availableWidth) {
+            currentLine = testLine;
+        } else {
+            if (currentLine) {
+                lines.push(currentLine);
+                currentLine = word;
+            } else {
+                // Si una palabra individual es más ancha que el cuadro, forzar corte
+                let remainingWord = word;
+                while (remainingWord.length > 0) {
+                    let subString = remainingWord;
+                    while (getTextWidth(subString, fontSize) > availableWidth && subString.length > 1) {
+                        subString = subString.slice(0, -1);
+                    }
+                    if (subString.length > 0) {
+                        lines.push(subString);
+                        remainingWord = remainingWord.slice(subString.length);
+                    } else {
+                        remainingWord = '';
+                    }
+                }
+                currentLine = '';
+            }
+        }
+    }
+    if (currentLine) {
+        lines.push(currentLine);
+    }
+
+    // Calcular altura total del texto
+    const labelHeight = label ? labelSize + 5 : 0;
+    const totalTextHeight = lines.length * lineHeight;
+    const totalHeight = labelHeight + totalTextHeight + (padding * 2);
+
+    // Verificar si cabe en la página actual
+    const startY = y - (label ? 5 : 0);
+    const availableHeight = pageHeight - fromTop(startY) - marginBottom;
+
+    let result = [];
+    let currentPage = page;
+    let currentPageY = y;
+    let linesDrawn = 0;
+
+    // Si no cabe en la página actual, crear nueva página
+    if (totalHeight > availableHeight) {
+        // Dibujar lo que cabe en la página actual
+        const maxLinesInPage = Math.floor((availableHeight - labelHeight - (padding * 2)) / lineHeight);
+        const linesForCurrentPage = Math.min(maxLinesInPage, lines.length);
+
+        if (linesForCurrentPage > 0) {
+            // Dibujar líneas en página actual
+            const drawData = this.drawLinesOnPage({
+                page: currentPage,
+                lines: lines.slice(0, linesForCurrentPage),
+                x,
+                y: currentPageY,
+                width,
+                maxHeight: availableHeight,
+                fontSize,
+                font,
+                color,
+                lineSpacing,
+                label,
+                labelSize,
+                labelFont,
+                labelColor,
+                padding,
+                drawBorder,
+                borderColor,
+                borderWidth,
+                backgroundColor
+            });
+
+            result.push({
+                page: currentPage,
+                y: currentPageY,
+                usedHeight: drawData.usedHeight,
+                linesDrawn: linesForCurrentPage
+            });
+
+            linesDrawn = linesForCurrentPage;
+        }
+
+        // Crear nuevas páginas para el texto restante
+        while (linesDrawn < lines.length) {
+            // Crear nueva página
+            currentPage = pdfDoc.addPage();
+            const newFromTop = (yPos) => currentPage.getHeight() - yPos;
+            currentPageY = marginTop + 20; // Margen superior para nueva página
+
+            // Dibujar etiqueta en nueva página si se requiere
+            const labelOnNewPage = showLabelOnNewPage && label ? `${label} (continuación)` : '';
+
+            // Calcular cuántas líneas caben en la nueva página
+            const newAvailableHeight = currentPage.getHeight() - marginTop - marginBottom;
+            const newMaxLines = Math.floor((newAvailableHeight - (labelOnNewPage ? labelSize + 5 : 0) - (padding * 2)) / lineHeight);
+            const linesForNewPage = Math.min(newMaxLines, lines.length - linesDrawn);
+
+            if (linesForNewPage > 0) {
+                const drawData = this.drawLinesOnPage({
+                    page: currentPage,
+                    lines: lines.slice(linesDrawn, linesDrawn + linesForNewPage),
+                    x,
+                    y: currentPageY,
+                    width,
+                    maxHeight: newAvailableHeight,
+                    fontSize,
+                    font,
+                    color,
+                    lineSpacing,
+                    label: labelOnNewPage,
+                    labelSize,
+                    labelFont,
+                    labelColor,
+                    padding,
+                    drawBorder,
+                    borderColor,
+                    borderWidth,
+                    backgroundColor
+                });
+
+                result.push({
+                    page: currentPage,
+                    y: currentPageY,
+                    usedHeight: drawData.usedHeight,
+                    linesDrawn: linesForNewPage
+                });
+
+                linesDrawn += linesForNewPage;
+            } else {
+                // Si no cabe ni una línea, romper el bucle
+                break;
+            }
+        }
+    } else {
+        // Todo cabe en la página actual
+        const drawData = this.drawLinesOnPage({
+            page: currentPage,
+            lines,
+            x,
+            y: currentPageY,
+            width,
+            maxHeight,
+            fontSize,
+            font,
+            color,
+            lineSpacing,
+            label,
+            labelSize,
+            labelFont,
+            labelColor,
+            padding,
+            drawBorder,
+            borderColor,
+            borderWidth,
+            backgroundColor
+        });
+
+        result.push({
+            page: currentPage,
+            y: currentPageY,
+            usedHeight: drawData.usedHeight,
+            linesDrawn: lines.length
+        });
+    }
+
+    return result;
+}
+
+/**
+ * DIBUJAR LÍNEAS EN UNA PÁGINA (función auxiliar)
+ */
+drawLinesOnPage({
+    page,
+    lines,
+    x,
+    y,
+    width,
+    maxHeight,
+    fontSize,
+    font,
+    color,
+    lineSpacing,
+    label = '',
+    labelSize = 11,
+    labelFont = null,
+    labelColor = rgb(0, 0, 0),
+    padding = 5,
+    drawBorder = true,
+    borderColor = rgb(0, 0, 0),
+    borderWidth = 0.5,
+    backgroundColor = null
+}) {
+    const fromTop = (yPos) => page.getHeight() - yPos;
+    const lineHeight = fontSize * lineSpacing;
+    const labelHeight = label ? labelSize + 5 : 0;
+
+    let currentY = y;
+
+    // Dibujar fondo si se especifica
+    if (backgroundColor) {
+        const boxHeight = labelHeight + (lines.length * lineHeight) + (padding * 2);
+        page.drawRectangle({
+            x: x - padding,
+            y: fromTop(currentY + boxHeight + 5),
+            width: width + (padding * 2),
+            height: boxHeight + 10,
+            color: backgroundColor,
+            borderWidth: 0
+        });
+    }
+
+    // Dibujar borde del cuadro
+    if (drawBorder) {
+        const boxHeight = labelHeight + (lines.length * lineHeight) + (padding * 2);
+        page.drawRectangle({
+            x: x - padding,
+            y: fromTop(currentY + boxHeight + 5),
+            width: width + (padding * 2),
+            height: boxHeight + 10,
+            borderWidth: borderWidth,
+            borderColor: borderColor
+        });
+    }
+
+        currentY += padding;   // 🔥 AGREGAR ESTA LÍNEA — aplica el gap superior
+
+    // Dibujar etiqueta si existe
+    if (label) {
+        page.drawText(label, {
+            x: x,
+            y: fromTop(currentY + 2),
+            size: labelSize,
+            font: labelFont || font,
+            color: labelColor
+        });
+        currentY += labelHeight;
+    }
+
+    // Dibujar cada línea de texto
+    for (const line of lines) {
+        page.drawText(line, {
+            x: x,
+            y: fromTop(currentY + 2),
+            size: fontSize,
+            font: font,
+            color: color
+        });
+        currentY += lineHeight;
+    }
+
+    const usedHeight = (labelHeight + (lines.length * lineHeight) + (padding * 2) + 10);
+
+    return {
+        usedHeight,
+        linesCount: lines.length
+    };
+}
 
   getDownloadsPath() {
     return path.join(os.homedir(), 'Downloads');
@@ -107,7 +459,7 @@ class PDFGeneratorCoosalud {
         // =========================
         // GRAFICA
         // =========================
-        const graficaY = tituloY + 30;
+        const graficaY =  220;
 
         // 🔥 DECIDIR QUÉ IMAGEN USAR
         let imagenBase64 = null;
@@ -144,17 +496,118 @@ class PDFGeneratorCoosalud {
                 height: 180
             });
         }
-        // BLOQUE INFERIOR
-        const bloqueY = graficaY + 240;
 
+
+// =========================
+// BLOQUE INFERIOR - LOGOAUDIOMETRÍA
+// =========================
+const bloqueY = graficaY + 240;
+
+// --- DIAGNÓSTICO (lado izquierdo) ---
+const diagX = 50;
+const diagY = bloqueY;
+
+// Título DIAGNÓSTICO
+page.drawText('DIAGNÓSTICO', { 
+    x: diagX, 
+    y: fromTop(diagY), 
+    size: 11, 
+    font: fontBold 
+});
+
+// DIAGNÓSTICO OD
+await this.drawWrappedTextInBox({
+    page,
+    text: datos.diagnostico_od || 'No especificado',
+    x: diagX + 5,
+    y: diagY + 20,
+    width: 180,
+    maxHeight: 50,
+    fontSize: 10,
+    font,
+    fontBold,
+    color: rgb(0.9, 0.2, 0.2),
+    label: 'O.D.:',
+    pdfDoc,
+    options: {
+        labelColor: rgb(0, 0, 0),
+        labelSize: 10,
+        drawBorder: false,
+        padding: 2
+    }
+});
+
+// DIAGNÓSTICO OI
+await this.drawWrappedTextInBox({
+    page,
+    text: datos.diagnostico_oi || 'No especificado',
+    x: diagX + 5,
+    y: diagY + 60,
+    width: 180,
+    maxHeight: 50,
+    fontSize: 10,
+    font,
+    fontBold,
+    color: rgb(0.2, 0.5, 0.9),
+    label: 'O.I.:',
+    pdfDoc,
+    options: {
+        labelColor: rgb(0, 0, 0),
+        labelSize: 10,
+        drawBorder: false,
+        padding: 2
+    }
+});
+
+// --- OBSERVACIONES (lado derecho, debajo de la tabla) ---
+// La tabla comienza en X=260, así que ponemos observaciones en X=50 debajo de la tabla
+const obsY = bloqueY + 120; // Ajustado para que no choque
+
+// Título OBSERVACIONES
+page.drawText('OBSERVACIONES', { 
+    x: 50, 
+    y: fromTop(obsY), 
+    size: 11, 
+    font: fontBold 
+});
+
+// Cuadro de OBSERVACIONES (más ancho y más abajo)
+await this.drawWrappedTextInBox({
+    page,
+    text: datos.diagnostico || 'No hay observaciones',
+    x: 50,
+    y: obsY + 20,
+    width: 240, // Más ancho para aprovechar el espacio
+    maxHeight: 55,
+    fontSize: 10,
+    font,
+    fontBold,
+    color: rgb(0.3, 0.3, 0.3),
+    label: '', // Sin etiqueta porque ya pusimos el título
+    pdfDoc,
+    options: {
+        drawBorder: true,
+        borderColor: rgb(0.5, 0.5, 0.5),
+        borderWidth: 0.5,
+        padding: 8,
+        backgroundColor: rgb(0.98, 0.98, 0.98),
+        showLabelOnNewPage: true
+    }
+});
+
+        /*
         // DIAGNOSTICO
         page.drawText('DIAGNÓSTICO', { x: 50, y: fromTop(bloqueY), size: 11, font: fontBold });
         page.drawText('O.D.', { x: 50, y: fromTop(bloqueY + 20), size: 10, font: fontBold });
         page.drawText(datos.diagnostico_od || '', { x: 80, y: fromTop(bloqueY + 35), size: 10, font });
         page.drawText('O.I.', { x: 50, y: fromTop(bloqueY + 60), size: 10, font: fontBold });
         page.drawText(datos.diagnostico_oi || '', { x: 80, y: fromTop(bloqueY + 75), size: 10, font });
-     //   page.drawText('OBSERVACIONES', { x: 50, y: fromTop(bloqueY + 105), size: 11, font: fontBold });
+        page.drawText('OBSERVACIONES', { x: 50, y: fromTop(bloqueY + 105), size: 11, font: fontBold });
      //   page.drawText(datos.diagnostico || '________', { x: 50, y: fromTop(bloqueY + 120), size: 10, font });
+*/
+
+
+
 
         // TABLA CON SOPORTE NR
         const tableX = 260;
@@ -692,7 +1145,90 @@ async generarPDFAudiometria(datos, entidad) {
             });
         }
 
-        // =========================
+
+        // ============================================
+// BLOQUE 1 - DIAGNÓSTICO COMPLETO (CON BORDE)
+// ============================================
+
+const DIAG_X = 50;
+const DIAG_Y = 550;
+
+// --- TÍTULO ---
+page.drawText('DIAGNÓSTICO', { 
+    x: DIAG_X, 
+    y: fromTop(DIAG_Y), 
+    size: 11, 
+    font: fontBold 
+});
+
+// --- CAJA O.D. (CON BORDE) ---
+await this.drawWrappedTextInBox({
+    page,
+    text: datos.diagnostico_od || 'No especificado',
+    x: DIAG_X + 5,
+    y: DIAG_Y + 18,
+    width: 240,
+    maxHeight: 150,   
+    fontSize: 9,
+    font,
+    fontBold,
+    color: rgb(0, 0, 0),
+  
+    pdfDoc,
+    options: {
+        labelColor: rgb(0, 0, 0),
+        labelSize: 9,
+        drawBorder: true,        // 🔥 CAMBIADO: false → true
+        borderColor: rgb(0, 0, 0),
+        borderWidth: 0.5,
+        padding: 2
+    }
+});
+
+
+// ============================================
+// BLOQUE 2 - OBSERVACIONES COMPLETO
+// ============================================
+
+// 🔥 VARIABLES DE CONTROL (cambia estos números)
+const OBS_X = 55;        // Posición X del título OBSERVACIONES
+const OBS_Y = 650;        // Posición Y del título OBSERVACIONES (misma que DIAGNÓSTICO)
+
+// --- TÍTULO ---
+page.drawText('OBSERVACIONES', { 
+    x: OBS_X, 
+    y: fromTop(OBS_Y), 
+    size: 11, 
+    font: fontBold 
+});
+
+// --- CAJA OBSERVACIONES (pegada al título) ---
+await this.drawWrappedTextInBox({
+    page,
+    text: datos.observaciones || datos.diagnostico || 'No hay observaciones',
+    x: OBS_X,             // Misma X que el título
+    y: OBS_Y + 18,        // 18px debajo del título
+    width: 240,
+    maxHeight: 150,
+    fontSize: 9,
+    font,
+    fontBold,
+    color: rgb(0.3, 0.3, 0.3),
+    label: '',
+    pdfDoc,
+    options: {
+        drawBorder: true,
+        borderColor: rgb(0, 0, 0),
+        borderWidth: 0.5,
+        padding: 5,
+        backgroundColor: null, // 🔥 SIN FONDO GRIS
+        showLabelOnNewPage: true
+    }
+});
+
+
+
+        /* =========================
         // DIAGNÓSTICO
         // =========================
         const diagY = 560;
@@ -710,14 +1246,21 @@ async generarPDFAudiometria(datos, entidad) {
             size: 10, 
             font 
         });
+        */
+
+
+// =========================
+// DIAGNÓSTICO Y OBSERVACIONES - AUDIOMETRÍA (LADO A LADO)
+// =========================
+
 
         // =========================
         // TABLA PTA CON TÍTULO
         // =========================
         const pta = datos.pta || {};
 
-        const ptaX = 55;
-        const ptaY = 650;
+        const ptaX = 350;
+        const ptaY = 475;
 
         const ptaCol1 = 45;
         const ptaCol2 = 55;
@@ -839,8 +1382,8 @@ async generarPDFAudiometria(datos, entidad) {
         // =========================
         // TABLA DE FRECUENCIAS
         // =========================
-        const tablaX = 340;
-        const tablaY = 320;
+        const tablaX = 320;
+        const tablaY = 250;
         const rowHeight = 18;
 
         function cell(x, y, w, h) {
