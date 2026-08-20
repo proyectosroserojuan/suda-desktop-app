@@ -6,7 +6,8 @@
   "scripts": {
     "start": "electron .",
     "build": "electron-packager . audiometria-app --platform=win32 --arch=x64 --out=dist --overwrite",
-    "dist": "electron-builder --win --x64 --publish always"
+    "dist": "electron-builder --win --x64 --publish never",
+    "release": "electron-builder --win --x64 --publish always" 
   },
   "build": {
     "win": {
