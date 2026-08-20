@@ -821,7 +821,7 @@ button.reset-btn:hover {
                -->
 
        
-          <div class="diagnostico-section" style="margin-top: 0;">
+          <div class="diagnostico-section" style="margin-top: 0;"    id="seccionObservaciones">
               <h4>OBSERVACIONES</h4>
               <textarea id="diagnostico" class="diagnostico-input" rows="3" placeholder="Escriba aquí el diagnóstico del paciente..."></textarea>
           </div>
@@ -832,7 +832,7 @@ button.reset-btn:hover {
         <div style="display: flex; flex-direction: column; gap: 15px;">
           
           <!-- Campo para OÍDO DERECHO -->
-          <div class="diagnostico-section" style="margin-top: 0;">
+          <div class="diagnostico-section" style="margin-top: 0;"  id="grupoDiscriminacionOD">
               <h4 style="color: #e74c3c;">🔴 Discriminación Oído Derecho (OD)</h4>
               <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
                   <span>Discriminación del</span>
@@ -844,7 +844,7 @@ button.reset-btn:hover {
           </div>
 
           <!-- Campo para OÍDO IZQUIERDO -->
-          <div class="diagnostico-section" style="margin-top: 0;">
+          <div class="diagnostico-section" style="margin-top: 0;" id="grupoDiscriminacionOI">
               <h4 style="color: #3498db;">🔵 Discriminación Oído Izquierdo (OI)</h4>
               <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
                   <span>Discriminación del</span>
@@ -905,6 +905,12 @@ document.addEventListener('DOMContentLoaded', function() {
         const resetBtn = document.getElementById('resetBtn');
         if (resetBtn) {
             resetBtn.style.display = 'none';
+        }
+
+            const seccionObservaciones = document.getElementById('seccionObservaciones');
+        if (seccionObservaciones) {
+            seccionObservaciones.style.display = 'none';
+            console.log('🔒 Sección OBSERVACIONES ocultada (modo combinado)');
         }
     }
 
@@ -2679,7 +2685,55 @@ document.querySelectorAll('.btn-rehacer').forEach(btn => {
 
 
 
+<script>
+// ============================================
+// NAVEGACIÓN CON FLECHAS - DISCRIMINACIÓN
+// ============================================
 
+document.addEventListener('DOMContentLoaded', function() {
+    // Lista de campos de discriminación en orden
+    const camposDiscriminacion = [
+        'discriminacion_od_porcentaje',
+        'discriminacion_od_db',
+        'discriminacion_oi_porcentaje',
+        'discriminacion_oi_db'
+    ];
+    
+    // Agregar event listeners a cada campo
+    camposDiscriminacion.forEach((id, index) => {
+        const input = document.getElementById(id);
+        if (!input) return;
+        
+        input.addEventListener('keydown', function(e) {
+            const cols = 2; // 2 campos por grupo (porcentaje y dB)
+            let nextIndex = index;
+            
+            // Flecha derecha → siguiente campo
+            if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+                e.preventDefault();
+                nextIndex = index + 1;
+            }
+            
+            // Flecha izquierda → campo anterior
+            if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+                e.preventDefault();
+                nextIndex = index - 1;
+            }
+            
+            // Verificar si el siguiente índice es válido
+            if (nextIndex >= 0 && nextIndex < camposDiscriminacion.length && nextIndex !== index) {
+                const siguienteInput = document.getElementById(camposDiscriminacion[nextIndex]);
+                if (siguienteInput) {
+                    siguienteInput.focus();
+                    siguienteInput.select();
+                }
+            }
+        });
+    });
+    
+    console.log('✅ Navegación con flechas activada para campos de discriminación');
+});
+</script>
 
 </body>
 <script>

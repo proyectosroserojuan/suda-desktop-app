@@ -50,6 +50,8 @@ verificarExamenPorCita: (citaId) => ipcRenderer.invoke('verificar-examen-por-cit
 // En preload.js, dentro del objeto api, agrega esta línea:
 abrirVentanaDetalles: (datosExamen) => ipcRenderer.send('abrir-ventana-detalles', datosExamen),
   
+
+actualizarExamen: (citaId, data) => ipcRenderer.invoke('actualizar-examen', citaId, data),
   // Pacientes
   crearPaciente: (data) => ipcRenderer.invoke('crear-paciente', data),
   obtenerPacientes: () => ipcRenderer.invoke('obtener-pacientes'),

@@ -31,6 +31,22 @@ const pool = new Pool({
 module.exports = pool;
 */
 
+/*
+const { Pool } = require("pg");
+
+const pool = new Pool({
+  user: "tsdbadmin",
+  host: "dumo6dde1x.spncmxf4so.tsdb.cloud.timescale.com",
+  database: "tsdb",
+  password: "uklvklohvvyhvb56",
+  port: 33963,
+  family: 4
+});
+module.exports = pool;
+*/
+
+
+
 
 const { Pool } = require("pg");
 

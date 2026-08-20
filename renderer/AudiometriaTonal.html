@@ -1769,6 +1769,9 @@ async function onGrabarAudiometriaClick() {
             throw new Error('No hay cita seleccionada');
         }
 
+        // 🔥 NUEVO: detectar si estamos editando
+        const modoEdicion = localStorage.getItem('modoEdicion') === 'true';
+
         const resultado = await window.DuplicadoService.ejecutarConControl(
             async () => {
 
@@ -1827,19 +1830,23 @@ async function onGrabarAudiometriaClick() {
             throw new Error('API no disponible. Reinicie la aplicación.');
         }
         
-        // ✅ USAR guardarExamen
-        if (!window.api.guardarExamen) {
-            throw new Error('Función guardarExamen no disponible');
+        // 🔥 NUEVO: elegir entre actualizar (edición) o crear (nuevo)
+        let result;
+        if (modoEdicion && window.api.actualizarExamen) {
+            result = await window.api.actualizarExamen(parseInt(citaId), data);
+        } else {
+            if (!window.api.guardarExamen) {
+                throw new Error('Función guardarExamen no disponible');
+            }
+            result = await window.api.guardarExamen(data);
         }
-        
-        const result = await window.api.guardarExamen(data);
         
         if (!result || !result.ok) {
             throw new Error(result?.error || 'Error al guardar');
         }
         
         console.log('✅ Guardado exitoso en BD, ID:', result.id);
-        mostrarNotificacionAudiometria('✅ Audiometría guardada exitosamente');
+        mostrarNotificacionAudiometria(modoEdicion ? '✅ Audiometría actualizada exitosamente' : '✅ Audiometría guardada exitosamente');
 
 
         // 🔥 Limpiar modo edición tras guardar
@@ -1918,10 +1925,9 @@ localStorage.removeItem('citaIdEdicion');
 
             },
             citaId,
-            {},
+            { modoEdicion },
             mostrarNotificacionAudiometria
         );
-
         if (!resultado.ok) {
             if (resultado.cancelado || resultado.enProceso) {
                 return;

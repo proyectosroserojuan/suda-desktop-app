@@ -47,64 +47,77 @@
                 backdrop-filter: blur(4px);
             `;
 
-            modal.innerHTML = `
-                <div style="
-                    background: #ffffff;
-                    border-radius: 20px;
-                    padding: 45px 40px 35px;
-                    max-width: 460px;
-                    width: 92%;
-                    text-align: center;
-                    box-shadow: 0 30px 80px rgba(0,0,0,0.4);
-                    animation: modalFadeIn 0.3s ease;
-                ">
-                    <div style="margin-bottom: 20px;">
-                        <div style="
-                            width: 70px;
-                            height: 70px;
-                            background: #fee2e2;
-                            border-radius: 50%;
-                            display: flex;
-                            align-items: center;
-                            justify-content: center;
-                            margin: 0 auto 15px;
-                        ">
-                            <span style="font-size: 36px;">🚫</span>
-                        </div>
-                        <h3 style="color: #1a2332; margin: 0; font-size: 20px; font-weight: 700;">
-                            Cita ya atendida
-                        </h3>
-                    </div>
-                    
-                    <p style="color: #4a5a6a; font-size: 15px; margin-bottom: 20px; line-height: 1.7;">
-                        Esta cita <strong style="color: #dc2626;">ya tiene resultados registrados</strong>.
-                        <br><br>
-                        <span style="color: #6b7280; font-size: 14px;">
-                            No es posible registrar nuevos resultados desde aquí.
-                            <br><br>
-                            Para modificar los resultados existentes, utiliza la opción 
-                            <strong style="color: #2c6e9c;">"Editar"</strong> desde el listado de citas.
-                        </span>
-                    </p>
-                    
-                    <button id="btnCerrarModalDuplicado" style="
-                        width: 100%;
-                        padding: 16px;
-                        background: #2c6e9c;
-                        color: white;
-                        border: none;
-                        border-radius: 10px;
-                        font-size: 16px;
-                        font-weight: 600;
-                        cursor: pointer;
-                        transition: all 0.25s ease;
-                        letter-spacing: 0.5px;
-                    ">
-                        Entendido
-                    </button>
-                </div>
-            `;
-
+ modal.innerHTML = `
+    <div style="
+        background: #ffffff;
+        border-radius: 20px;
+        padding: 45px 40px 35px;
+        max-width: 460px;
+        width: 92%;
+        text-align: center;
+        box-shadow: 0 30px 80px rgba(0,0,0,0.4);
+        animation: modalFadeIn 0.3s ease;
+    ">
+        <div style="margin-bottom: 20px;">
+            <div style="
+                width: 70px;
+                height: 70px;
+                background: #fee2e2;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                margin: 0 auto 15px;
+            ">
+                <span style="font-size: 36px;"></span>
+            </div>
+            <h3 style="color: #1a2332; margin: 0; font-size: 20px; font-weight: 700;">
+                Cita ya atendida
+            </h3>
+        </div>
+        
+        <p style="color: #4a5a6a; font-size: 15px; margin-bottom: 20px; line-height: 1.7;">
+            Esta cita <strong style="color: #dc2626;">ya tiene resultados registrados</strong>.
+            <br><br>
+            <span style="color: #6b7280; font-size: 14px;">
+                Si necesitas modificar los resultados existentes, 
+                haz clic en <strong>"Editar Resultados"</strong>
+            </span>
+        </p>
+        
+        <div style="display: flex; gap: 10px;">
+            <button id="btnEditarCita" style="
+                flex: 1;
+                padding: 16px;
+                background: #2c6e9c;
+                color: white;
+                border: none;
+                border-radius: 10px;
+                font-size: 16px;
+                font-weight: 600;
+                cursor: pointer;
+                transition: all 0.25s ease;
+            ">
+                Editar Resultados
+            </button>
+            
+            <button id="btnCerrarModalDuplicado" style="
+                flex: 1;
+                padding: 16px;
+                background: #6b7280;
+                color: white;
+                border: none;
+                border-radius: 10px;
+                font-size: 16px;
+                font-weight: 600;
+                cursor: pointer;
+                transition: all 0.25s ease;
+            ">
+                Cerrar
+            </button>
+        </div>
+    </div>
+`;
             // Agregar estilos de animación
             const styleAnim = document.createElement('style');
             styleAnim.textContent = `
@@ -125,6 +138,7 @@
 
             // Manejador del botón
             const cerrarBtn = document.getElementById('btnCerrarModalDuplicado');
+            const editarBtn = document.getElementById('btnEditarCita');
 
             function cerrarModal() {
                 modalAbierto = false;
@@ -135,6 +149,10 @@
             }
 
             cerrarBtn.addEventListener('click', cerrarModal);
+            editarBtn.addEventListener('click', function() {
+    window.location.href = 'modificaryborrarresultados.html';
+    cerrarModal();
+});
 
             // Cerrar con Escape
             const handlerEscape = (e) => {
@@ -225,64 +243,65 @@
         }
     }
 
-    /**
-     * Función principal que envuelve el guardado con control de duplicados
-     */
-    async function ejecutarConControl(funcionGuardar, citaId, opciones = {}, notificarCallback) {
-        if (!citaId) {
-            return { ok: false, error: 'ID de cita no proporcionado' };
-        }
+async function ejecutarConControl(funcionGuardar, citaId, opciones = {}, notificarCallback) {
+    if (!citaId) {
+        return { ok: false, error: 'ID de cita no proporcionado' };
+    }
 
-        if (typeof funcionGuardar !== 'function') {
-            return { ok: false, error: 'Función de guardado no válida' };
-        }
+    if (typeof funcionGuardar !== 'function') {
+        return { ok: false, error: 'Función de guardado no válida' };
+    }
 
-        // 1. Verificar si ya está en proceso
-        if (!comenzarProceso(citaId)) {
-            if (notificarCallback) {
-                notificarCallback('⏳ Ya hay un proceso en curso para esta cita', true);
-            }
-            return { ok: false, error: 'Proceso en curso', enProceso: true };
+    // 1. Verificar si ya está en proceso
+    if (!comenzarProceso(citaId)) {
+        if (notificarCallback) {
+            notificarCallback('⏳ Ya hay un proceso en curso para esta cita', true);
         }
+        return { ok: false, error: 'Proceso en curso', enProceso: true };
+    }
 
-        try {
-            // 2. Verificar duplicado - BLOQUEAR si ya existe (mostrará modal)
+    try {
+        // 2. Verificar duplicado - SOLO si NO estamos en modo edición.
+        //    En modo edición es esperado que ya exista un examen: es
+        //    justamente el que se está actualizando, no un duplicado.
+        if (!opciones.modoEdicion) {
             const verif = await verificarDuplicado(citaId, notificarCallback);
-            
+
             if (verif.duplicado) {
                 finalizarProceso(citaId);
-                return { 
-                    ok: false, 
-                    cancelado: true, 
+                return {
+                    ok: false,
+                    cancelado: true,
                     bloqueado: true,
                     error: 'La cita ya tiene resultados registrados'
                 };
             }
-
-            // 3. Ejecutar la función de guardado
-            const resultado = await funcionGuardar();
-
-            // 4. Si el guardado fue exitoso, actualizar el estado de la cita
-            if (resultado && resultado.ok) {
-                console.log(`✅ Resultados guardados correctamente para cita ${citaId}`);
-                
-                try {
-                    await window.api.actualizarEstadoCita(citaId, 'atendida');
-                    console.log(`📌 Cita ${citaId} actualizada a "atendida"`);
-                } catch (err) {
-                    console.warn('⚠️ No se pudo actualizar el estado de la cita:', err);
-                }
-            }
-
-            return resultado;
-
-        } catch (error) {
-            console.error('❌ Error en ejecutarConControl:', error);
-            return { ok: false, error: error.message };
-        } finally {
-            finalizarProceso(citaId);
         }
+
+        // 3. Ejecutar la función de guardado
+        const resultado = await funcionGuardar();
+
+        // 4. Si el guardado fue exitoso, actualizar el estado de la cita
+        if (resultado && resultado.ok) {
+            console.log(`✅ Resultados guardados correctamente para cita ${citaId}`);
+
+            try {
+                await window.api.actualizarEstadoCita(citaId, 'atendida');
+                console.log(`📌 Cita ${citaId} actualizada a "atendida"`);
+            } catch (err) {
+                console.warn('⚠️ No se pudo actualizar el estado de la cita:', err);
+            }
+        }
+
+        return resultado;
+
+    } catch (error) {
+        console.error('❌ Error en ejecutarConControl:', error);
+        return { ok: false, error: error.message };
+    } finally {
+        finalizarProceso(citaId);
     }
+}
 
     /**
      * Limpia el estado interno

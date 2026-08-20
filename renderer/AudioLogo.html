@@ -312,9 +312,76 @@ iframe {
         setTimeout(() => div.remove(), 3000);
     }
     
+
+async function grabarTodos() {
+    const btn = document.querySelector('.tab-btn.grabar');
+    const textoOriginal = btn.textContent;
+    btn.textContent = '⏳ Guardando...';
+    btn.disabled = true;
+
+    try {
+        const citaData = localStorage.getItem('citaActual');
+        if (!citaData) {
+            mostrarNotificacion('❌ No hay cita seleccionada', true);
+            btn.textContent = textoOriginal;
+            btn.disabled = false;
+            return;
+        }
+
+        const cita = JSON.parse(citaData);
+        const citaId = cita?.id || cita?.id_cita || cita?.cita_id;
+
+        if (!citaId) {
+            mostrarNotificacion('❌ ID de cita no válido', true);
+            btn.textContent = textoOriginal;
+            btn.disabled = false;
+            return;
+        }
+
+        const modoEdicion = localStorage.getItem('modoEdicion') === 'true';
+
+        const funcionGuardar = async () => {
+            return await ejecutarGuardadoReal(citaId, modoEdicion);
+        };
+
+        const resultado = await window.DuplicadoService.ejecutarConControl(
+            funcionGuardar,
+            citaId,
+            { modoEdicion },
+            mostrarNotificacion
+        );
+
+        if (!resultado.ok) {
+            if (resultado.cancelado) return;
+            if (resultado.enProceso) {
+                mostrarNotificacion('⏳ Ya hay un proceso en curso', true);
+                return;
+            }
+            mostrarNotificacion('❌ Error: ' + (resultado.error || 'Desconocido'), true);
+            return;
+        }
+
+        if (resultado.pdfPath) {
+            window.rutaPDFActual = resultado.pdfPath;
+            window.datosExamenActual = resultado.datosParaDetalles;
+            mostrarModalResultados();
+        } else {
+            mostrarNotificacion('✅ Exámenes guardados correctamente');
+        }
+
+    } catch (error) {
+        console.error('❌ Error en grabarTodos:', error);
+        mostrarNotificacion('❌ Error: ' + error.message, true);
+    } finally {
+        btn.textContent = textoOriginal;
+        btn.disabled = false;
+    }
+}
+
 // ============================================
 // GRABAR AMBOS EXÁMENES (CON CONTROL DE DUPLICADOS)
 // ============================================
+/*
 async function grabarTodos() {
     const btn = document.querySelector('.tab-btn.grabar');
     const textoOriginal = btn.textContent;
@@ -341,17 +408,20 @@ async function grabarTodos() {
             return;
         }
 
+        // 🔥 Detectar modo edición
+        const modoEdicion = localStorage.getItem('modoEdicion') === 'true';
+
         // 2. Definir la función de guardado
         const funcionGuardar = async () => {
-            return await ejecutarGuardadoReal(citaId);
+            return await ejecutarGuardadoReal(citaId, modoEdicion);
         };
 
         // 3. Ejecutar con control de duplicados
         const resultado = await window.DuplicadoService.ejecutarConControl(
             funcionGuardar,
             citaId,
-            {}, // opciones
-            mostrarNotificacion // callback para notificaciones
+            { modoEdicion }, // 🔥 se lo pasamos al control de duplicados
+            mostrarNotificacion
         );
 
         if (!resultado.ok) {
@@ -385,11 +455,13 @@ async function grabarTodos() {
     }
 }
 
+*/
+
 // ============================================
 // FUNCIÓN DE GUARDADO REAL (extraída de grabarTodos)
 // ============================================
-async function ejecutarGuardadoReal(citaId) {
-    console.log('🔄 Ejecutando guardado real para cita:', citaId);
+async function ejecutarGuardadoReal(citaId, modoEdicion = false) {
+    console.log('🔄 Ejecutando guardado real para cita:', citaId, '| Edición:', modoEdicion);
 
     try {
         mostrarLoading(true);
@@ -474,21 +546,25 @@ async function ejecutarGuardadoReal(citaId) {
         };
 
         // Guardar en base de datos
-        let examenGuardado = false;
-        if (window.api?.guardarExamen) {
-            const result = await window.api.guardarExamen(data);
-            if (result && result.ok) {
-                examenGuardado = true;
-                console.log('✅ Examen guardado, ID:', result.id);
-                localStorage.removeItem('modoEdicion');
-                localStorage.removeItem('examenActual');
-                localStorage.removeItem('citaIdEdicion');
-            }
-        }
+      let examenGuardado = false;
+    let apiResult = null;
 
-        if (!examenGuardado) {
-            throw new Error('No se pudo guardar el examen');
-        }
+    if (modoEdicion && window.api?.actualizarExamen) {
+        apiResult = await window.api.actualizarExamen(parseInt(citaId), data);
+    } else if (window.api?.guardarExamen) {
+        apiResult = await window.api.guardarExamen(data);
+    }
+
+    if (apiResult && apiResult.ok) {
+        examenGuardado = true;
+        localStorage.removeItem('modoEdicion');
+        localStorage.removeItem('examenActual');
+        localStorage.removeItem('citaIdEdicion');
+    }
+
+    if (!examenGuardado) {
+        throw new Error('No se pudo guardar el examen');
+    }
 
         // Generar PDF
         let rutaPDF = null;

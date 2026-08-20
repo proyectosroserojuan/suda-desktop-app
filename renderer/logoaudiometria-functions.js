@@ -96,8 +96,8 @@ function obtenerDatosCita() {
 
 // En logoaudiometria.html - REEMPLAZA guardarEnBaseDeDatos
 
-async function guardarEnBaseDeDatos(pacienteId, citaId, diagnostico, diagnostico_od, diagnostico_oi, otoscopia, valoresOD, valoresOI, imagenBase64, tipoAtencionNombre) {
-    console.log('guardarEnBaseDeDatos - Inicio');
+async function guardarEnBaseDeDatos(pacienteId, citaId, diagnostico, diagnostico_od, diagnostico_oi, otoscopia, valoresOD, valoresOI, imagenBase64, tipoAtencionNombre, modoEdicion = false) {
+    console.log('guardarEnBaseDeDatos - Inicio | Edición:', modoEdicion);
     console.log('pacienteId:', pacienteId);
     console.log('citaId:', citaId);
     
@@ -113,9 +113,6 @@ async function guardarEnBaseDeDatos(pacienteId, citaId, diagnostico, diagnostico
         valores_od: valoresOD,
         valores_oi: valoresOI,
         grafica_logo_base64: imagenBase64,
-        // Campos de audiometría como null
-        diagnostico_od: null,
-        diagnostico_oi: null,
         observaciones: null,
         grafica_tonal_base64: null,
         pta_via_aerea_od: null,
@@ -134,11 +131,18 @@ async function guardarEnBaseDeDatos(pacienteId, citaId, diagnostico, diagnostico
     
     console.log('Datos a enviar a window.api:', JSON.stringify(data, null, 2));
     
-    if (!window.api || !window.api.guardarExamen) {
-        throw new Error('window.api.guardarExamen no está disponible');
+    let result;
+
+    // 🔥 NUEVO: elegir entre actualizar (edición) o crear (nuevo)
+    if (modoEdicion && window.api?.actualizarExamen) {
+        result = await window.api.actualizarExamen(citaId, data);
+    } else {
+        if (!window.api || !window.api.guardarExamen) {
+            throw new Error('window.api.guardarExamen no está disponible');
+        }
+        result = await window.api.guardarExamen(data);
     }
-    
-    const result = await window.api.guardarExamen(data);
+
     console.log('Resultado de window.api:', result);
     
     if (!result.ok) {
@@ -259,8 +263,10 @@ const diagnostico_oi = obtenerDiscriminacionOI();
             throw new Error('No hay cita seleccionada');
         }
 
+        // 🔥 NUEVO: detectar si estamos editando
+        const modoEdicion = localStorage.getItem('modoEdicion') === 'true';
 
-                const resultado = await window.DuplicadoService.ejecutarConControl(
+        const resultado = await window.DuplicadoService.ejecutarConControl(
             async () => {
         
         // Capturar gráfica
@@ -274,24 +280,28 @@ const diagnostico_oi = obtenerDiscriminacionOI();
         }
         
         // Guardar en base de datos
+        // Guardar en base de datos
         const id = await guardarEnBaseDeDatos(
             paciente.id,
             cita.id,
             diagnostico,
             diagnostico_od,
             diagnostico_oi,
-            otoscopia,      // ✅ AGREGADO
+            otoscopia,
             valores.od,
             valores.oi,
             imagenBase64,
-            cita?.tipo_atencion_nombre   // ← NUEVO
+            cita?.tipo_atencion_nombre,
+            modoEdicion // 🔥 NUEVO
         );
-        
-   
 
+        console.log('✅ Guardado exitoso, ID:', id);
+        mostrarNotificacion(modoEdicion ? '✅ Logoaudiometría actualizada exitosamente' : '✅ Logoaudiometría guardada exitosamente');
 
-console.log('✅ Guardado exitoso, ID:', id);
-        mostrarNotificacion('✅ Logoaudiometría guardada exitosamente');
+        // 🔥 NUEVO: limpiar modo edición tras guardar
+        localStorage.removeItem('modoEdicion');
+        localStorage.removeItem('examenActual');
+        localStorage.removeItem('citaIdEdicion');
         
         // Generar PDF
         try {
@@ -331,7 +341,7 @@ console.log('✅ Guardado exitoso, ID:', id);
 
             },
             cita.id,
-            {},
+            { modoEdicion },
             mostrarNotificacion
         );
 

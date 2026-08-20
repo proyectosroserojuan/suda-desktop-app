@@ -105,7 +105,16 @@ ipcMain.on('abrir-ventana-detalles', (event, datosExamen) => {
 });
 
 */
-
+ipcMain.handle('actualizar-examen', async (event, citaId, data) => {
+    try {
+        const { actualizarExamen } = require('./db/examenes_unificados');
+        const resultado = await actualizarExamen(citaId, data);
+        return { ok: true, ...resultado };
+    } catch (error) {
+        console.error('❌ Error actualizando examen:', error);
+        return { ok: false, error: error.message };
+    }
+});
 
 
 // ============================================================
