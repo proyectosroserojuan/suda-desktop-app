@@ -22,7 +22,7 @@ body {
 /* LADO IZQUIERDO */
 .login-left {
   flex: 1;
-  background: linear-gradient(135deg, #1e3c72, #2a5298, #ffffff);
+  background: linear-gradient(135deg, #ad0997, #2a5298, #ffffff);
   color: white;
   display: flex;
   flex-direction: column;

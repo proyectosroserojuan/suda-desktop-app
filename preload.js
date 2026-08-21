@@ -126,6 +126,10 @@ actualizarFormato: (data) => ipcRenderer.invoke('actualizar-formato', data),
 generarPDF: (datos, entidad, tipo) => ipcRenderer.invoke('generar-pdf', datos, entidad, tipo),
 
 
+
+downloadUpdate: () => ipcRenderer.invoke('download-update'),
+quitAndInstall: () => ipcRenderer.invoke('quit-and-install'),
+
 // Dentro del objeto api, al final o donde prefieras
 checkForUpdates: () => ipcRenderer.invoke('check-for-updates'),
 

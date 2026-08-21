@@ -39,6 +39,8 @@
 
     <!-- LADO DERECHO -->
 <div class="login-right">
+  <button id="btnActualizar">Buscar actualizaciones</button>
+<div id="estadoActualizacion"></div>
 
      <!-- CONTENEDOR DEL LOGO HORIZONTAL -->
       <div class="logo-container">
@@ -92,6 +94,29 @@ let tiempoEspera;
 window.addEventListener('resize', function() {
     clearTimeout(tiempoEspera);
     tiempoEspera = setTimeout(aplicarEscala, 150);
+});
+
+document.getElementById('btnActualizar').addEventListener('click', async () => {
+  const estado = document.getElementById('estadoActualizacion');
+  estado.textContent = '🔍 Verificando...';
+  
+  const result = await window.api.checkForUpdates();
+  
+  if (result.ok && result.result && result.result.updateInfo) {
+    estado.textContent = `✅ Actualización ${result.result.updateInfo.version} disponible. Descargando...`;
+    
+    // Forzar la descarga manual
+    await window.api.downloadUpdate();
+    
+    estado.textContent = '✅ Actualización descargada. Reiniciando...';
+    
+    // Forzar reinicio después de 2 segundos
+    setTimeout(() => {
+      window.api.quitAndInstall();
+    }, 2000);
+  } else {
+    estado.textContent = '✅ No hay actualizaciones disponibles.';
+  }
 });
 
 

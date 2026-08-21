@@ -33,6 +33,20 @@ ipcMain.handle('abrir-pdf-nativo', async (event, rutaPDF) => {
   }
 });
 
+// Handler para descargar manualmente
+ipcMain.handle('download-update', async () => {
+  console.log('⬇️ Forzando descarga manual...');
+  autoUpdater.downloadUpdate();
+  return { ok: true };
+});
+
+// Handler para reiniciar e instalar
+ipcMain.handle('quit-and-install', async () => {
+  console.log('🔄 Reiniciando para instalar...');
+  autoUpdater.quitAndInstall();
+  return { ok: true };
+});
+
 // Handler para imprimir PDF (abre con app nativa y envía comando de impresión)
 ipcMain.handle('imprimir-pdf-nativo', async (event, rutaPDF) => {
   try {
