@@ -83,19 +83,38 @@ ipcMain.on('mostrar-modal-resultados', (event, rutaPDF) => {
   }
 });
 
-// Handler para forzar verificación de actualizaciones
 ipcMain.handle('check-for-updates', async () => {
   console.log('🔍 Verificación forzada desde el renderer');
   try {
+    // 1. Forzar la verificación
     const result = await autoUpdater.checkForUpdatesAndNotify();
     console.log('✅ Resultado de verificación:', result);
-    return { ok: true, result };
+    
+    // 2. Si hay actualización, FORZAR la descarga MANUALMENTE
+    if (result && result.updateInfo) {
+      console.log('🆕 Actualización detectada:', result.updateInfo.version);
+      
+      // ✅ FORZAR DESCARGA MANUAL (NO confiar en autoDownload)
+      autoUpdater.downloadUpdate();
+      
+      // ✅ Notificar al renderer que hay actualización
+      mainWindow.webContents.send('update-available', result.updateInfo.version);
+      
+      return { 
+        ok: true, 
+        result: {
+          isUpdateAvailable: true,
+          versionInfo: result.updateInfo
+        }
+      };
+    }
+    
+    return { ok: true, result: { isUpdateAvailable: false } };
   } catch (error) {
     console.error('❌ Error al verificar:', error);
     return { ok: false, error: error.message };
   }
 });
-
 // Cerrar modal
 ipcMain.on('cerrar-modal', (event) => {
   const ventanaPrincipal = BrowserWindow.getFocusedWindow();
@@ -1329,6 +1348,13 @@ app.on('window-all-closed', () => {
   }
 });
 
+// ✅ Evento para forzar descarga desde el renderer
+ipcMain.on('force-download-update', () => {
+  console.log('⬇️ Forzando descarga desde el renderer...');
+  autoUpdater.downloadUpdate();
+});
+
 setInterval(() => {
   checkForUpdates();
 }, 10 * 1000); // ← 30 segundos
+

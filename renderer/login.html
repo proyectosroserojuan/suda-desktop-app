@@ -98,24 +98,37 @@ window.addEventListener('resize', function() {
 
 document.getElementById('btnActualizar').addEventListener('click', async () => {
   const estado = document.getElementById('estadoActualizacion');
-  estado.textContent = '🔍 Verificando...';
   
-  const result = await window.api.checkForUpdates();
+  estado.textContent = '🔍 Verificando actualizaciones...';
+  estado.style.color = 'blue';
   
-  if (result.ok && result.result && result.result.updateInfo) {
-    estado.textContent = `✅ Actualización ${result.result.updateInfo.version} disponible. Descargando...`;
+  try {
+    // 1. Verificar si hay actualización
+    const result = await window.api.checkForUpdates();
+    console.log('📦 Resultado:', result);
     
-    // Forzar la descarga manual
-    await window.api.downloadUpdate();
-    
-    estado.textContent = '✅ Actualización descargada. Reiniciando...';
-    
-    // Forzar reinicio después de 2 segundos
-    setTimeout(() => {
-      window.api.quitAndInstall();
-    }, 2000);
-  } else {
-    estado.textContent = '✅ No hay actualizaciones disponibles.';
+    // 2. Si hay actualización, FORZAR la descarga
+    if (result.ok && result.result && result.result.isUpdateAvailable) {
+      estado.textContent = `✅ Actualización ${result.result.versionInfo.version} disponible. Descargando...`;
+      estado.style.color = 'green';
+      
+      // ✅ FORZAR DESCARGA MANUAL
+      await window.api.downloadUpdate();
+      
+      // ✅ Esperar 3 segundos y reiniciar
+      estado.textContent = '✅ Actualización descargada. Reiniciando en 3 segundos...';
+      setTimeout(() => {
+        window.api.quitAndInstall();
+      }, 3000);
+      
+    } else {
+      estado.textContent = '✅ No hay actualizaciones disponibles.';
+      estado.style.color = 'gray';
+    }
+  } catch (error) {
+    console.error('❌ Error:', error);
+    estado.textContent = '❌ Error al verificar actualizaciones.';
+    estado.style.color = 'red';
   }
 });
 
