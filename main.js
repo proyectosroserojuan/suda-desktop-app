@@ -377,7 +377,7 @@ autoUpdater.logger = require('electron-log');
 autoUpdater.logger.transports.file.level = 'info';
 
 // NO descargar automáticamente - queremos mostrar un modal primero
-autoUpdater.autoDownload = false;
+autoUpdater.autoDownload = true;
 
 // Configurar el feed de actualizaciones (GitHub)
 autoUpdater.setFeedURL({
@@ -391,24 +391,15 @@ autoUpdater.setFeedURL({
 // 🎯 EVENTOS DEL AUTO-UPDATER
 // ============================================
 
-// Cuando hay una actualización disponible
+// REEMPLAZA el evento update-available por esto:
 autoUpdater.on('update-available', (info) => {
   console.log('🆕 Actualización disponible:', info.version);
   
-  dialog.showMessageBox({
-    type: 'info',
-    title: 'Actualización disponible',
-    message: `Versión ${info.version} disponible para descargar.`,
-    detail: '¿Quieres descargar la actualización ahora?',
-    buttons: ['✅ Descargar ahora', '⏰ Más tarde'],
-    defaultId: 0,
-    cancelId: 1
-  }).then((result) => {
-    if (result.response === 0) {
-      console.log('⬇️ Iniciando descarga...');
-      autoUpdater.downloadUpdate();
-    }
-  });
+  // ✅ Mostrar notificación NO BLOQUEANTE
+  // (opcional: puedes mostrar un mensaje en la UI en lugar de un modal)
+  
+  // ✅ Descarga automática (sin preguntar)
+  autoUpdater.downloadUpdate();
 });
 
 // Progreso de descarga
@@ -422,16 +413,18 @@ autoUpdater.on('update-downloaded', (info) => {
   
   dialog.showMessageBox({
     type: 'info',
-    title: 'Actualización lista',
-    message: 'La actualización se ha descargado correctamente.',
-    detail: 'La aplicación se cerrará para instalar la actualización. ¿Deseas continuar?',
+    title: '🔄 Actualización lista',
+    message: 'La aplicación se actualizará automáticamente.',
+    detail: 'La aplicación se reiniciará en 10 segundos para instalar la actualización.\n\n¿Quieres reiniciar ahora?',
     buttons: ['🔄 Reiniciar ahora', '⏰ Más tarde'],
     defaultId: 0,
     cancelId: 1
   }).then((result) => {
     if (result.response === 0) {
-      console.log('🔄 Instalando actualización...');
       autoUpdater.quitAndInstall();
+    } else {
+      // Si elige "Más tarde", se actualizará la próxima vez que abra
+      console.log('⏰ Usuario eligió reiniciar después');
     }
   });
 });
@@ -1322,9 +1315,6 @@ app.on('window-all-closed', () => {
   }
 });
 
-// ============================================
-// ⏰ VERIFICAR ACTUALIZACIONES CADA 30 MINUTOS
-// ============================================
 setInterval(() => {
   checkForUpdates();
-}, 30 * 60 * 1000); // 30 minutos
+}, 10 * 1000); // ← 30 segundos
