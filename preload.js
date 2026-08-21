@@ -115,6 +115,8 @@ generarYMostrarPDFSinDescargar: async (citaId) => {
 
   
 
+  
+
   // Agregar estos métodos al objeto api en preload.js:
 
 // Entidades y formatos
@@ -122,6 +124,10 @@ obtenerEntidades: () => ipcRenderer.invoke('obtener-entidades'),
 obtenerFormatoEntidad: (entidadId) => ipcRenderer.invoke('obtener-formato-entidad', entidadId),
 actualizarFormato: (data) => ipcRenderer.invoke('actualizar-formato', data),
 generarPDF: (datos, entidad, tipo) => ipcRenderer.invoke('generar-pdf', datos, entidad, tipo),
+
+
+// Dentro del objeto api, al final o donde prefieras
+checkForUpdates: () => ipcRenderer.invoke('check-for-updates'),
 
 // Agregar dentro del objeto api (junto a los otros métodos)
 generarPDFUnificadoAudiometria: (datos, entidad) => ipcRenderer.invoke('generar-pdf-unificado-audiometria', datos, entidad),
@@ -170,11 +176,17 @@ abrirPDFNativo: (rutaPDF) => ipcRenderer.invoke('abrir-pdf-nativo', rutaPDF),
 // Imprimir PDF
 imprimirPDFNativo: (rutaPDF) => ipcRenderer.invoke('imprimir-pdf-nativo', rutaPDF),
 
+
+
+
 // Escuchar comando de impresión desde main
 onComandoImprimir: (callback) => {
   ipcRenderer.removeAllListeners('comando-imprimir');
   ipcRenderer.on('comando-imprimir', (event, rutaPDF) => {
     callback(rutaPDF);
   });
+
+
+  
 }
 });

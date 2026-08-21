@@ -69,6 +69,19 @@ ipcMain.on('mostrar-modal-resultados', (event, rutaPDF) => {
   }
 });
 
+// Handler para forzar verificación de actualizaciones
+ipcMain.handle('check-for-updates', async () => {
+  console.log('🔍 Verificación forzada desde el renderer');
+  try {
+    const result = await autoUpdater.checkForUpdatesAndNotify();
+    console.log('✅ Resultado de verificación:', result);
+    return { ok: true, result };
+  } catch (error) {
+    console.error('❌ Error al verificar:', error);
+    return { ok: false, error: error.message };
+  }
+});
+
 // Cerrar modal
 ipcMain.on('cerrar-modal', (event) => {
   const ventanaPrincipal = BrowserWindow.getFocusedWindow();
