@@ -34,6 +34,32 @@ function showMessage(message, type = 'error', onAccept = null, fraseAdicional = 
     
     const icon = icons[type] || icons.info;
     const title = titles[type] || titles.info;
+
+
+
+
+// Construir el contenido del mensaje
+let contenidoMensaje = message;
+
+// Si es un mensaje de éxito y hay frase adicional, agregarla
+if (type === 'success' && fraseAdicional) {
+    contenidoMensaje = `
+        <div style="margin-bottom: 12px; font-size: 16px; font-weight: 500;">
+            ${message}
+        </div>
+        <div style="padding: 12px 16px; background: #f8f9fa; border-left: 4px solid #2a5298; border-radius: 4px; font-size: 13px; color: #2c3e50; line-height: 1.5; text-align: left; margin: 8px 0 16px 0;">
+            <span style="font-weight: 600; color: #1e3c72;">📰 FRASE DEL DÍA</span>
+            <br>
+            ${fraseAdicional}
+        </div>
+    `;
+} else {
+    contenidoMensaje = `<p>${message}</p>`;
+}
+
+
+
+
     
     // Crear mensaje con estructura profesional
     const div = document.createElement('div');
@@ -43,10 +69,17 @@ function showMessage(message, type = 'error', onAccept = null, fraseAdicional = 
             <span class="icon">${icon}</span>
             <h3>${title}</h3>
         </div>
-        <div class="msg-body">
+
+
+    <!--    <div class="msg-body">
             <p>${message}</p>
             <button id="btn-aceptar">Aceptar</button>
-        </div>
+        </div> -->
+
+        <div class="msg-body">
+    ${contenidoMensaje}
+    <button id="btn-aceptar">Aceptar</button>
+</div>
     `;
     document.body.appendChild(div);
     
@@ -101,6 +134,22 @@ async function login() {
         if (res.ok) {
             // ✅ Login exitoso - Mostrar bienvenida
             const nombreUsuario = res.user.nombre_completo || res.user.username || 'Usuario';
+
+
+//quitar si falla
+// OBTENER FRASE DEL DÍA (SIN BLOQUEAR)
+let fraseDelDia = null;
+try {
+    if (window.noticiasService) {
+        const dato = window.noticiasService.obtenerParaModal();
+        fraseDelDia = dato.texto;
+    }
+} catch (error) {
+    console.warn('No se pudo obtener frase:', error);
+}
+
+
+/*
             showMessage(
                 'Bienvenido ' + nombreUsuario,
                 'success',
@@ -108,6 +157,20 @@ async function login() {
                     window.location.href = 'dashboard.html';
                 }
             );
+
+*/
+
+showMessage(
+    'Bienvenido ' + nombreUsuario,
+    'success',
+    function() {
+        window.location.href = 'dashboard.html';
+    },
+    fraseDelDia  // ← NUEVO PARÁMETRO AQUÍ
+);
+
+
+
         } else {
             // ❌ Login fallido
             showMessage(res.error || 'Credenciales incorrectas', 'error');

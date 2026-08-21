@@ -13,7 +13,6 @@ const noticiasService = {
         { fecha: '6 de agosto de 1825', evento: 'Creación de la República de Bolivia' },
         { fecha: '13 de junio de 1953', evento: 'Golpe de Estado a Gustavo Rojas Pinilla' },
         { fecha: '19 de abril de 1970', evento: 'Elecciones presidenciales - Frente Nacional' },
-        { fecha: '2 de diciembre de 1993', evento: 'Muerte de Pablo Escobar' },
         { fecha: '24 de agosto de 2016', evento: 'Firma del Acuerdo de Paz con las FARC' }
     ],
 
@@ -35,13 +34,13 @@ const noticiasService = {
             const index = Math.floor(Math.random() * this.datosHistoricos.length);
             const evento = this.datosHistoricos[index];
             return {
-                texto: `📜 Tal día como hoy, ${evento.fecha}: ${evento.evento}`,
+                texto: `Tal día como hoy, ${evento.fecha}: ${evento.evento}`,
                 tipo: 'historico'
             };
         } else {
             const index = Math.floor(Math.random() * this.frases.length);
             return {
-                texto: `💡 ${this.frases[index]}`,
+                texto: `${this.frases[index]}`,
                 tipo: 'motivacional'
             };
         }
