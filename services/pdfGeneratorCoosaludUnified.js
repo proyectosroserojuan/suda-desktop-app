@@ -35,17 +35,50 @@ class PDFGeneratorCoosaludUnified {
     const paragraphs = text.split('\n');
     const lines = [];
     
+    const maxLineWidth = width - (padding * 2);
+
     for (const paragraph of paragraphs) {
       const words = paragraph.split(' ');
       let currentLine = '';
-      
+
       for (const word of words) {
         const testLine = currentLine + (currentLine ? ' ' : '') + word;
         const testWidth = font.widthOfTextAtSize(testLine, fontSize);
-        
-        if (testWidth > width - (padding * 2) && currentLine !== '') {
+
+        if (testWidth > maxLineWidth && currentLine !== '') {
+          // La línea actual ya no entra: la cerramos y arrancamos una nueva con "word"
           lines.push(currentLine);
-          currentLine = word;
+          currentLine = '';
+
+          // Si "word" por sí sola tampoco entra en el ancho, la partimos por caracteres
+          if (font.widthOfTextAtSize(word, fontSize) > maxLineWidth) {
+            let chunk = '';
+            for (const char of word) {
+              const testChunk = chunk + char;
+              if (font.widthOfTextAtSize(testChunk, fontSize) > maxLineWidth && chunk !== '') {
+                lines.push(chunk);
+                chunk = char;
+              } else {
+                chunk = testChunk;
+              }
+            }
+            currentLine = chunk;
+          } else {
+            currentLine = word;
+          }
+        } else if (testWidth > maxLineWidth && currentLine === '') {
+          // Caso: la primera palabra de la línea ya excede el ancho (palabra muy larga sola)
+          let chunk = '';
+          for (const char of word) {
+            const testChunk = chunk + char;
+            if (font.widthOfTextAtSize(testChunk, fontSize) > maxLineWidth && chunk !== '') {
+              lines.push(chunk);
+              chunk = char;
+            } else {
+              chunk = testChunk;
+            }
+          }
+          currentLine = chunk;
         } else {
           currentLine = testLine;
         }
@@ -54,7 +87,6 @@ class PDFGeneratorCoosaludUnified {
         lines.push(currentLine);
       }
     }
-    
     // Truncar si es necesario
     const finalLines = lines.slice(0, maxLines);
     let currentY = y + padding + fontSize;
@@ -487,7 +519,7 @@ const obsY = 620;        // ← Posición Y del TÍTULO (INDEPENDIENTE)
 const obsX = 50;        // ← Misma X que los diagnósticos
 
 // Definir el área del "div" para observaciones
-const obsBoxWidth = 298;      // Mismo ancho que los diagnósticos
+const obsBoxWidth = 280;      // Mismo ancho que los diagnósticos
 const obsBoxHeight = 60;      // Alto fijo del div (más grande para texto largo)
 const obsBoxX = obsX;
 const obsBoxY = obsY + 20;    // ← Cuadro 20px abajo del título (INDEPENDIENTE)
