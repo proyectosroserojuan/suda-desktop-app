@@ -1,7 +1,7 @@
 {
   "name": "audiometria-app",
   "productName": "S.U.D.A LUIS IGNACIO SANIN",
-  "version": "1.0.1",
+  "version": "1.0.3",
   "main": "main.js",
   "scripts": {
     "start": "electron .",
