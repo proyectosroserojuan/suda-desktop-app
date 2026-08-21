@@ -29,7 +29,10 @@ jobs:
       - name: Release
         uses: softprops/action-gh-release@v1
         with:
-          files: release/*.exe
+          files: |
+            release/*.exe
+            release/*.blockmap
+            release/latest.yml  # ← ¡AGREGADO!
           generate_release_notes: true
         env:
-          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}  # ✅ CAMBIADO
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
