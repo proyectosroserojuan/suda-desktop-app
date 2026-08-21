@@ -4444,7 +4444,7 @@ function dibujarGuionesParaOido(puntos, color) {
         
         const idxPrev = freqs.indexOf(prev.freq);
         const idxCurr = freqs.indexOf(curr.freq);
-        if (idxCurr - idxPrev > 1) continue;
+        if (idxCurr - idxPrev > 2) continue;
         
         const midX = (prev.x + curr.x) / 2;
         const midY = (prev.y + curr.y) / 2;

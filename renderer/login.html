@@ -92,6 +92,32 @@ window.addEventListener('resize', function() {
     clearTimeout(tiempoEspera);
     tiempoEspera = setTimeout(aplicarEscala, 150);
 });
+
+
+// ============================================
+// NAVEGACIÓN CON TECLADO (Enter)
+// ============================================
+
+document.addEventListener('DOMContentLoaded', function() {
+    const usernameInput = document.getElementById('username');
+    const passwordInput = document.getElementById('password');
+    
+    // Cuando presionas Enter en el campo USUARIO → pasa a CONTRASEÑA
+    usernameInput.addEventListener('keydown', function(event) {
+        if (event.key === 'Enter') {
+            event.preventDefault(); // Evita que haga submit
+            passwordInput.focus();   // Enfoca el campo contraseña
+        }
+    });
+    
+    // Cuando presionas Enter en el campo CONTRASEÑA → ejecuta login
+    passwordInput.addEventListener('keydown', function(event) {
+        if (event.key === 'Enter') {
+            event.preventDefault();
+            login(); // Ejecuta la función de login
+        }
+    });
+});
 </script>
 </body>
 </html>

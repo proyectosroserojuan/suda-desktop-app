@@ -292,12 +292,12 @@ function mostrarDetalles(datos) {
                     <span style="margin-left: 10px; background: #4caf50; padding: 2px 10px; border-radius: 12px; color: white; font-size: 12px;">
                         ${totalExamenes} examen(es)
                     </span>
-                    ${esCombinado ? '<span style="margin-left: 10px; background: #ff9800; padding: 2px 10px; border-radius: 12px; color: white; font-size: 12px;">Combinado</span>' : ''}
+                  <!--  ${esCombinado ? '<span style="margin-left: 10px; background: #ff9800; padding: 2px 10px; border-radius: 12px; color: white; font-size: 12px;">Combinado</span>' : ''} -->
                 </div>
             </div>
             <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
-                <button onclick="verPDF(${cita.id})" style="background: #ffffff; color: white; border: none; padding: 8px 20px; border-radius: 6px; cursor: pointer; font-weight: bold;">
-                    Ver RESULTADO
+                <button onclick="verPDF(${cita.id})" style="background: #ffffff; color: black; border: none; padding: 8px 20px; border-radius: 6px; cursor: pointer; font-weight: bold;">
+                    Ver Resultado
                 </button>
                 <span class="badge-estado badge-${cita.estado || 'pendiente'}">
                     ${cita.estado || 'pendiente'}
@@ -340,13 +340,13 @@ function mostrarDetalles(datos) {
         <div class="examen-tabs">
             ${audiometria ? `
                 <div class="examen-tab active" onclick="cambiarTab('audiometria')">
-                    🦻 Audiometría
+                    Audiometría Tonal
                     <span class="badge-small">${formatearFecha(audiometria.fecha_registro) || ''}</span>
                 </div>
             ` : ''}
             ${logoaudiometria ? `
                 <div class="examen-tab ${!audiometria ? 'active' : ''}" onclick="cambiarTab('logoaudiometria')">
-                    🗣️ Logoaudiometría
+                    Logoaudiometría
                     <span class="badge-small">${formatearFecha(logoaudiometria.fecha_registro) || ''}</span>
                 </div>
             ` : ''}
@@ -420,43 +420,43 @@ function mostrarDetalles(datos) {
         html += `
             <div class="examen-content ${isActive}" id="contenido-logoaudiometria">
                 <div class="section">
-                    <div class="section-title">🗣️ Logoaudiometría</div>
+                    <div class="section-title">Logoaudiometría</div>
                     <div class="grid-2">
                         <div>
                             <h3 style="color: #1a237e; margin-bottom: 10px;">Oído Derecho (OD)</h3>
                             <div class="info-item">
-                                <div class="label">URV</div>
+                                <div class="label">Umbral de Voaz</div>
                                 <div class="value">${logoaudiometria.urv_od !== null && logoaudiometria.urv_od !== undefined ? logoaudiometria.urv_od : 'N/A'}</div>
                             </div>
                             <div class="info-item" style="margin-top: 8px;">
-                                <div class="label">Upalabra</div>
+                                <div class="label">Umbral de Palabra</div>
                                 <div class="value">${logoaudiometria.upalabra_od !== null && logoaudiometria.upalabra_od !== undefined ? logoaudiometria.upalabra_od : 'N/A'}</div>
                             </div>
                             <div class="info-item" style="margin-top: 8px;">
-                                <div class="label">Udisc</div>
+                                <div class="label">Umbbral de Discrinación</div>
                                 <div class="value">${logoaudiometria.udisc_od !== null && logoaudiometria.udisc_od !== undefined ? logoaudiometria.udisc_od : 'N/A'}</div>
                             </div>
                             <div class="info-item" style="margin-top: 8px;">
-                                <div class="label">Pmax</div>
+                                <div class="label">% Discrminación</div>
                                 <div class="value">${logoaudiometria.pmax_od !== null && logoaudiometria.pmax_od !== undefined ? logoaudiometria.pmax_od : 'N/A'}</div>
                             </div>
                         </div>
                         <div>
                             <h3 style="color: #1a237e; margin-bottom: 10px;">Oído Izquierdo (OI)</h3>
                             <div class="info-item">
-                                <div class="label">URV</div>
+                                <div class="label">Umbral de voz</div>
                                 <div class="value">${logoaudiometria.urv_oi !== null && logoaudiometria.urv_oi !== undefined ? logoaudiometria.urv_oi : 'N/A'}</div>
                             </div>
                             <div class="info-item" style="margin-top: 8px;">
-                                <div class="label">Upalabra</div>
+                                <div class="label">Umbral de Voz</div>
                                 <div class="value">${logoaudiometria.upalabra_oi !== null && logoaudiometria.upalabra_oi !== undefined ? logoaudiometria.upalabra_oi : 'N/A'}</div>
                             </div>
                             <div class="info-item" style="margin-top: 8px;">
-                                <div class="label">Udisc</div>
+                                <div class="label">Umbral de Discriminación</div>
                                 <div class="value">${logoaudiometria.udisc_oi !== null && logoaudiometria.udisc_oi !== undefined ? logoaudiometria.udisc_oi : 'N/A'}</div>
                             </div>
                             <div class="info-item" style="margin-top: 8px;">
-                                <div class="label">Pmax</div>
+                                <div class="label">% Discriminación</div>
                                 <div class="value">${logoaudiometria.pmax_oi !== null && logoaudiometria.pmax_oi !== undefined ? logoaudiometria.pmax_oi : 'N/A'}</div>
                             </div>
                         </div>
@@ -528,7 +528,7 @@ ${logoaudiometria.grafica_logo_base64 ? `
         // Mostrar estado de carga
         const btn = event.target || document.querySelector('button[onclick*="verPDF"]');
         if (btn) {
-            btn.textContent = '⏳ Generando...';
+            btn.textContent = 'El resultado se está generando...';
             btn.disabled = true;
         }
 

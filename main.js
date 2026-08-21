@@ -1,4 +1,8 @@
 const { app, BrowserWindow, ipcMain } = require('electron');
+
+const { autoUpdater } = require('electron-updater');
+const { dialog } = require('electron');
+
 require('dotenv').config();
 const { exec } = require('child_process');
 
@@ -176,6 +180,7 @@ ipcMain.on('abrir-ventana-detalles', async (event, datosExamen) => {
         const ventanaDetalles = new BrowserWindow({
             width: 1100,
             height: 850,
+            fullscreen: true,
             resizable: true,
             maximizable: true,
             minimizable: true,
@@ -348,6 +353,89 @@ const excelService = require('./services/excelService');
 let mainWindow;
 let usuarioActual = null;
 let ventanaCitas = null;
+
+//NUEVO---
+// ============================================
+// 🚀 CONFIGURACIÓN DEL AUTO-UPDATER
+// ============================================
+
+// Configurar logging para debugging
+autoUpdater.logger = require('electron-log');
+autoUpdater.logger.transports.file.level = 'info';
+
+// NO descargar automáticamente - queremos mostrar un modal primero
+autoUpdater.autoDownload = false;
+
+// Configurar el feed de actualizaciones (GitHub)
+autoUpdater.setFeedURL({
+  provider: 'github',
+  owner: 'proyectosroserojuan',  // 🔴 REEMPLAZA con tu usuario de GitHub
+  repo: 'suda-desktop-app',      // 🔴 REEMPLAZA con el nombre de tu repositorio
+  private: false                // Cambia a true si tu repo es privado
+});
+
+// ============================================
+// 🎯 EVENTOS DEL AUTO-UPDATER
+// ============================================
+
+// Cuando hay una actualización disponible
+autoUpdater.on('update-available', (info) => {
+  console.log('🆕 Actualización disponible:', info.version);
+  
+  dialog.showMessageBox({
+    type: 'info',
+    title: 'Actualización disponible',
+    message: `Versión ${info.version} disponible para descargar.`,
+    detail: '¿Quieres descargar la actualización ahora?',
+    buttons: ['✅ Descargar ahora', '⏰ Más tarde'],
+    defaultId: 0,
+    cancelId: 1
+  }).then((result) => {
+    if (result.response === 0) {
+      console.log('⬇️ Iniciando descarga...');
+      autoUpdater.downloadUpdate();
+    }
+  });
+});
+
+// Progreso de descarga
+autoUpdater.on('download-progress', (progressObj) => {
+  console.log(`⬇️ Descargando: ${progressObj.percent.toFixed(2)}%`);
+});
+
+// Cuando la actualización ya está descargada
+autoUpdater.on('update-downloaded', (info) => {
+  console.log('✅ Actualización descargada:', info.version);
+  
+  dialog.showMessageBox({
+    type: 'info',
+    title: 'Actualización lista',
+    message: 'La actualización se ha descargado correctamente.',
+    detail: 'La aplicación se cerrará para instalar la actualización. ¿Deseas continuar?',
+    buttons: ['🔄 Reiniciar ahora', '⏰ Más tarde'],
+    defaultId: 0,
+    cancelId: 1
+  }).then((result) => {
+    if (result.response === 0) {
+      console.log('🔄 Instalando actualización...');
+      autoUpdater.quitAndInstall();
+    }
+  });
+});
+
+// Manejo de errores
+autoUpdater.on('error', (err) => {
+  console.error('❌ Error en auto-updater:', err);
+});
+
+// Función para verificar actualizaciones
+function checkForUpdates() {
+  console.log('🔍 Verificando actualizaciones...');
+  autoUpdater.checkForUpdatesAndNotify();
+}
+
+
+//AQUI TERMINA
 
 
 
@@ -979,6 +1067,12 @@ function createWindow() {
   mainWindow.loadFile('renderer/login.html');
 }
 
+
+  // ✅ Verificar actualizaciones al iniciar (3 segundos después)
+  setTimeout(() => {
+    checkForUpdates();
+  }, 3000);
+
 // Agregar después de los otros manejadores de pacientes
 const { actualizarPaciente, eliminarPaciente, obtenerPacientePorId } = require('./db/pacientes');
 
@@ -1214,3 +1308,10 @@ app.on('window-all-closed', () => {
     app.quit();
   }
 });
+
+// ============================================
+// ⏰ VERIFICAR ACTUALIZACIONES CADA 30 MINUTOS
+// ============================================
+setInterval(() => {
+  checkForUpdates();
+}, 30 * 60 * 1000); // 30 minutos

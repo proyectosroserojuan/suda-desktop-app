@@ -6,7 +6,8 @@
 // SISTEMA DE MENSAJES PERSONALIZADO
 // ============================================
 
-function showMessage(message, type = 'error', onAccept = null) {
+//function showMessage(message, type = 'error', onAccept = null) {
+function showMessage(message, type = 'error', onAccept = null, fraseAdicional = null) {
     // Eliminar mensajes anteriores
     const oldOverlay = document.querySelector('.custom-overlay');
     if (oldOverlay) oldOverlay.remove();

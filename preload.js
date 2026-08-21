@@ -71,6 +71,15 @@ obtenerPacientePorId: (id) => ipcRenderer.invoke('obtener-paciente-por-id', id),
 
   borrarResultadosExamen: (citaId) => ipcRenderer.invoke('borrar-resultados-examen', citaId),
   
+
+onDownloadProgress: (callback) => {
+  ipcRenderer.on('download-progress', (event, progress) => {
+    callback(progress);
+  });
+},
+
+
+
 // Agregar en el objeto api de preload.js:
 generarPDFAudiometria: (datos, entidad) => ipcRenderer.invoke('generar-pdf-audiometria', datos, entidad),
 generarPDFLogoaudiometria: (datos, entidad) => ipcRenderer.invoke('generar-pdf-logoaudiometria', datos, entidad),

@@ -483,11 +483,11 @@ this.drawWrappedTextInArea(
 // ============================================================
 // OBSERVACIONES - CON WRAPPING (DIV)
 // ============================================================
-const obsY = 600;        // ← Posición Y del TÍTULO (INDEPENDIENTE)
-const obsX = 90;        // ← Misma X que los diagnósticos
+const obsY = 620;        // ← Posición Y del TÍTULO (INDEPENDIENTE)
+const obsX = 50;        // ← Misma X que los diagnósticos
 
 // Definir el área del "div" para observaciones
-const obsBoxWidth = 290;      // Mismo ancho que los diagnósticos
+const obsBoxWidth = 298;      // Mismo ancho que los diagnósticos
 const obsBoxHeight = 60;      // Alto fijo del div (más grande para texto largo)
 const obsBoxX = obsX;
 const obsBoxY = obsY + 20;    // ← Cuadro 20px abajo del título (INDEPENDIENTE)
