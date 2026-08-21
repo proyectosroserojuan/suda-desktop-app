@@ -21,10 +21,8 @@ jobs:
       - name: Install dependencies
         run: npm install
       
-      - name: Build and publish app
-        run: npm run release
-        env:
-          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+      - name: Build app (genera todos los archivos)
+        run: npm run dist  # ← USAR dist, NO release
       
       - name: Release
         uses: softprops/action-gh-release@v1
@@ -32,7 +30,7 @@ jobs:
           files: |
             release/*.exe
             release/*.blockmap
-            release/latest.yml  # ← ¡AGREGADO!
+            release/latest.yml
           generate_release_notes: true
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
