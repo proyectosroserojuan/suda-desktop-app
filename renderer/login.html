@@ -115,11 +115,10 @@ document.getElementById('btnActualizar').addEventListener('click', async () => {
       // ✅ FORZAR DESCARGA MANUAL
       await window.api.downloadUpdate();
       
-      // ✅ Esperar 3 segundos y reiniciar
-      estado.textContent = '✅ Actualización descargada. Reiniciando en 3 segundos...';
-      setTimeout(() => {
-        window.api.quitAndInstall();
-      }, 3000);
+      // ✅ REINICIAR INMEDIATAMENTE (sin esperar)
+estado.textContent = '✅ Actualización descargada. Reiniciando...';
+window.api.quitAndInstall();
+  
       
     } else {
       estado.textContent = '✅ No hay actualizaciones disponibles.';
