@@ -1,15 +1,16 @@
 {
   "name": "audiometria-app",
   "productName": "S.U.D.A LUIS IGNACIO SANIN",
-  "version": "1.0.23",
+  "version": "1.0.24",
   "main": "main.js",
   "scripts": {
     "start": "electron .",
     "build": "electron-packager . audiometria-app --platform=win32 --arch=x64 --out=dist --overwrite",
     "dist": "electron-builder --win --x64 --publish never",
-    "release": "electron-builder --win --x64 --publish always" 
+    "release": "electron-builder --win --x64 --publish always"
   },
   "build": {
+    "artifactName": "SUDA-Setup-${version}.${ext}",
     "win": {
       "target": "nsis",
       "icon": "build/ico.ico"
@@ -38,7 +39,8 @@
       {
         "provider": "github",
         "owner": "proyectosroserojuan",
-        "repo": "suda-desktop-app"
+        "repo": "suda-desktop-app",
+        "draft": false
       }
     ]
   },

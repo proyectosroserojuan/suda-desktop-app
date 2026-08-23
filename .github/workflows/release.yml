@@ -8,29 +8,20 @@ on:
 jobs:
   build:
     runs-on: windows-latest
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
-      
+
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
           node-version: '20'
-      
+
       - name: Install dependencies
         run: npm install
-      
-      - name: Build app (genera todos los archivos)
-        run: npm run dist  # ← USAR dist, NO release
-      
-      - name: Release
-        uses: softprops/action-gh-release@v1
-        with:
-          files: |
-            release/*.exe
-            release/*.blockmap
-            release/latest.yml
-          generate_release_notes: true
+
+      - name: Build and publish
+        run: npx electron-builder --win --x64 --publish always
         env:
-          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
