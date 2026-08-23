@@ -95,35 +95,21 @@ window.addEventListener('resize', function() {
     clearTimeout(tiempoEspera);
     tiempoEspera = setTimeout(aplicarEscala, 150);
 });
-
 document.getElementById('btnActualizar').addEventListener('click', async () => {
   const estado = document.getElementById('estadoActualizacion');
-  
   estado.textContent = '🔍 Verificando actualizaciones...';
   estado.style.color = 'blue';
-  
+
   try {
-    // 1. Verificar si hay actualización
     const result = await window.api.checkForUpdates();
     console.log('📦 Resultado:', result);
-    
-    // 2. Si hay actualización, FORZAR la descarga
+
     if (result.ok && result.result && result.result.isUpdateAvailable) {
-      estado.textContent = `✅ Actualización ${result.result.versionInfo.version} disponible. Descargando...`;
+      estado.textContent = `⬇️ Descargando actualización ${result.result.versionInfo.version}...`;
       estado.style.color = 'green';
-      
-      // ✅ FORZAR DESCARGA MANUAL
-      await window.api.downloadUpdate();
-      
-estado.textContent = '✅ Actualización descargada. Cerrando aplicación...';
-// ✅ Cerrar la app (el usuario la abrirá manualmente)
-await window.api.quitAndInstall();
-// Si no se cierra, forzar cierre
-setTimeout(() => {
-  window.api.quitAndInstall();
-}, 3000);
-  
-      
+      // NO llamar downloadUpdate ni quitAndInstall aquí.
+      // autoDownload ya está descargando solo.
+      // El evento 'update-downloaded' (abajo) avisa cuando termine.
     } else {
       estado.textContent = '✅ No hay actualizaciones disponibles.';
       estado.style.color = 'gray';
@@ -135,6 +121,19 @@ setTimeout(() => {
   }
 });
 
+// Progreso real de la descarga
+window.api.onDownloadProgress((progress) => {
+  const estado = document.getElementById('estadoActualizacion');
+  estado.textContent = `⬇️ Descargando: ${progress.percent.toFixed(1)}%`;
+});
+
+// Se activa SOLO cuando el archivo terminó de descargarse de verdad
+window.api.onUpdateDownloaded((version) => {
+  const estado = document.getElementById('estadoActualizacion');
+  estado.textContent = `✅ Actualización ${version} lista. La app se cerrará para instalar...`;
+  estado.style.color = 'green';
+  // El diálogo nativo (main.js) ya se encarga de preguntar y llamar quitAndInstall()
+});
 
 // ============================================
 // NAVEGACIÓN CON TECLADO (Enter)

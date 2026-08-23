@@ -78,7 +78,12 @@ onDownloadProgress: (callback) => {
   });
 },
 
-
+onUpdateDownloaded: (callback) => {
+  ipcRenderer.removeAllListeners('update-downloaded');
+  ipcRenderer.on('update-downloaded', (event, version) => {
+    callback(version);
+  });
+},
 
 // Agregar en el objeto api de preload.js:
 generarPDFAudiometria: (datos, entidad) => ipcRenderer.invoke('generar-pdf-audiometria', datos, entidad),

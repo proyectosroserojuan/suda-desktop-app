@@ -94,8 +94,7 @@ ipcMain.handle('check-for-updates', async () => {
     if (result && result.updateInfo) {
       console.log('🆕 Actualización detectada:', result.updateInfo.version);
       
-      // ✅ FORZAR DESCARGA MANUAL (NO confiar en autoDownload)
-      autoUpdater.downloadUpdate();
+  
       
       // ✅ Notificar al renderer que hay actualización
       mainWindow.webContents.send('update-available', result.updateInfo.version);
@@ -443,21 +442,25 @@ autoUpdater.on('download-progress', (progressObj) => {
 
 autoUpdater.on('update-downloaded', (info) => {
   console.log('✅ Actualización descargada:', info.version);
-  
+
+  // ✅ Avisar al renderer que la descarga terminó de verdad
+  if (mainWindow) {
+    mainWindow.webContents.send('update-downloaded', info.version);
+  }
+
   dialog.showMessageBox({
     type: 'info',
     title: '🔄 Actualización lista',
     message: 'La actualización se ha descargado correctamente.',
-    detail: 'La aplicación se cerrará. Por favor, vuelve a abrirla para completar la instalación.',
-    buttons: ['✅ Cerrar ahora', '⏰ Más tarde'],
+    detail: 'La aplicación se cerrará para instalar la actualización.',
+    buttons: ['✅ Instalar ahora', '⏰ Más tarde'],
     defaultId: 0,
     cancelId: 1
   }).then((result) => {
     if (result.response === 0) {
-      // ✅ Cerrar la app (el usuario la abrirá manualmente)
-      app.quit();
+      autoUpdater.quitAndInstall();  // ← CORRECTO (antes era app.quit())
     } else {
-      console.log('⏰ Usuario eligió cerrar después');
+      console.log('⏰ Usuario eligió instalar después');
     }
   });
 });
