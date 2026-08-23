@@ -114,7 +114,7 @@ ipcMain.handle('check-for-updates', async () => {
     return { ok: false, error: error.message };
   }
 });
-// Cerrar modal
+
 ipcMain.on('cerrar-modal', (event) => {
   const ventanaPrincipal = BrowserWindow.getFocusedWindow();
   if (ventanaPrincipal) {
