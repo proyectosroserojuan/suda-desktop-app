@@ -440,6 +440,7 @@ autoUpdater.on('download-progress', (progressObj) => {
   console.log(`⬇️ Descargando: ${progressObj.percent.toFixed(2)}%`);
 });
 
+
 autoUpdater.on('update-downloaded', (info) => {
   console.log('✅ Actualización descargada:', info.version);
   
@@ -466,6 +467,8 @@ autoUpdater.on('update-downloaded', (info) => {
     autoUpdater.quitAndInstall();
   }, 5000);
 });
+
+
 
 // Manejo de errores
 autoUpdater.on('error', (err) => {
