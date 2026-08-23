@@ -444,30 +444,23 @@ autoUpdater.on('download-progress', (progressObj) => {
 autoUpdater.on('update-downloaded', (info) => {
   console.log('✅ Actualización descargada:', info.version);
   
-  // ✅ FORZAR REINICIO AUTOMÁTICO (sin preguntar)
   dialog.showMessageBox({
     type: 'info',
     title: '🔄 Actualización lista',
-    message: 'La aplicación se actualizará automáticamente.',
-    detail: 'La aplicación se reiniciará en 5 segundos para instalar la actualización.',
-    buttons: ['🔄 Reiniciar ahora', '⏰ Más tarde'],
+    message: 'La actualización se ha descargado correctamente.',
+    detail: 'La aplicación se cerrará. Por favor, vuelve a abrirla para completar la instalación.',
+    buttons: ['✅ Cerrar ahora', '⏰ Más tarde'],
     defaultId: 0,
     cancelId: 1
   }).then((result) => {
     if (result.response === 0) {
-      autoUpdater.quitAndInstall();
+      // ✅ Cerrar la app (el usuario la abrirá manualmente)
+      app.quit();
     } else {
-      console.log('⏰ Usuario eligió reiniciar después');
+      console.log('⏰ Usuario eligió cerrar después');
     }
   });
-  
-  // ✅ FUERZA EL REINICIO DESPUÉS DE 5 SEGUNDOS (incluso si no responde)
-  setTimeout(() => {
-    console.log('🔄 Forzando reinicio automático...');
-    autoUpdater.quitAndInstall();
-  }, 5000);
 });
-
 
 
 // Manejo de errores

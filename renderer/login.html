@@ -115,9 +115,13 @@ document.getElementById('btnActualizar').addEventListener('click', async () => {
       // ✅ FORZAR DESCARGA MANUAL
       await window.api.downloadUpdate();
       
-      // ✅ REINICIAR INMEDIATAMENTE (sin esperar)
-estado.textContent = '✅ Actualización descargada. Reiniciando...';
-window.api.quitAndInstall();
+estado.textContent = '✅ Actualización descargada. Cerrando aplicación...';
+// ✅ Cerrar la app (el usuario la abrirá manualmente)
+await window.api.quitAndInstall();
+// Si no se cierra, forzar cierre
+setTimeout(() => {
+  window.api.quitAndInstall();
+}, 3000);
   
       
     } else {
