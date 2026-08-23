@@ -33,9 +33,24 @@ ipcMain.handle('abrir-pdf-nativo', async (event, rutaPDF) => {
   }
 });
 
-// Handler para descargar manualmente
 ipcMain.handle('download-update', async () => {
   console.log('⬇️ Forzando descarga manual...');
+  
+  // ✅ FORZAR descarga (incluso si autoDownload es false)
+  if (autoUpdater.downloadPromise) {
+    console.log('⚠️ Ya hay una descarga en progreso.');
+    return { ok: true, alreadyDownloading: true };
+  }
+  
+  // ✅ Iniciar descarga con logs de progreso
+  autoUpdater.on('download-progress', (progressObj) => {
+    console.log(`⬇️ Progreso: ${progressObj.percent.toFixed(1)}%`);
+    // Enviar progreso al renderer
+    if (mainWindow) {
+      mainWindow.webContents.send('download-progress', progressObj);
+    }
+  });
+  
   autoUpdater.downloadUpdate();
   return { ok: true };
 });
@@ -409,7 +424,7 @@ autoUpdater.logger = require('electron-log');
 autoUpdater.logger.transports.file.level = 'info';
 
 // NO descargar automáticamente - queremos mostrar un modal primero
-autoUpdater.autoDownload = true;
+autoUpdater.autoDownload = false;
 
 // Configurar el feed de actualizaciones (GitHub)
 autoUpdater.setFeedURL({

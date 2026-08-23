@@ -95,6 +95,9 @@ window.addEventListener('resize', function() {
     clearTimeout(tiempoEspera);
     tiempoEspera = setTimeout(aplicarEscala, 150);
 });
+
+
+
 document.getElementById('btnActualizar').addEventListener('click', async () => {
   const estado = document.getElementById('estadoActualizacion');
   estado.textContent = '🔍 Verificando actualizaciones...';
@@ -107,9 +110,11 @@ document.getElementById('btnActualizar').addEventListener('click', async () => {
     if (result.ok && result.result && result.result.isUpdateAvailable) {
       estado.textContent = `⬇️ Descargando actualización ${result.result.versionInfo.version}...`;
       estado.style.color = 'green';
-      // NO llamar downloadUpdate ni quitAndInstall aquí.
-      // autoDownload ya está descargando solo.
-      // El evento 'update-downloaded' (abajo) avisa cuando termine.
+      
+      // ✅ INICIAR DESCARGA MANUAL
+      await window.api.downloadUpdate();
+      
+      // ✅ El progreso se muestra a través de onDownloadProgress
     } else {
       estado.textContent = '✅ No hay actualizaciones disponibles.';
       estado.style.color = 'gray';
