@@ -324,14 +324,12 @@ button.reset-btn:hover {
 /* ============================================ */
 .chart-container {
     height: 300px;
-    width: 85%;
-    max-width: 1200px;
+    width: 70%;
+    max-width: clamp(420px, 45vw, 650px);
     margin: 0 auto;
     position: relative;
     overflow: hidden;
-    
 }
-
 /* El canvas se escala automáticamente */
 #speechChart {
     display: block;
@@ -1208,6 +1206,10 @@ else if (
         });
     }
 };
+
+
+
+
 let chart;
 
 
@@ -1344,6 +1346,9 @@ function getEarValues(ear) {
     };
 }
 
+
+
+
 // Agregar listener para los nuevos campos
 document.querySelectorAll('[id$="_porcentaje_real"]').forEach(input => {
     input.addEventListener('input', function() {
@@ -1454,6 +1459,10 @@ function generarPuntosClinicos(data, ear) {
 
 function generarCurvaSuave(data, ear) {
 
+
+const usarCurvaSuave = true; // Cambia a false si quieres volver a línea recta
+
+
     const campos = getCamposValidos(ear);
     const puntos = [];
 
@@ -1517,10 +1526,22 @@ function generarCurvaSuave(data, ear) {
             }
 
             // Tramo 2: U.Palabra → U.Discriminación (porcentajePalabra → porcentaje final)
+            // Tramo 2: U.Palabra → U.Discriminación (porcentajePalabra → porcentaje final)
             else if (db <= punto3x) {
-                y = data.porcentajePalabra + 
-                    ((db - punto2x) / (punto3x - punto2x)) * 
-                    (data.porcentaje - data.porcentajePalabra);
+                if (usarCurvaSuave) {
+                    // ✅ CURVA SUAVE - No lineal
+                    const t = (db - punto2x) / (punto3x - punto2x);
+                    // Usar la función de suavizado
+                    const tSuave = t * t * (3 - 2 * t);
+                    y = data.porcentajePalabra + 
+                        tSuave * 
+                        (data.porcentaje - data.porcentajePalabra);
+                } else {
+                    // LÍNEA RECTA (original)
+                    y = data.porcentajePalabra + 
+                        ((db - punto2x) / (punto3x - punto2x)) * 
+                        (data.porcentaje - data.porcentajePalabra);
+                }
             }
 
             else {
@@ -1534,8 +1555,17 @@ function generarCurvaSuave(data, ear) {
             if (db < punto1x) y = NaN;
 
             // Tramo 1: U.Voz → U.Palabra (0% → porcentajePalabra)
+            // Tramo 1: U.Voz → U.Palabra (0% → porcentajePalabra)
             else if (db <= punto2x) {
-                y = ((db - punto1x) / (punto2x - punto1x)) * data.porcentajePalabra;
+                if (usarCurvaSuave) {
+                    // ✅ CURVA SUAVE - No lineal
+                    const t = (db - punto1x) / (punto2x - punto1x);
+                    const tSuave = t * t * (3 - 2 * t);
+                    y = tSuave * data.porcentajePalabra;
+                } else {
+                    // LÍNEA RECTA (original)
+                    y = ((db - punto1x) / (punto2x - punto1x)) * data.porcentajePalabra;
+                }
             }
 
             // Tramo 2: U.Palabra → U.Discriminación (porcentajePalabra constante)
@@ -1556,6 +1586,22 @@ function generarCurvaSuave(data, ear) {
 
     return puntos;
 }
+
+
+// ============================================
+// FUNCIÓN AUXILIAR PARA INTERPOLACIÓN SUAVE (CURVA)
+// ============================================
+function interpolacionSuave(puntoA, puntoB, t) {
+    // t va de 0 a 1
+    // Usa una función de suavizado (cubic easing) para que la curva sea más orgánica
+    const suavizado = t * t * (3 - 2 * t); // Smoothstep
+    return {
+        x: puntoA.x + (puntoB.x - puntoA.x) * suavizado,
+        y: puntoA.y + (puntoB.y - puntoA.y) * suavizado
+    };
+}
+
+
 function getClinicalInterpretation(name, data) {
     let texto = `${name}: `;
 
@@ -1655,26 +1701,32 @@ function initializeChart() {
                 legend: { display: false } 
             },
             scales: {
-           x: {
+x: {
     type: 'linear',
     min: 0,
-    max: 115 * SCALE_X_SPEECH, // 👈 MULTIPLICAR EL MÁXIMO
+    max: 120 * SCALE_X_SPEECH,
     
-    grid: { 
-        color: '#000000',
-        drawTicks: false,
-        tickColor: '#000000',
-        tickWidth: 2,
-        borderColor: '#000000',
-        borderWidth: 2
+grid: { 
+    color: function(context) {
+        const v = Math.round(context.tick.value);
+        return (v % 10 === 0) ? '#000000' : 'transparent';
     },
+    lineWidth: function(context) {
+        const v = Math.round(context.tick.value);
+        return (v % 10 === 0) ? 2 : 0;
+    },
+    drawTicks: false,
+    tickColor: '#000000',
+    tickWidth: 2,
+    borderColor: '#000000',
+    borderWidth: 2
+},
     ticks: {
-        stepSize: 5 * SCALE_X_SPEECH, // 👈 PASO DE 5 ESCALADO
+        stepSize: 5 * SCALE_X_SPEECH,
         autoSkip: false,
         maxRotation: 0,
         minRotation: 0,
         callback: function(value) {
-            // Mostrar el valor redondeado al múltiplo de 5 más cercano
             return Math.round(value / 5) * 5;
         }
     },
@@ -1768,7 +1820,8 @@ function updateChart() {
                 borderColor: "#e74c3c",
                 borderWidth: 3,
                 pointRadius: 0,
-                tension: 0.5,
+                tension: 0.10,
+                cubicInterpolationMode: 'monotone',
                 spanGaps: true,
                 fill: false,
                 borderJoinStyle: 'round',
@@ -2527,26 +2580,18 @@ function ajustarScaleChart() {
     
     if (!container || !canvas) return;
     
-    // Obtener el ancho real disponible del contenedor
     const containerWidth = container.clientWidth;
     const containerHeight = container.clientHeight || 300;
     
-    // Tu escala base definida en CSS (la que usas para 14")
     const escalaBase = 0.70;
     
-    // Calcular escala según el ancho disponible
-    // El canvas tiene un tamaño base de ~1200px (ancho original)
-    const anchoBase = 1200;
+    const anchoBase = 850; // 🔥 debe coincidir con el máximo del clamp()
     const escalaPorAncho = Math.min(1, containerWidth / anchoBase);
     
-    // Mantener la proporción pero ajustando la escala
-    // No usar scale menor a 0.40 ni mayor a 1.0
     let nuevaEscala = Math.max(0.40, Math.min(1.0, escalaBase * (1 + (escalaPorAncho - 0.7) * 1.5)));
     
-    // Aplicar la escala al canvas
     canvas.style.transform = `scale(${nuevaEscala})`;
     
-    // Actualizar Chart.js para que se redibuje correctamente
     if (chart && chartInitialized) {
         setTimeout(() => {
             chart.resize();

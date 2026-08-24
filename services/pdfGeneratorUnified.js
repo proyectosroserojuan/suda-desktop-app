@@ -653,13 +653,13 @@ const tablaLogoaudiometriaRows = `
 }
 .sello-central {
     position: fixed;
-    bottom: -60px;
-    right: -60px;
+    bottom: -70px;
+    right: -40px;
     z-index: 9999;
     pointer-events: none;
 }
 .sello-central img {
-    width: 500px;
+    width: 300px;
     height: auto;
     opacity: 0.9;
     object-fit: contain;
