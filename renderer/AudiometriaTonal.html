@@ -1775,15 +1775,15 @@ async function onGrabarAudiometriaClick() {
         const resultado = await window.DuplicadoService.ejecutarConControl(
             async () => {
 
-        const diagnostico_od = document.getElementById('diagnostico_od')?.value || '';
+        const diagnostico = document.getElementById('diagnostico')?.value || '';
 
 
 
-        const diagnostico_oi = document.getElementById('diagnostico_oi')?.value || '';
+      //  const diagnostico_oi = document.getElementById('diagnostico_oi')?.value || '';
         const observaciones = document.getElementById('observaciones_audiometria')?.value || '';
         const otoscopia = document.getElementById('otoscopia_audiometria')?.value || '';
         
-        console.log('Diagnósticos:', { diagnostico_od, diagnostico_oi, observaciones });
+        console.log('Diagnósticos:', { diagnostico, observaciones });
         
         let imagenBase64 = '';
         try {
@@ -1800,8 +1800,8 @@ async function onGrabarAudiometriaClick() {
             paciente_id: parseInt(pacienteId),
             cita_id: parseInt(citaId),
             entidad_id: cita?.entidad_id || null,
-            diagnostico_od: diagnostico_od,
-            diagnostico_oi: diagnostico_oi,
+            diagnostico: diagnostico,
+          //  diagnostico_oi: diagnostico_oi,
             observaciones: observaciones,
             otoscopia: otoscopia,
             valores_od: valores.od,
@@ -1868,8 +1868,8 @@ localStorage.removeItem('citaIdEdicion');
                 valores_od: valores.od,
                 valores_oi: valores.oi,
                 freqs: valores.freqs,
-                diagnostico_od: diagnostico_od,
-                diagnostico_oi: diagnostico_oi,
+                diagnostico: diagnostico,
+             //   diagnostico_oi: diagnostico_oi,
                 observaciones: observaciones,
                 otoscopia: otoscopia,
                 grafica_tonal_base64: imagenBase64,
@@ -2523,13 +2523,13 @@ function obtenerDatosPacienteAudiometria() {
 }
 
 // Modificar guardarAudiometriaEnBaseDeDatos
-async function guardarAudiometriaEnBaseDeDatos(pacienteId, citaId, entidadId, diagnostico_od, diagnostico_oi, observaciones, otoscopia, valoresOD, valoresOI, imagenBase64) {
+async function guardarAudiometriaEnBaseDeDatos(pacienteId, citaId, entidadId, diagnostico, observaciones, otoscopia, valoresOD, valoresOI, imagenBase64) {
     const data = {
         paciente_id: pacienteId,
         cita_id: citaId,
         entidad_id: entidadId,
-        diagnostico_od: diagnostico_od,
-        diagnostico_oi: diagnostico_oi,
+        diagnostico: diagnostico,
+      //  diagnostico_oi: diagnostico_oi,
         observaciones: observaciones,
         otoscopia: otoscopia,  // ← AGREGAR ESTA LÍNEA
         valores_od: valoresOD,
@@ -2556,11 +2556,11 @@ async function guardarAudiometriaEnBaseDeDatos(pacienteId, citaId, entidadId, di
 // Agregar funciones para obtener diagnósticos
 function obtenerDiagnosticoOd() {
     // Si agregaste inputs para diagnóstico en el HTML
-    return document.getElementById('diagnostico_od')?.value || '';
+    return document.getElementById('diagnostico')?.value || '';
 }
 
 function obtenerDiagnosticoOi() {
-    return document.getElementById('diagnostico_oi')?.value || '';
+    return document.getElementById('diagnostico')?.value || '';
 }
 
 function obtenerObservaciones() {
@@ -2610,8 +2610,8 @@ createInputs('oi-bone-inputs', 'oi-bone', 'bone');
         });
 
         // Diagnóstico / otoscopia / observaciones
-        if (document.getElementById('diagnostico_od')) {
-            document.getElementById('diagnostico_od').value = examen.diagnostico_od || '';
+        if (document.getElementById('diagnostico')) {
+            document.getElementById('diagnostico').value = examen.diagnostico || '';
         }
         if (document.getElementById('otoscopia_audiometria')) {
             document.getElementById('otoscopia_audiometria').value = examen.otoscopia || '';

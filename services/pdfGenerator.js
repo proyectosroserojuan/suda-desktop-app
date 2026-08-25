@@ -1346,7 +1346,7 @@ if (imagenes.selloBase64) {
         <div class="dx-diagnosticos">
             <div class="dx-obs-box dx-diagnostico-od">
                 <div class="diagnostico-titulo">DIAGNÓSTICO</div>
-                <div class="diagnostico-texto">${datos.diagnostico_od || ''}</div>
+                <div class="diagnostico-texto">${datos.diagnostico || ''}</div>
             </div>
 
         </div>
