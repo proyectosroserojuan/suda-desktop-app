@@ -361,7 +361,7 @@ const pta = datosAudiometria.pta || {};
 
 // Tabla PTA CON BORDES NEGROS (exactamente como en la foto)
 const tablaPTA = `
-<div style="position: fixed; right: 4px; top: 29%; margin: 0; z-index: 1000; width: 420px; height: 300px; background: white; padding: 12px; border-radius: 6px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+<div style="position: fixed; right: 4px; top: 29%; margin: 0; z-index: 1000; width: 420px; height: 315px; background: white; padding: 12px; border-radius: 6px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
   <div style="font-weight: bold; font-size: 13px; margin-bottom: 6px;">PROMEDIO TONAL (PTA)</div>
   <table style="border-collapse: collapse; font-size: 11px; width: 100%;">  <!-- CAMBIADO: width: 100% -->
     <thead>
@@ -390,7 +390,7 @@ const tablaPTA = `
   <!-- DIAGNÓSTICOS UNO DEBAJO DEL OTRO -->
   <div style="margin-top: 10px;">
     <div style="font-weight: bold; font-size: 11px; margin-top: 8px; margin-bottom: 3px; border-bottom: 1px solid #ddd; padding-bottom: 3px;">DIAGNÓSTICO AUDIOMETRIA TONAL</div>
-    <div style="font-size: 11px; padding: 3px 0; line-height: 1.4; word-wrap: break-word; white-space: pre-wrap;">${datosAudiometria.diagnostico_od || ''}</div>
+    <div style="font-size: 11px; padding: 3px 0; line-height: 1.4; word-wrap: break-word; white-space: pre-wrap;">${datosAudiometria.diagnostico || ''}</div>
     <div style="font-weight: bold; font-size: 11px; margin-top: 10px; margin-bottom: 3px; border-bottom: 1px solid #ddd; padding-bottom: 3px;">DIAGNÓSTICO LOGOAUDIOMETRÍA</div>
     <div style="font-size: 10px; color: #555; padding: 2px 0;">Oido Derecho:</div>
     <div style="font-size: 11px; padding: 2px 0 4px 0; line-height: 1.4; word-wrap: break-word; white-space: pre-wrap;">${datosLogoaudiometria.diagnostico_od || ''}</div>
@@ -653,7 +653,7 @@ const tablaLogoaudiometriaRows = `
 }
 .sello-central {
     position: fixed;
-    bottom: -70px;
+    bottom: 5px;
     right: -40px;
     z-index: 9999;
     pointer-events: none;
@@ -678,7 +678,7 @@ const tablaLogoaudiometriaRows = `
   border: 2px solid #ebebeb;        /* Borde azul */
   border-radius: 6px;               /* Esquinas redondeadas */
   padding: 8px 12px;
-  margin-top: 8px;
+  margin-top: 20px;
   background: #ffffff;
   max-height: 120px;                /* Altura máxima antes del scroll/salto */
   overflow: auto;                   /* Scroll si es necesario */
@@ -747,7 +747,7 @@ ${imagenes.qrBase64 ? `<div class="qr-central"><img src="${imagenes.qrBase64}" a
     <div class="grafica-titulo">AUDIOMETRÍA TONAL</div>
     <div class="grafica-img">${graficaAudiometriaHTML}</div>
   </div>
-  <div class="grafica-columna">
+  <div class="grafica-columna" style="margin-top: 25px;">
     <div class="grafica-titulo">LOGOAUDIOMETRÍA</div>
     <div class="grafica-img">${graficaLogoaudiometriaHTML}</div>
 

@@ -1107,7 +1107,7 @@ button:hover {
 <div class="diagnostics-row">
     <div class="diagnostico-section">
         <h4 style="color:#000000;">Diagnóstico</h4>
-        <textarea id="diagnostico_od" class="diagnostico-input" rows="3" placeholder="Diagnóstico"></textarea>
+        <textarea id="diagnostico" class="diagnostico-input" rows="3" placeholder="Diagnóstico"></textarea>
     </div>
 
 
@@ -5151,8 +5151,9 @@ window.addEventListener('message', function(event) {
                     valores_oi: valores.oi,
                     freqs: freqs,  // ✅ AGREGAR ESTO
                     pta: ultimosPTA || {},
-                    diagnostico_od: document.getElementById('diagnostico_od')?.value || '',
-                    diagnostico_oi: document.getElementById('diagnostico_oi')?.value || '',
+                    diagnostico: document.getElementById('diagnostico')?.value || '',
+                //    diagnostico_od: document.getElementById('diagnostico_od')?.value || '',
+                 //   diagnostico_oi: document.getElementById('diagnostico_oi')?.value || '',
                     observaciones: document.getElementById('observaciones_audiometria')?.value || '',
                     otoscopia: document.getElementById('otoscopia_audiometria')?.value || '',
                     grafica: grafica

@@ -21,6 +21,16 @@ jobs:
       - name: Install dependencies
         run: npm install
 
+      - name: Create .env file
+        run: |
+          echo "CLOUDINARY_CLOUD_NAME=${{ secrets.CLOUDINARY_CLOUD_NAME }}" >> .env
+          echo "CLOUDINARY_API_KEY=${{ secrets.CLOUDINARY_API_KEY }}" >> .env
+          echo "CLOUDINARY_API_SECRET=${{ secrets.CLOUDINARY_API_SECRET }}" >> .env
+        shell: bash
+        
+
+
+
       - name: Build app
         run: npm run dist
 

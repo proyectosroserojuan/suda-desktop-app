@@ -3,7 +3,8 @@ const { app, BrowserWindow, ipcMain } = require('electron');
 const { autoUpdater } = require('electron-updater');
 const { dialog } = require('electron');
 
-require('dotenv').config();
+const path = require('path');
+require('dotenv').config({ path: path.join(__dirname, '.env') });
 const { exec } = require('child_process');
 
 const { shell } = require('electron');
@@ -385,10 +386,12 @@ ipcMain.handle('obtener-estadisticas-entidad', async (event, mes, año) => {
         return { ok: false, error: error.message };
     }
 });
-const path = require('path');
+//const path = require('path');
 
 
 const initDB = require('./db/init');
+
+
 const { crearUsuario, loginUsuario, obtenerUsuarios, actualizarRol } = require('./db/usuarios');
 const { crearPaciente, obtenerPacientes } = require('./db/pacientes');
 const { crearCita, obtenerCitasPendientes, obtenerCitaPorId, actualizarEstadoCita, obtenerCitasPorPaciente, obtenerTodasLasCitas } = require('./db/citas');

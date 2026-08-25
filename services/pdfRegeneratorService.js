@@ -65,6 +65,22 @@ class PDFRegeneratorService {
         console.log('Tipo Atención ID:', cita.tipo_atencion_id);
         console.log('Tiene Audiometría:', !!examenAudiometria);
         console.log('Tiene Logoaudiometría:', !!examenLogoaudiometria);
+
+
+        // Al inicio de regenerarPDF, después de obtener los exámenes
+console.log('📊 DIAGNOSTICO en examenAudiometria:', {
+    existe: !!examenAudiometria,
+    diagnostico: examenAudiometria?.diagnostico,
+    diagnostico_od: examenAudiometria?.diagnostico_od,
+    diagnostico_oi: examenAudiometria?.diagnostico_oi
+});
+
+console.log('📊 DIAGNOSTICO en examenLogoaudiometria:', {
+    existe: !!examenLogoaudiometria,
+    diagnostico: examenLogoaudiometria?.diagnostico,
+    diagnostico_od: examenLogoaudiometria?.diagnostico_od,
+    diagnostico_oi: examenLogoaudiometria?.diagnostico_oi
+});
         
         try {
             if (!examenAudiometria && !examenLogoaudiometria) {
@@ -97,12 +113,12 @@ class PDFRegeneratorService {
             let pdfPath = null;
             
             // ✅ CASO 1: COMBINADO (tipos 3, 4, 7)
-            if (esCombinado) {
-                console.log('📄 Generando PDF COMBINADO (por tipo_atencion_id)');
-                
-                // Asegurarnos de tener datos de ambos
-                const datosAudiometria = await this.prepararDatosParaPDF(cita, examenAudiometria || examenLogoaudiometria, 'audiometria');
-                const datosLogoaudiometria = await this.prepararDatosParaPDF(cita, examenLogoaudiometria || examenAudiometria, 'logoaudiometria');
+if (esCombinado) {
+    console.log('📄 Generando PDF COMBINADO (por tipo_atencion_id)');
+    
+    // 🔥 CORREGIDO: Pasar CADA examen por separado, SIN usar ||
+    const datosAudiometria = await this.prepararDatosParaPDF(cita, examenAudiometria, 'audiometria');
+    const datosLogoaudiometria = await this.prepararDatosParaPDF(cita, examenLogoaudiometria, 'logoaudiometria');
                 
                 if (esCoosalud) {
                     pdfPath = await pdfGeneratorCoosaludUnified.generarPDFCombinadoCOO(
@@ -205,7 +221,7 @@ class PDFRegeneratorService {
         
         const tienePTA = !!(examen.pta_via_aerea_od || examen.pta_via_aerea_oi || 
                            examen.pta_via_osea_od || examen.pta_via_osea_oi);
-        const tieneDiagnostico = !!(examen.diagnostico_od || examen.diagnostico_oi);
+        const tieneDiagnostico = !!(examen.diagnostico);
         
         let tieneValores = false;
         if (examen.valores_od) {
@@ -259,6 +275,17 @@ class PDFRegeneratorService {
             return isNaN(num) ? null : num;
         };
 
+            const diagnostico = examenData?.diagnostico || '';
+    
+    console.log(`📋 DIAGNOSTICO para ${tipo}:`, {
+        valor: diagnostico,
+        desde_examenData: !!examenData?.diagnostico,
+        longitud: diagnostico.length
+    });
+
+
+       
+
         // 🔥 NUEVO: Convertir URLs de Cloudinary a base64
         let graficaTonalBase64 = examenData?.grafica_tonal_base64 || examenData?.grafica_base64 || '';
         
@@ -286,6 +313,7 @@ class PDFRegeneratorService {
             },
             valores_od: valoresOD,
             valores_oi: valoresOI,
+        
             diagnostico_od: examenData?.diagnostico_od || '',
             diagnostico_oi: examenData?.diagnostico_oi || '',
             observaciones: examenData?.observaciones || '',
@@ -298,7 +326,7 @@ class PDFRegeneratorService {
                 oi_air: parseNumber(examenData?.pta_via_aerea_oi),
                 oi_bone: parseNumber(examenData?.pta_via_osea_oi)
             },
-            diagnostico: examenData?.diagnostico || '',
+             diagnostico: diagnostico,
             urv_od: parseNumber(examenData?.urv_od),
             urv_oi: parseNumber(examenData?.urv_oi),
             upalabra_od: parseNumber(examenData?.upalabra_od),

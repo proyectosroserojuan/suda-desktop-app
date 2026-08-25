@@ -238,9 +238,9 @@ const fontBold = font;
         },
         logoaudiometria: {
             x: 25,             // Posición X (puede ser diferente)
-            y: 330,             // Posición Y (puede ser diferente)
-            width: 450,         // Ancho (puede ser diferente)
-            height: 450,        // Alto (puede ser diferente)
+            y: 380,             // Posición Y (puede ser diferente)
+            width: 350,         // Ancho (puede ser diferente)
+            height: 350,        // Alto (puede ser diferente)
             titulo: 'LOGOAUDIOMETRÍA'
         }
     };
@@ -324,8 +324,8 @@ const fontBold = font;
 
     page.drawText('LOGOAUDIOMETRÍA', { 
         x: graficaConfig.logoaudiometria.x + 150, 
-        y: fromTop(graficaConfig.logoaudiometria.y + 160),  // ← 30px dentro de la gráfica
-        size: 11, 
+        y: fromTop(graficaConfig.logoaudiometria.y + 100),  // ← 30px dentro de la gráfica
+        size: 9, 
         font: fontBold,
         color: rgb(0, 0, 0)
     });
@@ -426,9 +426,9 @@ page.drawRectangle({
 });
 
 // Construir el texto completo del diagnóstico
-const diagnosticoOD = datosAudiometria.diagnostico_od || '';
-const diagnosticoOI = datosAudiometria.diagnostico_oi || '';
-const diagnosticoTexto = `: ${diagnosticoOD}\n: ${diagnosticoOI}`;
+const diagnosticoOD = datosAudiometria.diagnostico || '';
+//const diagnosticoOI = datosAudiometria.diagnostico_oi || '';
+const diagnosticoTexto = `: ${diagnosticoOD}`;
 
 // Dibujar el diagnóstico con wrapping dentro del div
 this.drawWrappedTextInArea(
@@ -515,11 +515,11 @@ this.drawWrappedTextInArea(
 // ============================================================
 // OBSERVACIONES - CON WRAPPING (DIV)
 // ============================================================
-const obsY = 620;        // ← Posición Y del TÍTULO (INDEPENDIENTE)
+const obsY = 640;        // ← Posición Y del TÍTULO (INDEPENDIENTE)
 const obsX = 50;        // ← Misma X que los diagnósticos
 
 // Definir el área del "div" para observaciones
-const obsBoxWidth = 280;      // Mismo ancho que los diagnósticos
+const obsBoxWidth = 260;      // Mismo ancho que los diagnósticos
 const obsBoxHeight = 60;      // Alto fijo del div (más grande para texto largo)
 const obsBoxX = obsX;
 const obsBoxY = obsY + 20;    // ← Cuadro 20px abajo del título (INDEPENDIENTE)
@@ -604,7 +604,7 @@ this.drawWrappedTextInArea(
     // ============================================================
     
     const tablaAltoFila = 20;
-    const tablaLogoaudiometriaX = 480;
+    const tablaLogoaudiometriaX = 400;
     const tablaY = 515;  
     const tablaLogoCol1 = 65;
     const tablaLogoCol2 = 27;
@@ -976,7 +976,7 @@ page.drawText('LOGOAUDIOMETRÍA', {
         page.drawImage(img, { x: 80, y: fromTop(350), width: 450, height: 200 });
       }
 
-      const tableX = 80;
+      const tableX = 50;
       const tableY = 380;
       const rowHeight = 22;
 

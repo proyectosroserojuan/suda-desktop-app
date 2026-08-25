@@ -325,7 +325,7 @@ button.reset-btn:hover {
 .chart-container {
     height: 300px;
     width: 70%;
-    max-width: clamp(420px, 45vw, 650px);
+    max-width: clamp(420px, 55vw, 700px);
     margin: 0 auto;
     position: relative;
     overflow: hidden;
@@ -835,8 +835,9 @@ button.reset-btn:hover {
               <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
                   <span>Discriminación del</span>
                   <input type="number" id="discriminacion_od_porcentaje" class="diagnostico-input" style="width: 70px; text-align: center;" placeholder="%">
-                  <span>% en dB</span>
+                  <span>% en</span>
                   <input type="number" id="discriminacion_od_db" class="diagnostico-input" style="width: 70px; text-align: center;" placeholder="dB">
+                  <span>dB</span>
                   <span style="font-weight: bold; color: #e74c3c;">O.D</span>
               </div>
           </div>
@@ -846,9 +847,10 @@ button.reset-btn:hover {
               <h4 style="color: #3498db;">🔵 Discriminación Oído Izquierdo (OI)</h4>
               <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
                   <span>Discriminación del</span>
-                  <input type="number" id="discriminacion_oi_porcentaje" class="diagnostico-input" style="width: 70px; text-align: center;" placeholder="%">
-                  <span>% en dB</span>
-                  <input type="number" id="discriminacion_oi_db" class="diagnostico-input" style="width: 70px; text-align: center;" placeholder="dB">
+                  <input type="number" id="discriminacion_oi_porcentaje" class="diagnostico-input" style="width: 70px; text-align: center;">
+                  <span>% en</span>
+                  <input type="number" id="discriminacion_oi_db" class="diagnostico-input" style="width: 70px; text-align: center;">
+                  <span>dB</span>
                   <span style="font-weight: bold; color: #3498db;">O.I</span>
               </div>
           </div>
@@ -1498,10 +1500,26 @@ const usarCurvaSuave = true; // Cambia a false si quieres volver a línea recta
         else if (!campos.udisc) {
 
             if (db < punto1x) y = NaN;
-            else if (db <= punto2x) {
-                // Curva: 0% → porcentajePalabra
-                y = ((db - punto1x) / (punto2x - punto1x)) * data.porcentajePalabra;
-            }
+// Tramo 1: U.Voz → U.Palabra (0% → porcentajePalabra)
+else if (db <= punto2x) {
+    if (usarCurvaSuave) {
+        // ✅ CURVA SUAVE - No lineal
+        const t = (db - punto1x) / (punto2x - punto1x);
+        const tSuave = t * t * (3 - 2 * t);
+        y = tSuave * data.porcentajePalabra;
+    } // Tramo 1: U.Voz → U.Palabra (0% → porcentajePalabra)
+else if (db <= punto2x) {
+    if (usarCurvaSuave) {
+        // ✅ CURVA SUAVE - No lineal
+        const t = (db - punto1x) / (punto2x - punto1x);
+        const tSuave = t * t * (3 - 2 * t);
+        y = tSuave * data.porcentajePalabra;
+    } else {
+        // LÍNEA RECTA (original)
+        y = ((db - punto1x) / (punto2x - punto1x)) * data.porcentajePalabra;
+    }
+}
+}
             else {
                 y = NaN;
             }
@@ -1513,9 +1531,18 @@ const usarCurvaSuave = true; // Cambia a false si quieres volver a línea recta
             if (db < punto1x) y = NaN;
 
             // Tramo 1: U.Voz → U.Palabra (0% → porcentajePalabra)
-            else if (db <= punto2x) {
-                y = ((db - punto1x) / (punto2x - punto1x)) * data.porcentajePalabra;
-            }
+// Tramo 1: U.Voz → U.Palabra (0% → porcentajePalabra)
+else if (db <= punto2x) {
+    if (usarCurvaSuave) {
+        // ✅ CURVA SUAVE - No lineal
+        const t = (db - punto1x) / (punto2x - punto1x);
+        const tSuave = t * t * (3 - 2 * t);
+        y = tSuave * data.porcentajePalabra;
+    } else {
+        // LÍNEA RECTA (original)
+        y = ((db - punto1x) / (punto2x - punto1x)) * data.porcentajePalabra;
+    }
+}
 
 
                         // 🔥 NUEVO: Tramo con punto intermedio (si existe)
@@ -1726,6 +1753,7 @@ grid: {
         autoSkip: false,
         maxRotation: 0,
         minRotation: 0,
+        color: '#000000',   // ← AGREGAR ESTA LÍNEA
         callback: function(value) {
             return Math.round(value / 5) * 5;
         }
@@ -2585,7 +2613,7 @@ function ajustarScaleChart() {
     
     const escalaBase = 0.70;
     
-    const anchoBase = 850; // 🔥 debe coincidir con el máximo del clamp()
+     const anchoBase = 700; // ← CAMBIAR de 850 a 700 (coincide con tu nuevo max-width)
     const escalaPorAncho = Math.min(1, containerWidth / anchoBase);
     
     let nuevaEscala = Math.max(0.40, Math.min(1.0, escalaBase * (1 + (escalaPorAncho - 0.7) * 1.5)));
@@ -2793,14 +2821,14 @@ function obtenerDiscriminacionOD() {
     const p = document.getElementById('discriminacion_od_porcentaje')?.value || '';
     const d = document.getElementById('discriminacion_od_db')?.value || '';
     if (!p && !d) return '';
-    return `Discriminación del ${p}% en dB ${d} O.D`;
+    return `Discriminación del ${p}% en ${d} dB O.D`;
 }
 
 function obtenerDiscriminacionOI() {
     const p = document.getElementById('discriminacion_oi_porcentaje')?.value || '';
     const d = document.getElementById('discriminacion_oi_db')?.value || '';
     if (!p && !d) return '';
-    return `Discriminación del ${p}% en dB ${d} O.I`;
+    return `Discriminación del ${p}% en ${d} dB O.I`;
 }
 
 
