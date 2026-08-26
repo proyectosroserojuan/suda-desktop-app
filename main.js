@@ -63,6 +63,11 @@ ipcMain.handle('quit-and-install', async () => {
   return { ok: true };
 });
 
+
+ipcMain.handle('get-app-version', () => {
+  return app.getVersion();
+});
+
 // Handler para imprimir PDF (abre con app nativa y envía comando de impresión)
 ipcMain.handle('imprimir-pdf-nativo', async (event, rutaPDF) => {
   try {

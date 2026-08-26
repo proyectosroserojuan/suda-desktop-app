@@ -80,10 +80,7 @@ onDownloadProgress: (callback) => {
 
 
 
-    // Nueva función para obtener versión
-    getAppVersion: () => {
-        return process.env.npm_package_version || '1.0.0';
-    },
+obtenerVersionApp: () => ipcRenderer.invoke('get-app-version'),
 
 onUpdateDownloaded: (callback) => {
   ipcRenderer.removeAllListeners('update-downloaded');
