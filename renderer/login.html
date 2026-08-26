@@ -42,6 +42,11 @@
   <button id="btnActualizar">Actualizar</button>
 <div id="estadoActualizacion"></div>
 
+<!-- Mostrar versión -->
+<div class="version-info">
+    Versión: <span id="appVersion">Cargando...</span>
+</div>
+
      <!-- CONTENEDOR DEL LOGO HORIZONTAL -->
       <div class="logo-container">
       <div class="audiologo-info">
@@ -82,6 +87,21 @@ function calcularEscala() {
     let escala = Math.min(ancho / 1366, alto / 768);
     return Math.max(0.6, Math.min(1.5, escala));
 }
+
+
+// Función para obtener la versión
+async function cargarVersion() {
+    try {
+        const version = await window.api.getAppVersion();
+        document.getElementById('appVersion').textContent = version;
+    } catch (error) {
+        console.error('Error al cargar versión:', error);
+        document.getElementById('appVersion').textContent = '1.0.0';
+    }
+}
+
+// Llamar al cargar la página
+document.addEventListener('DOMContentLoaded', cargarVersion);
 
 function aplicarEscala() {
     const escala = calcularEscala();

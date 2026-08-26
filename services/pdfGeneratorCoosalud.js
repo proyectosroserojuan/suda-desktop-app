@@ -1164,7 +1164,7 @@ page.drawText('DIAGNÓSTICO', {
 // --- CAJA O.D. (CON BORDE) ---
 await this.drawWrappedTextInBox({
     page,
-    text: datos.diagnostico_od || 'No especificado',
+    text: datos.diagnostico || 'No especificado',
     x: DIAG_X + 5,
     y: DIAG_Y + 18,
     width: 240,

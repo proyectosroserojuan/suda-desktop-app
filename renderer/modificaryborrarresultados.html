@@ -903,8 +903,8 @@
             if (!button.disabled) {
                 modalAction = 'editar';
                 modalCitaId = citaId;
-                document.getElementById('modalTitle').textContent = '✏️ Editar resultados del examen';
-                document.getElementById('modalMessage').textContent = 'Para editar los resultados de esta cita, ingresa tu clave de usuario.';
+                document.getElementById('modalTitle').textContent = 'Editar resultados del examen';
+                document.getElementById('modalMessage').textContent = 'Para editar los resultados de esta cita, ingrese el codigo para confirmar.';
                 document.getElementById('modalConfirmar').className = 'btn-confirmar';
                 document.getElementById('modalConfirmar').textContent = 'Editar';
                 mostrarModal();
@@ -915,8 +915,8 @@
             if (!button.disabled) {
                 modalAction = 'borrar';
                 modalCitaId = citaId;
-                document.getElementById('modalTitle').textContent = '🗑️ Borrar resultados del examen';
-                document.getElementById('modalMessage').textContent = '⚠️ Esta acción eliminará permanentemente los resultados del examen. Ingresa tu clave para confirmar.';
+                document.getElementById('modalTitle').textContent = 'Borrar resultados del examen';
+                document.getElementById('modalMessage').textContent = 'Esta acción eliminará permanentemente los resultados del examen. Ingrese el codigo Para confirmar.';
                 document.getElementById('modalConfirmar').className = 'btn-confirmar danger';
                 document.getElementById('modalConfirmar').textContent = 'Borrar';
                 mostrarModal();

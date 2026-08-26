@@ -78,6 +78,13 @@ onDownloadProgress: (callback) => {
   });
 },
 
+
+
+    // Nueva función para obtener versión
+    getAppVersion: () => {
+        return process.env.npm_package_version || '1.0.0';
+    },
+
 onUpdateDownloaded: (callback) => {
   ipcRenderer.removeAllListeners('update-downloaded');
   ipcRenderer.on('update-downloaded', (event, version) => {
