@@ -96,7 +96,7 @@ function obtenerDatosCita() {
 
 // En logoaudiometria.html - REEMPLAZA guardarEnBaseDeDatos
 
-async function guardarEnBaseDeDatos(pacienteId, citaId, diagnostico, diagnostico_od, diagnostico_oi, otoscopia, valoresOD, valoresOI, imagenBase64, tipoAtencionNombre, modoEdicion = false) {
+async function guardarEnBaseDeDatos(pacienteId, citaId, diagnostico, diagnostico_od, diagnostico_oi, otoscopia, valoresOD, valoresOI, imagenBase64, tipoAtencionNombre, modoEdicion = false,nrFlags = { od: {}, oi: {} },  coclearOD = [], coclearOI = [], mascaraLogoOD = {}, mascaraLogoOI = {}  ) {
     console.log('guardarEnBaseDeDatos - Inicio | Edición:', modoEdicion);
     console.log('pacienteId:', pacienteId);
     console.log('citaId:', citaId);
@@ -126,7 +126,12 @@ async function guardarEnBaseDeDatos(pacienteId, citaId, diagnostico, diagnostico
         udisc_od: valoresOD?.udisc || null,
         udisc_oi: valoresOI?.udisc || null,
         pmax_od: valoresOD?.pmax || null,
-        pmax_oi: valoresOI?.pmax || null
+        pmax_oi: valoresOI?.pmax || null,
+        coclear_od: coclearOD,                    // ← NUEVO
+        coclear_oi: coclearOI,                     // ← NUEVO
+        mascara_logo_od: mascaraLogoOD,            // ← NUEVO
+        mascara_logo_oi: mascaraLogoOI,           // ← NUEVO
+          nr_flags: nrFlags                          // ← NUEVO
     };
     
     console.log('Datos a enviar a window.api:', JSON.stringify(data, null, 2));
@@ -247,6 +252,14 @@ const diagnostico_oi = obtenerDiscriminacionOI();
 
                const nrFlags = window.noResponseFlags || { od: {}, oi: {} };
         console.log('NR Flags:', nrFlags);
+
+const coclearOD = Array.isArray(window.manualPoints?.od) ? window.manualPoints.od : [];
+const coclearOI = Array.isArray(window.manualPoints?.oi) ? window.manualPoints.oi : [];
+
+console.log('🎯 COCLEAR OD que se va a guardar:', JSON.stringify(coclearOD));
+console.log('🎯 COCLEAR OI que se va a guardar:', JSON.stringify(coclearOI));
+        const mascarasLogo = window.enmascLogo?.getSymbols?.() || { od: {}, oi: {} };
+
         
         // Obtener datos del paciente y cita
         const paciente = obtenerDatosPaciente();
@@ -292,7 +305,10 @@ const diagnostico_oi = obtenerDiscriminacionOI();
             valores.oi,
             imagenBase64,
             cita?.tipo_atencion_nombre,
-            modoEdicion // 🔥 NUEVO
+            modoEdicion,
+            nrFlags,                 // ← NUEVO
+            coclearOD, coclearOI,    // ← NUEVO
+            mascarasLogo.od, mascarasLogo.oi  // ← NUEVO
         );
 
         console.log('✅ Guardado exitoso, ID:', id);

@@ -626,12 +626,13 @@ function aplicarSimbolosPersonalizados() {
         crear: crearPanelEnmascaramiento,
         refrescar: refrescar,
         reiniciar: intentarInicializar,
-        reset: function() {
-            personalSymbols = { od: {}, oi: {} };
-            refrescar();
-        }
-    };
-
+      reset: function() { personalSymbols = { od: {}, oi: {} }; refrescar(); },
+    getSymbols: function() { return personalSymbols; },        // ← NUEVO
+    setSymbols: function(obj) {                                  // ← NUEVO
+        personalSymbols = obj && obj.od && obj.oi ? obj : { od: {}, oi: {} };
+        refrescar();
+    }
+};
     // ============================================================
     // INICIAR
     // ============================================================

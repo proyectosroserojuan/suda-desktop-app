@@ -28,7 +28,7 @@ body {
 }
 
 
-/* Botón Sin Respuesta - Toggle */
+/* Botón Sin Respuesta - Toggle 
 .btn-sin-respuesta {
     transition: all 0.3s ease;
     font-weight: bold;
@@ -42,6 +42,17 @@ body {
 
 .btn-sin-respuesta:active {
     transform: scale(0.95);
+}
+    */
+
+    .btn-sin-respuesta {
+    transition: background 0.2s ease, opacity 0.2s ease;
+    font-weight: bold;
+    border: 2px solid transparent !important;
+}
+
+.btn-sin-respuesta:hover {
+    opacity: 0.9;
 }
 
 .btn-sin-respuesta.active {
@@ -137,7 +148,16 @@ body {
     color: #475569;
 }
 
-/* Botón Borrar Datos */
+.btn-borrar {
+    transition: background 0.2s ease !important;
+    font-weight: bold !important;
+}
+
+.btn-borrar:hover {
+    background: #c0392b !important;
+}
+
+/* Botón Borrar Datos 
 .btn-borrar {
     transition: all 0.3s ease !important;
     font-weight: bold !important;
@@ -147,6 +167,42 @@ body {
     background: #c0392b !important;
     transform: translateY(-1px) !important;
 }
+    */
+
+/* Estado reducido cuando el panel Coclear está abierto */
+.ear-section.reducido {
+    flex: 0 0 48% !important;
+    min-width: 0 !important;
+    max-width: 48% !important;
+    padding: 10px !important;
+}
+
+/* Ajustes internos para que los inputs quepan en el espacio reducido */
+.ear-section.reducido .input-grid {
+    grid-template-columns: 1fr !important;
+    gap: 8px !important;
+}
+
+.ear-section.reducido input {
+    font-size: 12px !important;
+    padding: 6px 8px !important;
+}
+
+.ear-section.reducido label {
+    font-size: 11px !important;
+}
+
+.ear-section.reducido button {
+    font-size: 11px !important;
+    padding: 6px 10px !important;
+}
+
+/* El panel coclear ocupa el otro ~48-50% */
+.coclear-panel {
+    flex: 0 0 48%;
+    min-width: 0;
+}
+
 
 /* Botón Rehacer (Restaurar) */
 .btn-rehacer {
@@ -428,6 +484,12 @@ button.reset-btn:hover {
 
 
 
+.coclear-panel {
+    flex: 1;
+    min-width: 220px;
+    background: #faf5ff;
+}
+
 .nr-btn {
     width: 40px;
     min-width: 40px;
@@ -497,15 +559,15 @@ button.reset-btn:hover {
   <!-- ============================================ -->
   <div style="display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 25px; padding: 15px; background: #f8f9fa; border-radius: 12px; border: 1px solid #e2e8f0;">
     
-<!--
+
     <button id="drawODBtn" style="margin:0;">
-        🔴 Dibujar OD
+        Coclear - RetroCoclear OD
     </button>
 
     <button id="drawOIBtn" style="margin:0;">
-        🔵 Dibujar OI
+        Coclear - RetroCoclear OI
     </button>
--->
+
 
 
 
@@ -534,7 +596,9 @@ button.reset-btn:hover {
       <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 25px;">
         
         <!-- OÍDO DERECHO -->
-        <div class="ear-section od">
+        <div id="odWrapper" style="display:flex; flex-wrap:wrap; gap:12px; min-width:0;">
+        <div class="ear-section od" id="odEarSection" style="flex:1; min-width:220px;">
+
          <div class="ear-title od">🔴 OÍDO DERECHO </div>
 
 
@@ -629,9 +693,11 @@ button.reset-btn:hover {
 </div>
           </div>
         </div>
+        </div> <!-- cierre odWrapper -->
         
         <!-- OÍDO IZQUIERDO -->
-        <div class="ear-section oi">
+        <div id="oiWrapper" style="display:flex; flex-wrap:wrap; gap:12px; min-width:0;">
+        <div class="ear-section oi" id="oiEarSection" style="flex:1; min-width:220px;">
          <div class="ear-title oi">🔵 OÍDO IZQUIERDO (OI)</div>
              <button type="button" class="btn-sin-respuesta" data-ear="oi" style="background: #2980b9; color: white; border: none; padding: 4px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; margin-bottom: 10px;">
         Sin Respuesta Oido Izquierdo
@@ -724,7 +790,7 @@ button.reset-btn:hover {
 
           </div>
         </div>
-        
+         </div>
       </div>
 
       <!-- ============================================ -->
@@ -1302,7 +1368,15 @@ function getEarValues(ear) {
         uDiscriminacion = Math.max(uDiscriminacion, 100);
     }
 
-    let porcentajePalabra = 30; // valor por defecto
+        let porcentajePalabra = 20; // ✅ Siempre 20% por defecto
+
+    // 🔥 PRIORIDAD: si el usuario escribió un "% Respuesta", ese manda
+    if (porcentajeReal !== null && !isNaN(porcentajeReal) && porcentajeReal >= 0 && porcentajeReal <= 100) {
+        porcentajePalabra = porcentajeReal;
+    }
+
+    /*
+    let porcentajePalabra = 20; // valor por defecto
     
     // 🔥 PRIORIDAD: Si hay porcentaje real ingresado, usarlo directamente
     if (porcentajeReal !== null && !isNaN(porcentajeReal) && porcentajeReal >= 0 && porcentajeReal <= 100) {
@@ -1343,6 +1417,8 @@ function getEarValues(ear) {
             }
         }
     }
+
+    */
 
     return {
         uVoz,
@@ -1693,6 +1769,7 @@ let manualPoints = {
     od: [],
     oi: []
 };
+window.manualPoints = manualPoints;   // ← AGREGAR esta línea justo después
 
 let activeDrawEar = "od";
 
@@ -1806,6 +1883,20 @@ y: {
 // ============================================
 // FUNCIÓN ACTUALIZAR GRÁFICA (CON ANIMACIÓN SUAVE)
 // ============================================
+
+function generarCurvaManual(puntoInicio, puntoFin, segments = 30) {
+    const puntos = [];
+    for (let i = 0; i <= segments; i++) {
+        const t = i / segments;
+        const tSuave = t * t * (3 - 2 * t); // smoothstep, igual que generarCurvaSuave
+        const x = puntoInicio.x + (puntoFin.x - puntoInicio.x) * t;
+        const y = puntoInicio.y + (puntoFin.y - puntoInicio.y) * tSuave;
+        puntos.push({ x, y });
+    }
+    return puntos;
+}
+
+
 function updateChart() {
     // Inicializar el chart si no existe
     if (!chartInitialized) {
@@ -1908,7 +1999,7 @@ function updateChart() {
         );
     }
 
-    // ======================
+    /*
     // PUNTOS MANUALES
     // ======================
     if (manualPoints.od.length > 0 && odActivo) {
@@ -1920,12 +2011,16 @@ function updateChart() {
             type: "line",
             backgroundColor: "#e74c3c",
             borderColor: "#e74c3c",
-            borderWidth: 2,
+            borderWidth: 3,
             pointRadius: 0,
-            tension: 0,
+            tension: 0.10,
+            cubicInterpolationMode: 'monotone',
             customSymbol: getSymbolText("od"),
             showLine: true,
-            borderDash: [5, 3]
+           // borderDash: [5, 3],
+            fill: false,
+            borderJoinStyle: 'round',
+            borderCapStyle: 'round'
         });
     }
 
@@ -1941,11 +2036,159 @@ function updateChart() {
             borderWidth: 2,
             pointRadius: 0,
             tension: 0,
+            cubicInterpolationMode: 'monotone',
             customSymbol: getSymbolText("oi"),
             showLine: true,
-            borderDash: [5, 3]
+            //borderDash: [5, 3],
+            fill: false,
+            borderJoinStyle: 'round',
+            borderCapStyle: 'round'
         });
     }
+
+
+    */
+
+
+/*
+    // ======================
+    // PUNTOS MANUALES (COCLEAR)
+    // ======================
+    if (manualPoints.od.length > 0 && odActivo) {
+        const ultimoPuntoOD = generarPuntosClinicos(od, "od").slice(-1)[0];
+        const puntoCoclearOD = manualPoints.od[0];
+
+        if (ultimoPuntoOD && puntoCoclearOD) {
+            datasets.push({
+                label: "OD Manual - Curva",
+                data: generarCurvaManual(ultimoPuntoOD, puntoCoclearOD),
+                type: "line",
+                borderColor: "#e74c3c",
+                borderWidth: 3,
+                pointRadius: 0,
+                showLine: true,
+                fill: false,
+                borderJoinStyle: 'round',
+                borderCapStyle: 'round'
+            });
+
+            datasets.push({
+                label: "OD Manual - Punto",
+                data: [puntoCoclearOD],
+                backgroundColor: "#e74c3c",
+                borderColor: "#e74c3c",
+                pointRadius: 0,
+                customSymbol: getSymbolText("od"),
+                showLine: false
+            });
+        }
+    }
+
+    if (manualPoints.oi.length > 0 && oiActivo) {
+        const ultimoPuntoOI = generarPuntosClinicos(oi, "oi").slice(-1)[0];
+        const puntoCoclearOI = manualPoints.oi[0];
+
+        if (ultimoPuntoOI && puntoCoclearOI) {
+            datasets.push({
+                label: "OI Manual - Curva",
+                data: generarCurvaManual(ultimoPuntoOI, puntoCoclearOI),
+                type: "line",
+                borderColor: "#3498db",
+                borderWidth: 3,
+                pointRadius: 0,
+                showLine: true,
+                fill: false,
+                borderJoinStyle: 'round',
+                borderCapStyle: 'round'
+            });
+
+            datasets.push({
+                label: "OI Manual - Punto",
+                data: [puntoCoclearOI],
+                backgroundColor: "#3498db",
+                borderColor: "#3498db",
+                pointRadius: 0,
+                customSymbol: getSymbolText("oi"),
+                showLine: false
+            });
+        }
+    }
+
+    */
+
+
+        if (manualPoints.od.length > 0 && odActivo) {
+        const ultimoPuntoOD = generarPuntosClinicos(od, "od").slice(-1)[0];
+        const cadenaOD = [ultimoPuntoOD, ...manualPoints.od].filter(Boolean);
+
+        if (cadenaOD.length > 1) {
+            let curvaCompleta = [];
+            for (let i = 0; i < cadenaOD.length - 1; i++) {
+                const segmento = generarCurvaManual(cadenaOD[i], cadenaOD[i + 1]);
+                curvaCompleta = curvaCompleta.concat(i === 0 ? segmento : segmento.slice(1));
+            }
+
+            datasets.push({
+                label: "OD Manual - Curva",
+                data: curvaCompleta,
+                type: "line",
+                borderColor: "#e74c3c",
+                borderWidth: 3,
+                pointRadius: 0,
+                showLine: true,
+                fill: false,
+                borderJoinStyle: 'round',
+                borderCapStyle: 'round'
+            });
+
+            datasets.push({
+                label: "OD Manual - Puntos",
+                data: manualPoints.od,
+                backgroundColor: "#e74c3c",
+                borderColor: "#e74c3c",
+                pointRadius: 0,
+                customSymbol: getSymbolText("od"),
+                showLine: false
+            });
+        }
+    }
+
+        if (manualPoints.oi.length > 0 && oiActivo) {
+        const ultimoPuntoOI = generarPuntosClinicos(oi, "oi").slice(-1)[0];
+        const cadenaOI = [ultimoPuntoOI, ...manualPoints.oi].filter(Boolean);
+
+        if (cadenaOI.length > 1) {
+            let curvaCompleta = [];
+            for (let i = 0; i < cadenaOI.length - 1; i++) {
+                const segmento = generarCurvaManual(cadenaOI[i], cadenaOI[i + 1]);
+                curvaCompleta = curvaCompleta.concat(i === 0 ? segmento : segmento.slice(1));
+            }
+
+            datasets.push({
+                label: "OI Manual - Curva",
+                data: curvaCompleta,
+                type: "line",
+                borderColor: "#3498db",
+                borderWidth: 3,
+                pointRadius: 0,
+                showLine: true,
+                fill: false,
+                borderJoinStyle: 'round',
+                borderCapStyle: 'round'
+            });
+
+            datasets.push({
+                label: "OI Manual - Puntos",
+                data: manualPoints.oi,
+                backgroundColor: "#3498db",
+                borderColor: "#3498db",
+                pointRadius: 0,
+                customSymbol: getSymbolText("oi"),
+                showLine: false
+            });
+        }
+    }
+
 
     // 🔥 ACTUALIZAR LOS DATOS EN VEZ DE RECREAR EL CHART
     chart.data.datasets = datasets;
@@ -2173,7 +2416,7 @@ resetValues();
 
 // ============================================
 // PRECARGA EN MODO EDICIÓN
-// ============================================
+/*
 (function precargarEdicionLogoaudiometria() {
     const modoEdicion = localStorage.getItem('modoEdicion') === 'true';
     if (!modoEdicion) return;
@@ -2226,6 +2469,48 @@ resetValues();
 
         updateChart();
 
+        // Cochlear
+const coclearOD = examen.coclear_od || [];
+const coclearOI = examen.coclear_oi || [];
+if (coclearOD.length) {
+    manualPoints.od = coclearOD;
+        window.manualPoints = manualPoints;  // ← asegurar sincronía
+
+    coclearActive.od = true;
+    crearPanelCoclear('od');
+    coclearOD.forEach((p, idx) => {
+        const i = idx + 1;
+        const pctInput = document.getElementById(`od_coclear_pct_${i}`);
+        const dbInput = document.getElementById(`od_coclear_db_${i}`);
+        if (i > 1) agregarFilaCoclear('od');
+        if (pctInput) pctInput.value = p.y;
+        if (dbInput) dbInput.value = p.x;
+    });
+}
+if (coclearOI.length) {
+    manualPoints.oi = coclearOI;
+    coclearActive.oi = true;
+    crearPanelCoclear('oi');
+    coclearOI.forEach((p, idx) => {
+        const i = idx + 1;
+        const pctInput = document.getElementById(`oi_coclear_pct_${i}`);
+        const dbInput = document.getElementById(`oi_coclear_db_${i}`);
+        if (i > 1) agregarFilaCoclear('oi');
+        if (pctInput) pctInput.value = p.y;
+        if (dbInput) dbInput.value = p.x;
+    });
+}
+
+// Máscaras de logoaudiometría
+if (examen.mascara_logo_od || examen.mascara_logo_oi) {
+    if (window.enmascLogo?.setSymbols) {
+        window.enmascLogo.setSymbols({
+            od: examen.mascara_logo_od || {},
+            oi: examen.mascara_logo_oi || {}
+        });
+    }
+}
+
         const btnGrabar = document.getElementById('grabarBtn');
         if (btnGrabar) btnGrabar.textContent = 'ACTUALIZAR';
 
@@ -2233,6 +2518,110 @@ resetValues();
         console.error('❌ Error precargando logoaudiometría en modo edición:', e);
     }
 })();
+
+*/
+
+// ============================================
+// PRECARGA EN MODO EDICIÓN
+// ============================================
+document.addEventListener('DOMContentLoaded', function () {
+setTimeout(function precargarEdicionLogoaudiometria() {
+    const modoEdicion = localStorage.getItem('modoEdicion') === 'true';
+    if (!modoEdicion) return;
+
+    try {
+        const examenGuardado = JSON.parse(localStorage.getItem('examenActual') || '{}');
+        const examen = examenGuardado.logoaudiometria || examenGuardado.audiometria || null;
+        if (!examen) return;
+
+        const setVal = (id, val) => {
+            const el = document.getElementById(id);
+            if (el && val !== null && val !== undefined && val !== '') el.value = val;
+        };
+
+        // Por si la BD devuelve el JSON como texto
+        const parsear = (v, porDefecto) => {
+            if (typeof v === 'string') { try { return JSON.parse(v); } catch { return porDefecto; } }
+            return v || porDefecto;
+        };
+
+        setVal('od_urv', examen.urv_od);
+        setVal('od_upalabra', examen.upalabra_od);
+        setVal('od_udisc', examen.udisc_od);
+        setVal('od_pmax', examen.pmax_od);
+
+        setVal('oi_urv', examen.urv_oi);
+        setVal('oi_upalabra', examen.upalabra_oi);
+        setVal('oi_udisc', examen.udisc_oi);
+        setVal('oi_pmax', examen.pmax_oi);
+
+        function parseDiscriminacion(texto) {
+            if (!texto) return { porcentaje: '', db: '' };
+            const m = texto.match(/del\s+([\d.]+)%\s+en\s+(?:dB\s+)?([\d.]+)/i);
+            return m ? { porcentaje: m[1], db: m[2] } : { porcentaje: '', db: '' };
+        }
+        const discOD = parseDiscriminacion(examen.diagnostico_od);
+        const discOI = parseDiscriminacion(examen.diagnostico_oi);
+        setVal('discriminacion_od_porcentaje', discOD.porcentaje);
+        setVal('discriminacion_od_db', discOD.db);
+        setVal('discriminacion_oi_porcentaje', discOI.porcentaje);
+        setVal('discriminacion_oi_db', discOI.db);
+
+        // Banderas "Sin respuesta" (NR)
+        const nrFlags = parsear(examen.nr_flags, {});
+        ['od', 'oi'].forEach(ear => {
+            const flags = nrFlags[ear] || {};
+            Object.keys(flags).forEach(field => {
+                if (!flags[field]) return;
+                noResponseFlags[ear][field] = true;
+                const btn = document.querySelector(`.nr-btn[data-ear="${ear}"][data-field="${field}"]`);
+                if (btn) btn.classList.add('active');
+            });
+        });
+
+        // ===== COCLEAR: abrir panel, crear filas, llenar y reconstruir puntos =====
+        console.log('coclear recibido en edición:', examen.coclear_od, examen.coclear_oi);
+
+        const restaurarCoclear = (ear, puntos) => {
+            puntos = parsear(puntos, []);
+            if (!Array.isArray(puntos) || puntos.length === 0) return;
+
+            coclearActive[ear] = true;
+            crearPanelCoclear(ear);                       // crea el panel y la fila 1
+            marcarBotonCoclear(ear, true);                // deja el botón resaltado
+
+            puntos.forEach((p, idx) => {
+                const i = idx + 1;
+                if (i > 1) agregarFilaCoclear(ear);       // primero se crea la fila
+                const pct = document.getElementById(`${ear}_coclear_pct_${i}`);
+                const db  = document.getElementById(`${ear}_coclear_db_${i}`);
+                if (pct) pct.value = p.y;
+                if (db)  db.value  = p.x;
+            });
+
+            actualizarPuntosCoclear(ear);                 // reconstruye manualPoints desde los inputs
+        };
+
+        restaurarCoclear('od', examen.coclear_od);
+        restaurarCoclear('oi', examen.coclear_oi);
+
+        // Máscaras de logoaudiometría
+        const mLogoOD = parsear(examen.mascara_logo_od, {});
+        const mLogoOI = parsear(examen.mascara_logo_oi, {});
+        if ((Object.keys(mLogoOD).length || Object.keys(mLogoOI).length) && window.enmascLogo?.setSymbols) {
+            window.enmascLogo.setSymbols({ od: mLogoOD, oi: mLogoOI });
+        }
+
+        updateChart();
+
+        const btnGrabar = document.getElementById('grabarBtn');
+        if (btnGrabar) btnGrabar.textContent = 'ACTUALIZAR';
+
+    } catch (e) {
+        console.error('❌ Error precargando logoaudiometría en modo edición:', e);
+    }
+}, 400);
+});
 
 
 document.querySelectorAll(".symbol-btn").forEach(btn => {
@@ -2260,22 +2649,262 @@ document.querySelectorAll(".nr-btn").forEach(btn => {
     });
 });
 
+
+
+let coclearActive = { od: false, oi: false };
+
 document.getElementById("drawODBtn")
-.addEventListener("click", () => {
-
-    drawMode = true;
-    activeDrawEar = "od";
-
-    document.body.style.cursor = "crosshair";
-});
+.addEventListener("click", () => toggleCoclearPanel("od"));
 
 document.getElementById("drawOIBtn")
-.addEventListener("click", () => {
+.addEventListener("click", () => toggleCoclearPanel("oi"));
 
-    drawMode = true;
-    activeDrawEar = "oi";
 
-    document.body.style.cursor = "crosshair";
+function marcarBotonCoclear(ear, activo) {
+    const btn = document.getElementById(ear === 'od' ? 'drawODBtn' : 'drawOIBtn');
+    if (!btn) return;
+    btn.style.background = activo ? '#1e3a8a' : '';
+    btn.style.boxShadow = activo ? '0 0 0 3px rgba(30,58,138,0.25)' : '';
+}
+
+function toggleCoclearPanel(ear) {
+    coclearActive[ear] = !coclearActive[ear];
+
+    if (coclearActive[ear]) {
+        crearPanelCoclear(ear);
+    } else {
+        eliminarPanelCoclear(ear);
+    }
+    marcarBotonCoclear(ear, coclearActive[ear]);
+}
+
+
+/*
+function toggleCoclearPanel(ear) {
+    coclearActive[ear] = !coclearActive[ear];
+
+    if (coclearActive[ear]) {
+        crearPanelCoclear(ear);
+    } else {
+        eliminarPanelCoclear(ear);
+    }
+}
+
+
+
+
+function crearPanelCoclear(ear) {
+    const wrapper = document.getElementById(ear === 'od' ? 'odWrapper' : 'oiWrapper');
+    const color = ear === 'od' ? '#e74c3c' : '#3498db';
+    const nombre = ear === 'od' ? 'OD' : 'OI';
+
+    const panel = document.createElement('div');
+    panel.className = 'ear-section coclear-panel';
+    panel.id = `coclearPanel_${ear}`;
+    panel.style.borderLeft = `4px solid ${color}`;
+    panel.innerHTML = `
+        <div class="ear-title" style="color:${color};">Coclear ${nombre}</div>
+        <div class="input-grid">
+            <div class="input-field">
+                <label>% Coclear</label>
+                <input type="number" id="${ear}_coclear_pct" min="0" max="100">
+            </div>
+            <div class="input-field">
+                <label>dB Coclear</label>
+                <input type="number" id="${ear}_coclear_db">
+            </div>
+        </div>
+    `;
+
+    wrapper.appendChild(panel);
+
+    actualizarEstadoInputsCoclear(ear);
+
+    document.getElementById(`${ear}_coclear_pct`)
+        .addEventListener('input', () => actualizarPuntoCoclear(ear));
+
+    document.getElementById(`${ear}_coclear_db`)
+        .addEventListener('input', () => actualizarPuntoCoclear(ear));
+}
+
+*/
+
+
+let coclearRowCount = { od: 1, oi: 1 };
+
+function crearPanelCoclear(ear) {
+    const wrapper = document.getElementById(ear === 'od' ? 'odWrapper' : 'oiWrapper');
+    const color = ear === 'od' ? '#e74c3c' : '#3498db';
+    const nombre = ear === 'od' ? 'OD' : 'OI';
+
+
+    const earSection = document.getElementById(ear === 'od' ? 'odEarSection' : 'oiEarSection');
+    if (earSection) earSection.classList.add('reducido');
+
+    coclearRowCount[ear] = 1;
+
+    const panel = document.createElement('div');
+    panel.className = 'ear-section coclear-panel';
+    panel.id = `coclearPanel_${ear}`;
+    panel.style.borderLeft = `4px solid ${color}`;
+    panel.innerHTML = `
+        <div class="ear-title" style="color:${color};">Coclear ${nombre}</div>
+        <div id="coclearRows_${ear}">
+            <div class="input-grid coclear-row" data-index="1">
+                <div class="input-field">
+                    <label>% Coclear</label>
+                    <input type="number" id="${ear}_coclear_pct_1" min="0" max="100">
+                </div>
+                <div class="input-field">
+                    <label>dB Coclear
+                        <button type="button" class="btn-siguiente-coclear" data-ear="${ear}" title="Agregar siguiente punto"
+                            style="margin-left:6px; padding:1px 8px; border-radius:6px; border:none; background:${color}; color:#fff; cursor:pointer;">→</button>
+                    </label>
+                    <input type="number" id="${ear}_coclear_db_1">
+                </div>
+            </div>
+        </div>
+    `;
+
+    wrapper.appendChild(panel);
+    actualizarEstadoInputsCoclear(ear);
+
+    document.getElementById(`${ear}_coclear_pct_1`)
+        .addEventListener('input', () => actualizarPuntosCoclear(ear));
+    document.getElementById(`${ear}_coclear_db_1`)
+        .addEventListener('input', () => actualizarPuntosCoclear(ear));
+
+    panel.querySelector('.btn-siguiente-coclear')
+        .addEventListener('click', () => agregarFilaCoclear(ear));
+}
+
+function agregarFilaCoclear(ear) {
+    coclearRowCount[ear]++;
+    const idx = coclearRowCount[ear];
+    const color = ear === 'od' ? '#e74c3c' : '#3498db';
+
+    const row = document.createElement('div');
+    row.className = 'input-grid coclear-row';
+    row.dataset.index = idx;
+    row.style.marginTop = '10px';
+    row.innerHTML = `
+        <div class="input-field">
+            <label>% Coclear</label>
+            <input type="number" id="${ear}_coclear_pct_${idx}" min="0" max="100">
+        </div>
+        <div class="input-field">
+            <label>dB Coclear
+                <button type="button" class="btn-siguiente-coclear" data-ear="${ear}" title="Agregar siguiente punto"
+                    style="margin-left:6px; padding:1px 8px; border-radius:6px; border:none; background:${color}; color:#fff; cursor:pointer;">→</button>
+            </label>
+            <input type="number" id="${ear}_coclear_db_${idx}">
+        </div>
+    `;
+
+    document.getElementById(`coclearRows_${ear}`).appendChild(row);
+
+    document.getElementById(`${ear}_coclear_pct_${idx}`)
+        .addEventListener('input', () => actualizarPuntosCoclear(ear));
+    document.getElementById(`${ear}_coclear_db_${idx}`)
+        .addEventListener('input', () => actualizarPuntosCoclear(ear));
+
+    row.querySelector('.btn-siguiente-coclear')
+        .addEventListener('click', () => agregarFilaCoclear(ear));
+}
+
+
+/*
+function eliminarPanelCoclear(ear) {
+    const panel = document.getElementById(`coclearPanel_${ear}`);
+    if (panel) panel.remove();
+
+    manualPoints[ear] = [];
+    updateChart();
+}
+    */
+
+
+    function eliminarPanelCoclear(ear) {
+    const panel = document.getElementById(`coclearPanel_${ear}`);
+    if (panel) panel.remove();
+
+
+    const earSection = document.getElementById(ear === 'od' ? 'odEarSection' : 'oiEarSection');
+    if (earSection) earSection.classList.remove('reducido');
+
+    coclearRowCount[ear] = 1;
+    manualPoints[ear] = [];
+    updateChart();
+}
+
+function actualizarEstadoInputsCoclear(ear) {
+    const tieneValor = document.getElementById(`${ear}_pmax`).value !== "";
+
+    const inputPct = document.getElementById(`${ear}_coclear_pct`);
+    const inputDb = document.getElementById(`${ear}_coclear_db`);
+
+    if (inputPct) inputPct.disabled = !tieneValor;
+    if (inputDb) inputDb.disabled = !tieneValor;
+
+    if (!tieneValor) {
+        manualPoints[ear] = [];
+        updateChart();
+    }
+}
+
+
+/*
+function actualizarPuntoCoclear(ear) {
+    const pctInput = document.getElementById(`${ear}_coclear_pct`);
+    const dbInput = document.getElementById(`${ear}_coclear_db`);
+
+    const pct = parseFloat(pctInput.value);
+    const db = parseFloat(dbInput.value);
+
+    if (isNaN(pct)) {
+        manualPoints[ear] = [];
+        updateChart();
+        return;
+    }
+
+    const uDiscriminacion = parseFloat(document.getElementById(`${ear}_udisc`).value) || 45;
+    const xFinal = !isNaN(db) ? db : uDiscriminacion;
+
+    manualPoints[ear] = [{ x: xFinal, y: pct }];
+    updateChart();
+}
+*/
+
+function actualizarPuntosCoclear(ear) {
+    const count = coclearRowCount[ear];
+    const puntos = [];
+
+    for (let i = 1; i <= count; i++) {
+        const pctInput = document.getElementById(`${ear}_coclear_pct_${i}`);
+        const dbInput = document.getElementById(`${ear}_coclear_db_${i}`);
+        if (!pctInput) continue;
+
+        const pct = parseFloat(pctInput.value);
+        if (isNaN(pct)) continue;
+
+        const db = parseFloat(dbInput.value);
+        const uDiscriminacion = parseFloat(document.getElementById(`${ear}_udisc`).value) || 45;
+        const xFinal = !isNaN(db) ? db : (puntos.length > 0 ? puntos[puntos.length - 1].x : uDiscriminacion);
+
+        puntos.push({ x: xFinal, y: pct });
+    }
+
+    manualPoints[ear] = puntos;
+    updateChart();
+}
+
+
+
+document.getElementById('od_pmax').addEventListener('input', () => {
+    if (coclearActive.od) actualizarEstadoInputsCoclear('od');
+});
+document.getElementById('oi_pmax').addEventListener('input', () => {
+    if (coclearActive.oi) actualizarEstadoInputsCoclear('oi');
 });
 
 document.getElementById("clearManualBtn")
@@ -2580,6 +3209,8 @@ document.querySelectorAll('.btn-borrar').forEach(btn => {
     });
 });
 
+
+/*
 // Botón "Rehacer"
 document.querySelectorAll('.btn-rehacer').forEach(btn => {
     btn.addEventListener('click', function() {
@@ -2587,6 +3218,8 @@ document.querySelectorAll('.btn-rehacer').forEach(btn => {
         rehacerOido(ear);
     });
 });
+
+*/
 
 // ============================================
 // 🚀 INICIALIZAR EL SISTEMA
@@ -2887,7 +3520,11 @@ window.addEventListener('message', function(event) {
                         diagnostico_oi: obtenerDiscriminacionOI(),  // ← Llama a la función
                         grafica: grafica,
                         // ✅ AGREGAR LAS BANDERAS NR
-                        nr_flags: nr_flags
+                        nr_flags: nr_flags,
+coclear_od: Array.isArray(window.manualPoints?.od) ? window.manualPoints.od : [],
+coclear_oi: Array.isArray(window.manualPoints?.oi) ? window.manualPoints.oi : [],                      // ← NUEVO
+                        mascara_logo_od: (window.enmascLogo?.getSymbols()?.od) || {}, // ← NUEVO
+                        mascara_logo_oi: (window.enmascLogo?.getSymbols()?.oi) || {}  // ← NUEVO
                     }
                 }, '*');
             }).catch(() => {

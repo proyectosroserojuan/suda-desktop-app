@@ -22,6 +22,12 @@ async function guardarExamen(data) {
         otoscopia,
         valores_od,
         valores_oi,
+        valores_osea_od, valores_osea_oi,       // ← NUEVO
+        mascara_aerea_od, mascara_aerea_oi,     // ← NUEVO
+        mascara_osea_od, mascara_osea_oi,       // ← NUEVO
+        mascara_logo_od, mascara_logo_oi,       // ← NUEVO
+        coclear_od, coclear_oi,     
+        nr_flags,            // ← NUEVO
         pta_via_aerea_od,
         pta_via_osea_od,
         pta_via_aerea_oi,
@@ -78,14 +84,20 @@ async function guardarExamen(data) {
               grafica_logo_url, grafica_logo_public_id,
               otoscopia,
               valores_od, valores_oi,
+              valores_osea_od, valores_osea_oi,
+              mascara_aerea_od, mascara_aerea_oi,
+              mascara_osea_od, mascara_osea_oi,
+              mascara_logo_od, mascara_logo_oi,
+              coclear_od, coclear_oi,
               diagnostico,
               urv_od, urv_oi, upalabra_od, upalabra_oi,
               udisc_od, udisc_oi, pmax_od, pmax_oi,
               pta_via_aerea_od, pta_via_osea_od,
               pta_via_aerea_oi, pta_via_osea_oi,
+              nr_flags,
               fecha_registro)
              VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15,
-                     $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, CURRENT_TIMESTAMP)
+                     $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28,$29,$30,$31,$32,$33,$34,$35,$36, $37, $38, CURRENT_TIMESTAMP)
              RETURNING id`,
             [
                 tipo_examen, paciente_id, cita_id, entidad_id,
@@ -95,13 +107,24 @@ async function guardarExamen(data) {
                 otoscopia,
                 valores_od ? JSON.stringify(valores_od) : null,
                 valores_oi ? JSON.stringify(valores_oi) : null,
+                valores_osea_od ? JSON.stringify(valores_osea_od) : null,     // ← NUEVO
+                valores_osea_oi ? JSON.stringify(valores_osea_oi) : null,     // ← NUEVO
+                mascara_aerea_od ? JSON.stringify(mascara_aerea_od) : null,   // ← NUEVO
+                mascara_aerea_oi ? JSON.stringify(mascara_aerea_oi) : null,   // ← NUEVO
+                mascara_osea_od ? JSON.stringify(mascara_osea_od) : null,     // ← NUEVO
+                mascara_osea_oi ? JSON.stringify(mascara_osea_oi) : null,     // ← NUEVO
+                mascara_logo_od ? JSON.stringify(mascara_logo_od) : null,     // ← NUEVO
+                mascara_logo_oi ? JSON.stringify(mascara_logo_oi) : null,     // ← NUEVO
+                coclear_od ? JSON.stringify(coclear_od) : null,               // ← NUEVO
+                coclear_oi ? JSON.stringify(coclear_oi) : null,               // ← NUEVO
                 diagnostico,
                 urv_od, urv_oi, upalabra_od, upalabra_oi,
                 udisc_od, udisc_oi, pmax_od, pmax_oi,
                 pta_via_aerea_od || null,
                 pta_via_osea_od || null,
                 pta_via_aerea_oi || null,
-                pta_via_osea_oi || null
+                pta_via_osea_oi || null,
+                nr_flags ? JSON.stringify(nr_flags) : null
             ]
         );
 
@@ -148,6 +171,12 @@ async function actualizarExamen(citaId, data) {
         otoscopia,
         valores_od,
         valores_oi,
+        valores_osea_od, valores_osea_oi,       // ← NUEVO
+        mascara_aerea_od, mascara_aerea_oi,     // ← NUEVO
+        mascara_osea_od, mascara_osea_oi,       // ← NUEVO
+        mascara_logo_od, mascara_logo_oi,       // ← NUEVO
+        coclear_od, coclear_oi,  
+        nr_flags,               // ← NUEVO
         diagnostico,
         urv_od, urv_oi,
         upalabra_od, upalabra_oi,
@@ -223,15 +252,21 @@ async function actualizarExamen(citaId, data) {
                 otoscopia = $9,
                 valores_od = $10,
                 valores_oi = $11,
-                diagnostico = $12,
-                urv_od = $13, urv_oi = $14,
-                upalabra_od = $15, upalabra_oi = $16,
-                udisc_od = $17, udisc_oi = $18,
-                pmax_od = $19, pmax_oi = $20,
-                pta_via_aerea_od = $21, pta_via_osea_od = $22,
-                pta_via_aerea_oi = $23, pta_via_osea_oi = $24,
+                valores_osea_od = $12, valores_osea_oi = $13,
+                mascara_aerea_od = $14, mascara_aerea_oi = $15,
+                mascara_osea_od = $16, mascara_osea_oi = $17,
+                mascara_logo_od = $18, mascara_logo_oi = $19,
+                coclear_od = $20, coclear_oi = $21,
+                diagnostico = $22,
+                urv_od = $23, urv_oi = $24,
+                upalabra_od = $25, upalabra_oi = $26,
+                udisc_od = $27, udisc_oi = $28,
+                pmax_od = $29, pmax_oi = $30,
+                pta_via_aerea_od = $31, pta_via_osea_od = $32,
+                pta_via_aerea_oi = $33, pta_via_osea_oi = $34,
+                nr_flags = COALESCE($35::jsonb, nr_flags),
                 fecha_registro = CURRENT_TIMESTAMP
-             WHERE id = $25
+             WHERE id = $36
              RETURNING id`,
             [
                 tipo_examen || null,
@@ -241,6 +276,16 @@ async function actualizarExamen(citaId, data) {
                 otoscopia,
                 valores_od ? JSON.stringify(valores_od) : null,
                 valores_oi ? JSON.stringify(valores_oi) : null,
+                valores_osea_od ? JSON.stringify(valores_osea_od) : null,
+                valores_osea_oi ? JSON.stringify(valores_osea_oi) : null,
+                mascara_aerea_od ? JSON.stringify(mascara_aerea_od) : null,
+                mascara_aerea_oi ? JSON.stringify(mascara_aerea_oi) : null,
+                mascara_osea_od ? JSON.stringify(mascara_osea_od) : null,
+                mascara_osea_oi ? JSON.stringify(mascara_osea_oi) : null,
+                mascara_logo_od ? JSON.stringify(mascara_logo_od) : null,
+                mascara_logo_oi ? JSON.stringify(mascara_logo_oi) : null,
+                coclear_od ? JSON.stringify(coclear_od) : null,
+                coclear_oi ? JSON.stringify(coclear_oi) : null,
                 diagnostico,
                 urv_od, urv_oi, upalabra_od, upalabra_oi,
                 udisc_od, udisc_oi, pmax_od, pmax_oi,
@@ -248,6 +293,7 @@ async function actualizarExamen(citaId, data) {
                 pta_via_osea_od || null,
                 pta_via_aerea_oi || null,
                 pta_via_osea_oi || null,
+                nr_flags ? JSON.stringify(nr_flags) : null,
                 examenActual.id
             ]
         );

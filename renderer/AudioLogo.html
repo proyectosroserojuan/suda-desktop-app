@@ -532,6 +532,17 @@ async function ejecutarGuardadoReal(citaId, modoEdicion = false) {
             grafica_logo_base64: datosLogoaudiometria?.grafica || '',
             valores_od: datosAudiometria?.valores_od || {},
             valores_oi: datosAudiometria?.valores_oi || {},
+            valores_osea_od: datosAudiometria?.valores_osea_od || {},           // ← NUEVO
+    valores_osea_oi: datosAudiometria?.valores_osea_oi || {},            // ← NUEVO
+    mascara_aerea_od: datosAudiometria?.mascara_aerea_od || {},         // ← NUEVO
+    mascara_aerea_oi: datosAudiometria?.mascara_aerea_oi || {},         // ← NUEVO
+    mascara_osea_od: datosAudiometria?.mascara_osea_od || {},           // ← NUEVO
+    mascara_osea_oi: datosAudiometria?.mascara_osea_oi || {},           // ← NUEVO
+    mascara_logo_od: datosLogoaudiometria?.mascara_logo_od || {},       // ← NUEVO
+    mascara_logo_oi: datosLogoaudiometria?.mascara_logo_oi || {},       // ← NUEVO
+    coclear_od: datosLogoaudiometria?.coclear_od || [],                 // ← NUEVO
+    coclear_oi: datosLogoaudiometria?.coclear_oi || [],   
+     nr_flags: datosLogoaudiometria?.nr_flags || null,                 // ← NUEVO
             pta_via_aerea_od: datosAudiometria?.pta?.od_air || null,
             pta_via_osea_od: datosAudiometria?.pta?.od_bone || null,
             pta_via_aerea_oi: datosAudiometria?.pta?.oi_air || null,

@@ -65,6 +65,28 @@ body {
     transform: translateY(calc(-1px * var(--escala)));
 }
 
+
+.input-field {
+    position: relative; /* ya tiene flex-direction: column, esto no rompe nada */
+}
+
+.mask-symbol-overlay {
+    position: absolute;
+    top: 1px;
+    right: 2px;
+    font-size: 11px;
+    font-weight: bold;
+    color: #6b21a5;
+    pointer-events: none; /* no bloquea clics ni el foco del input */
+    line-height: 1;
+    display: none;
+    z-index: 2;
+}
+
+.mask-symbol-overlay.visible {
+    display: block;
+}
+
 .top-buttons-row button {
     margin-top: 0;
     margin-right: 0;
@@ -692,6 +714,32 @@ button:hover {
     color: white;
 }
 
+
+
+/* Colores diferenciados por oído en el selector emergente de vía aérea */
+.symbol-selector.selector-od button {
+    border-color: #e74c3c;
+    color: #c0392b;
+}
+.symbol-selector.selector-od button:hover {
+    background: #e74c3c;
+    color: white;
+}
+
+.symbol-selector.selector-oi button {
+    border-color: #3498db;
+    color: #2980b9;
+}
+.symbol-selector.selector-oi button:hover {
+    background: #3498db;
+    color: white;
+}
+
+
+
+
+
+
 #loadingOverlay {
     display: none;
     position: fixed;
@@ -898,7 +946,7 @@ button:hover {
 <!-- ============================================ -->
 <div class="top-buttons-row">
     <button class="btn-back-floating">← Volver al Dashboard</button>
-    <button onclick="clearAll()" style="background-color:#0a2649; color:white; padding:8px 14px;">Limpiar datos</button>
+    <button onclick="clearAll()" style="background-color:#2c0101; color:white; padding:8px 14px;">Limpiar datos</button>
 <!--   <button id="elasticODBtn" style="background:#ff0101; color:white; padding:8px 14px;">VIA OSEA MANUAL OD</button> -->
  <!--    <button id="elasticOIBtn" style="background:#1e40af; color:white; padding:8px 14px;">VIA OSEA MANUAL OI</button> -->
     <button id="limpiarViaOseaBtn" style="background-color:#041931; color:white; padding:8px 14px;">Limpiar Vía Ósea</button>
@@ -1185,14 +1233,17 @@ async function capturarGraficaAudiometria() {
 
 function obtenerValoresAudiometria() {
 const freqs = ['125','250', '500', '750', '1000', '1500', '2000', '3000', '4000', '6000', '8000', ''];
-    const od = {};
-    const oi = {};
+ const od = {}, oi = {}, odOsea = {}, oiOsea = {};
     
     freqs.forEach(f => {
         const odInput = document.getElementById(`od_${f}`);
         const oiInput = document.getElementById(`oi_${f}`);
-        od[f] = odInput?.value || '';
-        oi[f] = oiInput?.value || '';
+       // od[f] = odInput?.value || '';
+       // oi[f] = oiInput?.value || '';
+        od[f] = document.getElementById(`od_${f}`)?.value || '';
+        oi[f] = document.getElementById(`oi_${f}`)?.value || '';
+        odOsea[f] = document.getElementById(`od-bone_${f}`)?.value || '';   // ← NUEVO
+        oiOsea[f] = document.getElementById(`oi-bone_${f}`)?.value || '';  // ← NUEVO
     });
     
       const odBoneSymbols = {};
@@ -1204,8 +1255,19 @@ const freqs = ['125','250', '500', '750', '1000', '1500', '2000', '3000', '4000'
         odBoneSymbols[f] = odInput?.value || '';
         oiBoneSymbols[f] = oiInput?.value || '';
     });
+
+    // ← NUEVO: máscaras (símbolos personalizados ya existentes en memoria)
+    const mascaraAereaOD = { ...personalAirSymbolsOD };
+    const mascaraAereaOI = { ...personalAirSymbolsOI };
+    const mascaraOseaOD  = { ...personalSymbolsOD };
+    const mascaraOseaOI  = { ...personalSymbolsOI };
     
-    return { od, oi, freqs, odBoneSymbols, oiBoneSymbols };
+        return {
+        od, oi, odOsea, oiOsea, freqs,
+        odBoneSymbols, oiBoneSymbols,
+        mascaraAereaOD, mascaraAereaOI,
+        mascaraOseaOD, mascaraOseaOI
+    };
 }
 
 
@@ -1236,6 +1298,8 @@ function guardarSimboloPersonalizadoAir(ear, freq, symbol) {
     } else {
         personalAirSymbolsOI[freq] = symbol;
     }
+        actualizarOverlaySimbolo(ear, freq, symbol); // ← NUEVA LÍNEA
+
 }
 
 function obtenerSimboloPersonalizadoAir(ear, freq, defaultSymbol) {
@@ -1330,7 +1394,7 @@ function actualizarPanelEnmascararAir() {
     // ✅ TAMAÑOS PEQUEÑOS Y CONSISTENTES para los símbolos
     const tamanos = {
         'od': {
-            'O': '14px',      // Reducido de 20px a 14px
+            '•': '14px',      // Reducido de 20px a 14px
             '△': '12px',      // Aumentado de 7px a 12px (para que se vea bien)
             '<': '14px',      // Reducido de 16px a 14px
             '[': '14px',      // Reducido de 16px a 14px
@@ -1366,6 +1430,7 @@ function actualizarPanelEnmascararAir() {
                       data-freq="${freq}" 
                       data-ear="od" 
                       data-tipo="air"
+                      data-valor="${valor}"
                       style="font-size: ${tamanoOD} !important; font-weight: bold; min-width: 30px; display: inline-block; text-align: center;">
                     ${simboloActual} ${valor} dB
                 </span>
@@ -1397,6 +1462,7 @@ function actualizarPanelEnmascararAir() {
                       data-freq="${freq}" 
                       data-ear="oi" 
                       data-tipo="air"
+                      data-valor="${valor}"
                       style="font-size: ${tamanoOI} !important; font-weight: bold; min-width: 30px; display: inline-block; text-align: center;">
                     ${simboloActual} ${valor} dB
                 </span>
@@ -1423,13 +1489,16 @@ function mostrarSelectorSimboloAir(elemento, ear, freq) {
     
     // Crear selector de símbolos
     const selector = document.createElement('div');
-    selector.className = 'symbol-selector';
+        selector.className = `symbol-selector ${ear === 'od' ? 'selector-od' : 'selector-oi'}`;
     selector.style.display = 'block';
     
     // Símbolos disponibles para vía aérea
-    const simbolosOD = ['O', 'O↘', '△', '<', '[', '┐'];
-    const simbolosOI = ['X', '↙X', '□', '>', ']', '┌']
+    const simbolosOD = ['•', '↘', '△', '<', '[', '┐'];
+    const simbolosOI = ['X', '↙', '□', '>', ']', '┌']
     const simbolos = ear === 'od' ? simbolosOD : simbolosOI;
+    
+
+
     
     simbolos.forEach(sim => {
         const btn = document.createElement('button');
@@ -1441,8 +1510,8 @@ function mostrarSelectorSimboloAir(elemento, ear, freq) {
             guardarSimboloPersonalizadoAir(ear, freq, sim);
             
             // Actualizar el símbolo en el elemento clickeado
-            const valor = elemento.textContent.split(' ')[1] || '';
-            elemento.textContent = `${sim} ${valor}`;
+    const valor = elemento.dataset.valor || '';
+    elemento.textContent = `${sim} ${valor} dB`;
             
             // Actualizar el dataset para reflejar el cambio
             elemento.dataset.symbol = sim;
@@ -1454,6 +1523,8 @@ function mostrarSelectorSimboloAir(elemento, ear, freq) {
         };
         selector.appendChild(btn);
     });
+
+    
     
     // Posicionar el selector cerca del elemento
     const rect = elemento.getBoundingClientRect();
@@ -1562,6 +1633,7 @@ function guardarSimboloPersonalizado(ear, freq, symbol) {
     } else {
         personalSymbolsOI[freq] = symbol;
     }
+      actualizarOverlaySimbolo(ear + '-bone', freq, symbol); // ← NUEVA LÍNEA
 }
 
 function obtenerSimboloPersonalizado(ear, freq, defaultSymbol) {
@@ -1806,6 +1878,12 @@ async function onGrabarAudiometriaClick() {
             otoscopia: otoscopia,
             valores_od: valores.od,
             valores_oi: valores.oi,
+            valores_osea_od: valores.odOsea,          // ← NUEVO
+            valores_osea_oi: valores.oiOsea,           // ← NUEVO
+            mascara_aerea_od: valores.mascaraAereaOD,  // ← NUEVO
+            mascara_aerea_oi: valores.mascaraAereaOI,  // ← NUEVO
+            mascara_osea_od: valores.mascaraOseaOD,    // ← NUEVO
+            mascara_osea_oi: valores.mascaraOseaOI,    // ← NUEVO
             grafica_tonal_base64: imagenBase64,
             grafica_logo_base64: null,
             pta_via_aerea_od: ultimosPTA.od_air,
@@ -1988,17 +2066,18 @@ function createInputs(containerId, prefix, tipo = 'air') {
         const div = document.createElement('div');
         div.className = 'input-field';
 
-        div.innerHTML = `
-            <label>${f} Hz</label>
-            <input 
-                type="text"
-                id="${prefix}_${f}"
-                data-index="${i}"
-                data-prefix="${prefix}"
-                data-tipo="${tipo}"
-                value=""
-            >
-        `;
+div.innerHTML = `
+    <label>${f} Hz</label>
+    <span class="mask-symbol-overlay" id="mask-overlay-${prefix}_${f}"></span>
+    <input 
+        type="text"
+        id="${prefix}_${f}"
+        data-index="${i}"
+        data-prefix="${prefix}"
+        data-tipo="${tipo}"
+        value=""
+    >
+`;
 
         container.appendChild(div);
     });
@@ -2011,6 +2090,11 @@ function createInputs(containerId, prefix, tipo = 'air') {
         });
 
         input.addEventListener("input", () => {
+
+                  if (/^\s*sr\s*$/i.test(input.value) && input.value !== 'sr') {
+                input.value = 'sr';
+            }
+
             updateChart();
             actualizarPTA();
             sincronizarCanvasDesdeInputs();
@@ -2227,7 +2311,7 @@ function updateBoneSymbolPoint(prefix, freq) {
         const y = chartY * scaleY;
 
         // Determinar el símbolo a usar
-        let symbol = prefix === 'od' ? activeBoneSymbolOD : activeBoneSymbolOI;
+      let symbol = prefix === 'od' ? '<' : '>';
         // Verificar si hay un símbolo personalizado para esta frecuencia
         if (prefix === 'od' && personalBoneSymbolsOD[freq]) {
             symbol = personalBoneSymbolsOD[freq];
@@ -2265,6 +2349,19 @@ function updateBoneSymbolPoint(prefix, freq) {
 
         // Redibujar solo los símbolos
         redrawBoneSymbolsOnly();
+    }
+}
+
+function actualizarOverlaySimbolo(prefix, freq, symbol) {
+    const overlay = document.getElementById(`mask-overlay-${prefix}_${freq}`);
+    if (!overlay) return;
+
+    if (symbol) {
+        overlay.textContent = symbol;
+        overlay.classList.add('visible');
+    } else {
+        overlay.textContent = '';
+        overlay.classList.remove('visible');
     }
 }
 
@@ -2354,7 +2451,7 @@ function actualizarPanelEnmascararBoneSymbols() {
         const input = document.getElementById(`od-bone-symbol_${freq}`);
         if (input && input.value !== '') {
             const valor = input.value;
-            const simboloActual = personalBoneSymbolsOD[freq] || activeBoneSymbolOD;
+           const simboloActual = personalBoneSymbolsOD[freq] || '<';
             
             const item = document.createElement('div');
             item.className = 'freq-item od-symbol-item';
@@ -2377,7 +2474,7 @@ function actualizarPanelEnmascararBoneSymbols() {
         const input = document.getElementById(`oi-bone-symbol_${freq}`);
         if (input && input.value !== '') {
             const valor = input.value;
-            const simboloActual = personalBoneSymbolsOI[freq] || activeBoneSymbolOI;
+            const simboloActual = personalBoneSymbolsOI[freq] || '>';
             
             const item = document.createElement('div');
             item.className = 'freq-item oi-symbol-item';
@@ -2587,7 +2684,8 @@ createInputs('oi-bone-inputs', 'oi-bone', 'bone');
 // ============================================
 // PRECARGA EN MODO EDICIÓN
 // ============================================
-(function precargarEdicionAudiometria() {
+document.addEventListener('DOMContentLoaded', function () {
+setTimeout(function precargarEdicionAudiometria() {
     const modoEdicion = localStorage.getItem('modoEdicion') === 'true';
     if (!modoEdicion) return;
 
@@ -2596,44 +2694,65 @@ createInputs('oi-bone-inputs', 'oi-bone', 'bone');
         const examen = examenGuardado.audiometria || examenGuardado.logoaudiometria || null;
         if (!examen) return;
 
-        // Vía aérea OD/OI (valores_od / valores_oi vienen como {freq: valor})
-        const valoresOD = examen.valores_od || {};
-        const valoresOI = examen.valores_oi || {};
+        // Por si la BD devuelve el JSON como texto
+        const pj = v => {
+            if (typeof v === 'string') { try { return JSON.parse(v); } catch { return {}; } }
+            return v || {};
+        };
 
-        Object.keys(valoresOD).forEach(freq => {
-            const input = document.getElementById(`od_${freq}`);
-            if (input && valoresOD[freq] !== '') input.value = valoresOD[freq];
-        });
-        Object.keys(valoresOI).forEach(freq => {
-            const input = document.getElementById(`oi_${freq}`);
-            if (input && valoresOI[freq] !== '') input.value = valoresOI[freq];
+        console.log('máscaras recibidas:', {
+            aereaOD: examen.mascara_aerea_od, aereaOI: examen.mascara_aerea_oi,
+            oseaOD: examen.mascara_osea_od,   oseaOI: examen.mascara_osea_oi
         });
 
-        // Diagnóstico / otoscopia / observaciones
-        if (document.getElementById('diagnostico')) {
-            document.getElementById('diagnostico').value = examen.diagnostico || '';
-        }
-        if (document.getElementById('otoscopia_audiometria')) {
-            document.getElementById('otoscopia_audiometria').value = examen.otoscopia || '';
-        }
-        if (document.getElementById('observaciones_audiometria')) {
-            document.getElementById('observaciones_audiometria').value = examen.observaciones || '';
-        }
+        // Valores en los inputs
+        const setVals = (prefix, obj) => {
+            obj = pj(obj);
+            Object.keys(obj).forEach(freq => {
+                const input = document.getElementById(`${prefix}_${freq}`);
+                if (input && obj[freq] !== '' && obj[freq] != null) input.value = obj[freq];
+            });
+        };
+        setVals('od', examen.valores_od);
+        setVals('oi', examen.valores_oi);
+        setVals('od-bone', examen.valores_osea_od);
+        setVals('oi-bone', examen.valores_osea_oi);
 
-        // Refrescar gráfica y PTA con los valores recién cargados
+        // Máscaras: memoria + símbolo sobre el input
+        const setMask = (obj, store, overlayPrefix) => {
+            obj = pj(obj);
+            Object.keys(obj).forEach(freq => {
+                if (!obj[freq]) return;
+                store[freq] = obj[freq];
+                actualizarOverlaySimbolo(overlayPrefix, freq, obj[freq]);
+            });
+        };
+        setMask(examen.mascara_aerea_od, personalAirSymbolsOD, 'od');
+        setMask(examen.mascara_aerea_oi, personalAirSymbolsOI, 'oi');
+        setMask(examen.mascara_osea_od,  personalSymbolsOD,    'od-bone');
+        setMask(examen.mascara_osea_oi,  personalSymbolsOI,    'oi-bone');
+
+        // Textos
+        const setTxt = (id, v) => { const el = document.getElementById(id); if (el) el.value = v || ''; };
+        setTxt('diagnostico', examen.diagnostico);
+        setTxt('otoscopia_audiometria', examen.otoscopia);
+        setTxt('observaciones_audiometria', examen.observaciones);
+
+        // Refrescar todo
         updateChart();
         actualizarPTA();
+        actualizarPanelEnmascararAir();
         sincronizarCanvasDesdeInputs();
         if (typeof redrawAll === 'function') redrawAll();
 
-        // Cambiar el texto del botón para dejar claro que es edición
         const btnGrabar = document.getElementById('grabarAudiometriaBtn');
         if (btnGrabar) btnGrabar.textContent = 'ACTUALIZAR CITA';
 
     } catch (e) {
         console.error('❌ Error precargando examen en modo edición:', e);
     }
-})();
+}, 300);
+});
 
 
 document.querySelectorAll(".symbol-btn").forEach(btn => {
@@ -3444,7 +3563,7 @@ function getSymbolText(ear) {
 
     const mapOI = {
         air: "x",
-        nr: "↙X",
+        nr: "↙",
         airMask: "□",
         bone: ">",
         boneMask: "]",
@@ -4826,7 +4945,7 @@ function actualizarPanelEnmascarar() {
         if (input && input.value !== '') {
             const valor = input.value;
             // Usar símbolo personalizado si existe
-            const simboloActual = obtenerSimboloPersonalizado('od', freq, activeBoneSymbols.od);
+            const simboloActual = obtenerSimboloPersonalizado('od', freq, '<');
             
             const item = document.createElement('div');
             item.className = 'freq-item od-item';
@@ -4848,7 +4967,7 @@ function actualizarPanelEnmascarar() {
         if (input && input.value !== '') {
             const valor = input.value;
             // Usar símbolo personalizado si existe
-            const simboloActual = obtenerSimboloPersonalizado('oi', freq, activeBoneSymbols.oi);
+            const simboloActual = obtenerSimboloPersonalizado('oi', freq, '>');
             
             const item = document.createElement('div');
             item.className = 'freq-item oi-item';
@@ -5149,6 +5268,12 @@ window.addEventListener('message', function(event) {
                     tieneDatos: true,
                     valores_od: valores.od,
                     valores_oi: valores.oi,
+                     valores_osea_od: valores.odOsea,          // ← NUEVO
+        valores_osea_oi: valores.oiOsea,           // ← NUEVO
+        mascara_aerea_od: valores.mascaraAereaOD,  // ← NUEVO
+        mascara_aerea_oi: valores.mascaraAereaOI,  // ← NUEVO
+        mascara_osea_od: valores.mascaraOseaOD,    // ← NUEVO
+        mascara_osea_oi: valores.mascaraOseaOI,    // ← NUEVO
                     freqs: freqs,  // ✅ AGREGAR ESTO
                     pta: ultimosPTA || {},
                     diagnostico: document.getElementById('diagnostico')?.value || '',
