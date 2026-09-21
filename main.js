@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain } = require('electron');
+const { app, BrowserWindow, ipcMain,  Menu, MenuItem, session } = require('electron');
 
 const { autoUpdater } = require('electron-updater');
 const { dialog } = require('electron');
@@ -1227,7 +1227,50 @@ ipcMain.handle('obtener-examenes-por-tipo', async (event, tipo) => {
 });
 
 
+// ============================================
+// CORRECTOR ORTOGRÁFICO + MENÚ CONTEXTUAL
+// ============================================
+app.on('web-contents-created', (event, contents) => {
+  contents.on('context-menu', (e, params) => {
+    // Solo en campos de texto editables
+    if (!params.isEditable) return;
+
+    const menu = new Menu();
+
+    // Sugerencias si la palabra está mal escrita
+    if (params.misspelledWord) {
+      params.dictionarySuggestions.forEach(sugerencia => {
+        menu.append(new MenuItem({
+          label: sugerencia,
+          click: () => contents.replaceMisspelling(sugerencia)
+        }));
+      });
+
+      if (params.dictionarySuggestions.length === 0) {
+        menu.append(new MenuItem({ label: 'Sin sugerencias', enabled: false }));
+      }
+
+      menu.append(new MenuItem({
+        label: 'Agregar al diccionario',
+        click: () => contents.session.addWordToSpellCheckerDictionary(params.misspelledWord)
+      }));
+
+      menu.append(new MenuItem({ type: 'separator' }));
+    }
+
+    menu.append(new MenuItem({ label: 'Cortar', role: 'cut', enabled: params.editFlags.canCut }));
+    menu.append(new MenuItem({ label: 'Copiar', role: 'copy', enabled: params.editFlags.canCopy }));
+    menu.append(new MenuItem({ label: 'Pegar', role: 'paste', enabled: params.editFlags.canPaste }));
+    menu.append(new MenuItem({ type: 'separator' }));
+    menu.append(new MenuItem({ label: 'Seleccionar todo', role: 'selectAll' }));
+
+    menu.popup();
+  });
+});
+
+
 app.whenReady().then(async () => {
+
   await initDB();
 
   try {
@@ -1266,6 +1309,8 @@ app.whenReady().then(async () => {
     console.log('El usuario audiologo ya existe');
   }
 
+
+  session.defaultSession.setSpellCheckerLanguages(['es', 'es-419']);
   createWindow();
 });
 

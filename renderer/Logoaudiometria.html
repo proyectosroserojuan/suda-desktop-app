@@ -482,12 +482,58 @@ button.reset-btn:hover {
     resize: vertical;
 }
 
+/* ===== Botones Coclear ===== */
+.btn-coclear {
+    padding: 4px 12px;
+    border: none;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: bold;
+    cursor: pointer;
+    margin-bottom: 10px;
+    transition: background 0.2s ease;
+}
 
+/* OD: rojo claro */
+.btn-coclear-od { background: #f5b7b1; color: #922b21; }
+.btn-coclear-od:hover { background: #f1948a; }
+.btn-coclear-od.activo {
+    background: #e74c3c;
+    color: #fff;
+    box-shadow: 0 0 0 3px rgba(231, 76, 60, 0.3);
+}
+
+/* OI: azul claro */
+.btn-coclear-oi { background: #aed6f1; color: #1b4f72; }
+.btn-coclear-oi:hover { background: #85c1e9; }
+.btn-coclear-oi.activo {
+    background: #3498db;
+    color: #fff;
+    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.3);
+}
+
+/* ===== Panel Coclear: fondo gris ===== */
+.coclear-panel {
+    background: #e9ecef;
+}
+
+/* ===== Inputs más angostos ===== */
+.coclear-panel .input-grid {
+    grid-template-columns: repeat(2, auto);
+    justify-content: start;
+    gap: 10px;
+}
+
+.coclear-panel .input-field input {
+    width: 70px;
+    padding: 4px 6px;
+    font-size: 12px;
+}
 
 .coclear-panel {
     flex: 1;
     min-width: 220px;
-    background: #faf5ff;
+    background: #e9ecef;
 }
 
 .nr-btn {
@@ -560,6 +606,8 @@ button.reset-btn:hover {
   <div style="display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 25px; padding: 15px; background: #f8f9fa; border-radius: 12px; border: 1px solid #e2e8f0;">
     
 
+
+ <!-- 
     <button id="drawODBtn" style="margin:0;">
         Coclear - RetroCoclear OD
     </button>
@@ -568,21 +616,17 @@ button.reset-btn:hover {
         Coclear - RetroCoclear OI
     </button>
 
+-->
 
 
 
-
-
-    <button id="clearManualBtn" style="margin:0;">
-        🗑 Limpiar puntos manuales
-    </button>
 
     <button id="resetBtn" class="reset-btn" style="margin:0;">
         Restablecer Valores
     </button>
 
     <button id="grabarBtn" class="btn-grabar" style="margin:0;">
-        GRABAR
+        GRABAR CITA
     </button>
 
   </div>
@@ -599,12 +643,18 @@ button.reset-btn:hover {
         <div id="odWrapper" style="display:flex; flex-wrap:wrap; gap:12px; min-width:0;">
         <div class="ear-section od" id="odEarSection" style="flex:1; min-width:220px;">
 
-         <div class="ear-title od">🔴 OÍDO DERECHO </div>
+         <div class="ear-title od">OÍDO DERECHO </div>
 
 
              <button type="button" class="btn-sin-respuesta" data-ear="od" style="background: #c0392b; color: white; border: none; padding: 4px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; margin-bottom: 10px;">
         Sin Respuesta Oido Derecho
     </button>
+
+
+<button type="button" id="drawODBtn" class="btn-coclear btn-coclear-od">
+    Coclear - RetroCoclear OD
+</button>
+
           <div class="input-grid">
             <div class="input-field">
               <label>U. Voz <small></small></label>
@@ -702,6 +752,13 @@ button.reset-btn:hover {
              <button type="button" class="btn-sin-respuesta" data-ear="oi" style="background: #2980b9; color: white; border: none; padding: 4px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; margin-bottom: 10px;">
         Sin Respuesta Oido Izquierdo
     </button>
+
+
+<button type="button" id="drawOIBtn" class="btn-coclear btn-coclear-oi">
+    Coclear - RetroCoclear OI
+</button>
+
+
           <div class="input-grid">
             <div class="input-field">
               <label>U. Voz <small></small></label>
@@ -808,60 +865,10 @@ button.reset-btn:hover {
       <!-- ============================================ -->
       <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
         
-        <!-- COLUMNA IZQUIERDA: SÍMBOLOS -->
-        <div style="display: flex; flex-direction: column; gap: 15px;">
-          
-          <!-- SÍMBOLOS OÍDO DERECHO -->
-          <div class="symbols-panel" style="margin-top: 0;">
-              <h4 style="width:100%; color:#e74c3c;">🔴 Oído Derecho (OD)</h4>
 
-              <button class="symbol-btn" data-ear="od" data-symbol="air">
-                  O<br><small>Conducción aérea</small>
-              </button>
 
-              <button class="symbol-btn" data-ear="od" data-symbol="nr">
-                  ↘O<br><small>Ausencia de respuesta</small>
-              </button>
 
-              <button class="symbol-btn" data-ear="od" data-symbol="airMask">
-                  △<br><small>Aérea enmascarada</small>
-              </button>
-
-              <button class="symbol-btn" data-ear="od" data-symbol="boneMask">
-                  [<br><small>Ósea mastoidea enmasc.</small>
-              </button>
-
-              <button class="symbol-btn" data-ear="od" data-symbol="frontMask">
-                  ┐<br><small>Ósea frente enmasc.</small>
-              </button>
-          </div>
-
-          <!-- SÍMBOLOS OÍDO IZQUIERDO -->
-          <div class="symbols-panel" style="margin-top: 0;">
-              <h4 style="width:100%; color:#3498db;">🔵 Oído Izquierdo (OI)</h4>
-
-              <button class="symbol-btn" data-ear="oi" data-symbol="air">
-                  X<br><small>Conducción aérea</small>
-              </button>
-
-              <button class="symbol-btn" data-ear="oi" data-symbol="nr">
-                  ↙X<br><small>Ausencia de respuesta</small>
-              </button>
-
-              <button class="symbol-btn" data-ear="oi" data-symbol="airMask">
-                  □<br><small>Aérea enmascarada</small>
-              </button>
-
-              <button class="symbol-btn" data-ear="oi" data-symbol="boneMask">
-                  ]<br><small>Ósea mastoidea enmasc.</small>
-              </button>
-
-              <button class="symbol-btn" data-ear="oi" data-symbol="frontMask">
-                  ┌<br><small>Ósea frente enmasc.</small>
-              </button>
-          </div>
-          
-        </div>
+        
 
         <!-- COLUMNA DERECHA: DIAGNÓSTICOS + OTOSCOPIA 
         <div style="display: flex; flex-direction: column; gap: 15px;">
@@ -2660,12 +2667,24 @@ document.getElementById("drawOIBtn")
 .addEventListener("click", () => toggleCoclearPanel("oi"));
 
 
+
+/*
 function marcarBotonCoclear(ear, activo) {
     const btn = document.getElementById(ear === 'od' ? 'drawODBtn' : 'drawOIBtn');
     if (!btn) return;
     btn.style.background = activo ? '#1e3a8a' : '';
     btn.style.boxShadow = activo ? '0 0 0 3px rgba(30,58,138,0.25)' : '';
 }
+
+
+*/
+
+function marcarBotonCoclear(ear, activo) {
+    const btn = document.getElementById(ear === 'od' ? 'drawODBtn' : 'drawOIBtn');
+    if (!btn) return;
+    btn.classList.toggle('activo', activo);
+}
+
 
 function toggleCoclearPanel(ear) {
     coclearActive[ear] = !coclearActive[ear];
@@ -2907,12 +2926,11 @@ document.getElementById('oi_pmax').addEventListener('input', () => {
     if (coclearActive.oi) actualizarEstadoInputsCoclear('oi');
 });
 
-document.getElementById("clearManualBtn")
-.addEventListener("click", () => {
 
+
+document.getElementById("clearManualBtn")?.addEventListener("click", () => {
     manualPoints.od = [];
     manualPoints.oi = [];
-
     updateChart();
 });
 
@@ -3448,6 +3466,57 @@ document.addEventListener('DOMContentLoaded', function() {
 </script>
 
 </body>
+
+
+<script>
+// ============================================
+// NAVEGACIÓN POR TECLADO EN INPUTS COCLEAR
+// → en % Coclear: pasa a dB Coclear
+// Enter en dB Coclear: genera / pasa a la siguiente fila
+// ============================================
+document.addEventListener('keydown', function (e) {
+    const input = e.target;
+    if (!input || input.tagName !== 'INPUT') return;
+
+    // Solo actúa sobre ids como od_coclear_pct_1 / oi_coclear_db_3
+    const m = /^(od|oi)_coclear_(pct|db)_(\d+)$/.exec(input.id);
+    if (!m) return;
+
+    const ear = m[1];
+    const campo = m[2];
+    const idx = parseInt(m[3], 10);
+
+    // → desde % Coclear hacia dB Coclear (misma fila)
+    if (campo === 'pct' && e.key === 'ArrowRight') {
+        const dbInput = document.getElementById(`${ear}_coclear_db_${idx}`);
+        if (dbInput && !dbInput.disabled) {
+            e.preventDefault();
+            dbInput.focus();
+            dbInput.select();
+        }
+        return;
+    }
+
+    // Enter en dB Coclear: siguiente fila (se crea solo si no existe)
+    if (campo === 'db' && e.key === 'Enter') {
+        e.preventDefault();
+
+        let siguiente = document.getElementById(`${ear}_coclear_pct_${idx + 1}`);
+
+        if (!siguiente) {
+            agregarFilaCoclear(ear);   // misma función que usa el botón →
+            siguiente = document.getElementById(`${ear}_coclear_pct_${idx + 1}`);
+        }
+
+        if (siguiente) {
+            siguiente.focus();
+            siguiente.select();
+        }
+    }
+});
+</script>
+
+
 <script>
 // ============================================
 // COMUNICACIÓN CON AudioLogo.html

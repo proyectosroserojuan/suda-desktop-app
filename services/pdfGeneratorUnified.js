@@ -763,8 +763,10 @@ ${imagenes.qrBase64 ? `<div class="qr-central"><img src="${imagenes.qrBase64}" a
 
 
 
-<div class="tablas-container" style="position: fixed; right: -5px; top: 64%; background: white; padding: 5px; max-width: 380px;">
-  
+<!-- <div class="tablas-container" style="position: fixed; right: -5px; top: 64%; background: white; padding: 5px; max-width: 380px;"> -->
+<div class="tablas-container" style="position: fixed; left: 520px; top: 64%; z-index: 10000; background: white; padding: 5px; max-width: 380px;">  
+
+
 <!--
   <table class="tabla-valores">
     <thead><tr><th>Frecuencia</th><th>OD</th><th>OI</th></tr></thead>
